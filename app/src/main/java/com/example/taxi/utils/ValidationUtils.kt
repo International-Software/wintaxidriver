@@ -8,7 +8,7 @@ object ValidationUtils {
     fun isValidFullName(fullName: String): Boolean = fullName.matches(Regex(FULL_NAME_PATTERN))
     fun isValidBirthday(birthday: String): Boolean = birthday.isNotEmpty()
     fun isValidCarName(carName: String): Boolean = carName.isNotEmpty()
-    fun isValidPhoneNumber(phone: String): Boolean = phone.length == 12
+    fun isValidPhoneNumber(phone: String): Boolean = phone.length == 13
     fun isValidCarColor(color: String): Boolean = color.isNotEmpty()
     fun isValidCarPosition(position: String): Boolean = position.isNotEmpty()
     fun isValidCarFirstTwoNumber(num1: String): Boolean = num1.length == 2

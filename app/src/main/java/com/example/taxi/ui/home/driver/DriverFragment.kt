@@ -1043,7 +1043,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 }
             }
         }
-        Log.d(TAG1, "setDashboardStatus: ${dashboardData.getTime()} ")
         var secondsElapsed = 0
 
 
@@ -1063,12 +1062,17 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 //        }
 //        viewBinding.priceTrip.text = currentDriveCost.toString()
 
+
         viewBinding.bottomDialog.inDriveCostPrice.text =
-            TaxiCalculator.getCurrentDriveCost(
-                dashboardData,
-                preferenceManager,
-                secondsElapsed.toLong()
-            )
+            if (preferenceManager.isHasDestinationSecond()) {
+                preferenceManager.getStartCost().toString()
+            } else {
+                TaxiCalculator.getCurrentDriveCost(
+                    dashboardData,
+                    preferenceManager,
+                    secondsElapsed.toLong()
+                )
+            }
 
 
     }

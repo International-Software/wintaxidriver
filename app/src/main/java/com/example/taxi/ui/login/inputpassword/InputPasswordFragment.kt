@@ -58,7 +58,6 @@ class InputPasswordFragment : Fragment() {
 
     private val localReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("SmsReceiver", "Received intent: $intent")
             val otp = intent.getStringExtra(EXTRA_OTP_CODE)
             viewBinding.pinView.setText(otp)
 

@@ -80,7 +80,7 @@ class CarDataFragment : Fragment() {
                             car_id = id,
                             position = autoCarPosition.text.toString().toInt(),
                             tech_pass_number = carPassportEdittext.text.toString(),
-                            car_number = combineTwo(autoCarFirstNumber.text.toString(), carNumberPlateEditText.text.toString()),
+                            car_number = combineTwo(carNumberPlateEditText.text.toString(),autoCarFirstNumber.text.toString()),
                             color_id = colorId
                         )
                     }

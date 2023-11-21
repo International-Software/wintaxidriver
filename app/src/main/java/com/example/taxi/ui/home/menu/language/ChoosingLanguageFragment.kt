@@ -78,7 +78,7 @@ class ChoosingLanguageFragment : Fragment() {
                     setButtonState(buttonInfo = buttonInfos[0], false)
 
                 }
-                UserPreferenceManager.Language.UZBEK -> {
+                UserPreferenceManager.Language.UZBEK,UserPreferenceManager.Language.KAZAKH -> {
                     setButtonState(buttonInfo = buttonInfos[0], true)
                     setButtonState(buttonInfo = buttonInfos[1], false)
                     setButtonState(buttonInfo = buttonInfos[2], false)
@@ -100,7 +100,7 @@ class ChoosingLanguageFragment : Fragment() {
                             }
                         }
                         when (index) {
-                            0 -> updateLanguage(UserPreferenceManager.Language.UZBEK)
+                            0 -> updateLanguage(UserPreferenceManager.Language.KAZAKH)
                             1 -> updateLanguage(UserPreferenceManager.Language.RUSSIAN)
                             2 -> updateLanguage(UserPreferenceManager.Language.KRILL)
                         }

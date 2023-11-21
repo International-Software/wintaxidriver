@@ -27,7 +27,7 @@ class PhoneNumberFormatWatcher(private val editText: TextInputEditText, private 
         } else if (isDeleting) {
             current = newString
         }
-        if(s.toString().length == 12){
+        if(s.toString().length == 13){
             inputLayout.error = null
         }
     }
@@ -37,7 +37,7 @@ class PhoneNumberFormatWatcher(private val editText: TextInputEditText, private 
         val sb = StringBuilder()
         for ((i, char) in filteredInput.withIndex()) {
             sb.append(char)
-            if (i == 1 || i == 4 || i == 6) {
+            if (i == 2 || i == 5 || i == 7) {
                 sb.append(' ')
             }
         }
@@ -47,6 +47,6 @@ class PhoneNumberFormatWatcher(private val editText: TextInputEditText, private 
 
 
 fun createPhoneNumberPlateEditText(editText: TextInputEditText, inputLayout: TextInputLayout) {
-    editText.filters = arrayOf(InputFilter.AllCaps(), InputFilter.LengthFilter(12))
+    editText.filters = arrayOf(InputFilter.AllCaps(), InputFilter.LengthFilter(13))
     editText.addTextChangedListener(PhoneNumberFormatWatcher(editText,inputLayout))
 }

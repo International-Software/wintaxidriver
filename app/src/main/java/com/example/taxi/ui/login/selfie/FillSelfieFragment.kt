@@ -144,7 +144,7 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
         uploadImageLicense.title("Haydovchilik guvohnomasi")
             .multipleSelection(enable = false, maxCount = 5).showCountInToolBar(false)
             .showFolder(true).cameraIcon(true).doneIcon(true).allowCropping(true)
-            .compressImage(false).maxImageSize(2).extension(PickExtension.JPEG)
+            .compressImage(false).maxImageSize(1).extension(PickExtension.JPEG)
     }
 
 

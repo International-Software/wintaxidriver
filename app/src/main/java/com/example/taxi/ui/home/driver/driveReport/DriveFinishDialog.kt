@@ -39,7 +39,8 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
     ): View {
         viewBinding = DialogFinishOrderBinding.inflate(layoutInflater, container, false)
 
-        viewBinding.payWithBonus.visibility = if(preferenceManager.getStatusIsTaximeter()) View.GONE else View.VISIBLE
+        viewBinding.payWithBonus.visibility =
+            if (preferenceManager.getStatusIsTaximeter()) View.GONE else View.VISIBLE
         return viewBinding.root
     }
 
@@ -71,7 +72,7 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         viewModel.getDriveAnalyticsLiveData().observe(viewLifecycleOwner) {
             renderAnalyticsReportData(it)
         }
-        driverViewModel.transferWithBonus.observe(viewLifecycleOwner){
+        driverViewModel.transferWithBonus.observe(viewLifecycleOwner) {
             transferUi(it)
         }
 
@@ -80,55 +81,62 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
             backFromBonusUi()
         }
 
-        driverViewModel.confirmationCode.observe(viewLifecycleOwner){
+        driverViewModel.confirmationCode.observe(viewLifecycleOwner) {
             confirmBonusUi(it)
         }
         viewBinding.payButton.setOnClickListener {
             val money = viewBinding.editPrice.text.toString().toInt()
-            driverViewModel.transferWithBonus(preferenceManager.getOrderId(),money)
+            driverViewModel.transferWithBonus(preferenceManager.getOrderId(), money)
 
         }
         viewBinding.passwordButton.setOnClickListener {
-            if (viewBinding.pinView.text?.isEmpty() == true){
-                Toast.makeText(requireContext(), "Tasdiqlash kodini kiriting", Toast.LENGTH_SHORT).show()
+            if (viewBinding.pinView.text?.isEmpty() == true) {
+                Toast.makeText(requireContext(), "Tasdiqlash kodini kiriting", Toast.LENGTH_SHORT)
+                    .show()
                 return@setOnClickListener
             }
-            driverViewModel.confirmBonusPassword(order_history_id,viewBinding.pinView.text.toString().toInt())
+            driverViewModel.confirmBonusPassword(
+                order_history_id,
+                viewBinding.pinView.text.toString().toInt()
+            )
         }
 
 
     }
 
     private fun confirmBonusUi(resource: Resource<MainResponse<Any>>?) {
-       resource?.let {
-           when(resource.state){
-               ResourceState.ERROR ->{}
-               ResourceState.SUCCESS ->{
-                   driverViewModel.completedOrder()
-                   viewModel.deleteDrive(driveId = raceId)
-                   preferenceManager.timeClear()
-                   navigateToDashboardFragment()
-               }
-               ResourceState.LOADING ->{}
-           }
-       }
+        resource?.let {
+            when (resource.state) {
+                ResourceState.ERROR -> {}
+                ResourceState.SUCCESS -> {
+                    driverViewModel.completedOrder()
+                    viewModel.deleteDrive(driveId = raceId)
+                    preferenceManager.timeClear()
+                    navigateToDashboardFragment()
+                }
+
+                ResourceState.LOADING -> {}
+            }
+        }
 
     }
 
     private fun transferUi(resource: Resource<MainResponse<BonusResponse>>?) {
         resource?.let {
-            when(it.state){
-                ResourceState.LOADING ->{
+            when (it.state) {
+                ResourceState.LOADING -> {
                     viewBinding.moneyForBonusLayout.isErrorEnabled = false
 
                 }
-                ResourceState.SUCCESS ->{
+
+                ResourceState.SUCCESS -> {
                     viewBinding.moneyForBonusLayout.isErrorEnabled = false
                     order_history_id = it.data?.data?.order_history_id!!
                     showPasswordUi()
 
                 }
-                ResourceState.ERROR ->{
+
+                ResourceState.ERROR -> {
                     viewBinding.moneyForBonusLayout.error = it.message
                 }
             }
@@ -136,7 +144,7 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
     }
 
     private fun showPasswordUi() {
-        with(viewBinding){
+        with(viewBinding) {
             passwordLiner.visibility = View.VISIBLE
             starting.visibility = View.GONE
             bonusLiner.visibility = View.GONE
@@ -254,8 +262,13 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
 
         preferenceManager.clearPassengerPhone()
+        val allPrice =
+            if (preferenceManager.isHasDestinationSecond()) {
+                moneyWithTime + preferenceManager.getStartCost()
+            } else {
+                moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
+            }
 
-        val allPrice = moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
 
 
 

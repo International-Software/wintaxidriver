@@ -2,6 +2,7 @@ package com.example.taxi.ui.login.inputphone
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,9 +52,12 @@ class InputPhoneFragment : Fragment() {
 
             val phone = "${viewBinding.textInputLayout.prefixText} ${viewBinding.edtInputPhone.text}"
 
+            val a = PhoneNumberUtil.formatPhoneNumber(phoneNumber = phone, countryCode = "KZ")
+                .toString()
+            Log.d("tekshirish", "onViewCreated: $phone")
             registerViewModel.register(
                 RegisterRequest(
-                    PhoneNumberUtil.formatPhoneNumber(phoneNumber = phone, countryCode = "UZ")
+                    PhoneNumberUtil.formatPhoneNumber(phoneNumber = phone, countryCode = "KZ")
                         .toString()
                 )
             )

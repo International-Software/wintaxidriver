@@ -68,6 +68,8 @@ class SelfieViewModel(private val getRegisterResponseUseCase: GetRegisterRespons
                         }
                     }, {
                             error ->
+                        Log.e("tekshirish", "fillSelfie: $error", )
+
                         _selfieResponse.postValue(
                             Resource(
                                 ResourceState.ERROR,

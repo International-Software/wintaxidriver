@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Alif Taxi (Driver)</string>
+    <string name="app_name" translatable="false">Go Taxi (Driver)</string>
     <string name="tizimga_kirish">Tizimga kirish</string>
     <string name="tizimga_kirish_uchun_telefon_raqamingizni_kiriting">Tizimga kirish uchun telefon raqamingizni kiriting</string>
     <string name="telefon_raqamingiz">Telefon raqamingiz</string>
@@ -186,8 +186,6 @@
     <string name="buyurtmani_yakunlaganingizdan_so_ng_u_yakunlangan_buyurtmalar_safiga_qo_shiladi_va_u_haqidagi_ma_lumotlarni_tarix_bo_limidan_topishingiz_mumkin_bo_ladi">Buyurtmani yakunlaganingizdan so\'ng u yakunlangan buyurtmalar safiga qo\'shiladi va u haqidagi ma\'lumotlarni Tarix bo\'limidan topishingiz mumkin bo\'ladi</string>
     <string name="yakunlash">Yakunlash</string>
     <string name="taximeter">Taxometer</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bonus_orqali_to_lov">Bonus orqali to\'lov</string>
     <string name="bonus_summani_kiriting">Bonus summani kiriting</string>
     <string name="tasdiqlash_kodini_kiriting">Tasdiqlash kodini kiriting</string>

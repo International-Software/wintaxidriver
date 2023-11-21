@@ -9,7 +9,7 @@ class PhoneNumberUtil {
                 return null
             }
             // Format the phone number
-            return PhoneNumberUtils.formatNumber(phoneNumber, countryCode)
+            return phoneNumber
 
         }
 

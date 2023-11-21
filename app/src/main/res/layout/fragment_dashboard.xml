@@ -84,8 +84,8 @@
                 android:layout_marginBottom="@dimen/_10sdp"
                 android:paddingHorizontal="@dimen/_20sdp"
                 android:textSize="@dimen/_16ssp"
-                app:colorBorder="@color/blue"
 
+                app:colorBorder="@color/blue"
                 app:colorOn="@color/blue"
                 app:on="false"
                 app:textOff="@string/inwork"

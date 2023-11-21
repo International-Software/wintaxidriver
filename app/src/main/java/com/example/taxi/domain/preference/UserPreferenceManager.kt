@@ -144,6 +144,8 @@ class UserPreferenceManager(private val context: Context) {
     fun getDestination1Lat(): String? = prefs.getString(DESTINATION1_LAT, "0.0")
     fun getDestination2Lat(): String? = prefs.getString(DESTINATION2_LAT, "0.0")
 
+    fun isHasDestinationSecond(): Boolean = getDestination2Long() != "0.0" && getDestination2Lat() != "0.0"
+
     fun clearPassengerPhone() {
         prefs.edit().remove(PASSENGER_PHONE).apply()
     }
@@ -256,6 +258,9 @@ class UserPreferenceManager(private val context: Context) {
             "la" -> {
                 Language.UZBEK
             }
+            "kk" ->{
+                Language.KAZAKH
+            }
 
             "com" -> {
                 Language.KRILL
@@ -358,7 +363,8 @@ class UserPreferenceManager(private val context: Context) {
     enum class Language(val code: String) {
         RUSSIAN("ru"),
         UZBEK("la"),
-        KRILL("com")
+        KRILL("com"),
+        KAZAKH("kk")
     }
 
     fun setDriverStatus(status: DriverStatus) {
