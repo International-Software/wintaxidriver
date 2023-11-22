@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.taxi.domain.drive.DriveService
 import com.example.taxi.domain.model.DashboardData
@@ -41,8 +42,10 @@ class DriveBackGroundService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        Log.d("orqafon", "onCreate: yaratildi")
         driveService.registerCallback(
             dashboardDataCallback = { dashboardData ->
+
                 serviceMessenger.sendDashboardData(dashboardData)
                 checkAndUpdateCPUWake(dashboardData)
             },
@@ -97,6 +100,7 @@ class DriveBackGroundService : Service() {
                 serviceMessenger.sendDashboardData(driveService.getDashboardData())
             }
             MessengerProtocol.COMMAND_START -> {
+                Log.d("orqafon", "onCommandReceived: start")
                 driveService.startDrive()
             }
             MessengerProtocol.COMMAND_PAUSE -> {

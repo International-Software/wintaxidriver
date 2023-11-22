@@ -270,6 +270,7 @@
                         android:layout_height="match_parent"
                         android:hint="100AAA"
                         android:textAllCaps="true"
+                        android:maxLength="13"
                         android:inputType="textCapCharacters"
                         android:textColorHint="#BAB9B9" />
 
@@ -327,7 +328,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="XR12345678"
-                    android:maxLength="15"
+                    android:maxLength="13"
                     android:textAllCaps="true"
                     android:inputType="textCapCharacters"
                     android:id="@+id/carPassportEdittext"

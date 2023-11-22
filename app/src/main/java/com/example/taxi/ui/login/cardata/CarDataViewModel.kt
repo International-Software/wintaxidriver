@@ -1,5 +1,6 @@
 package com.example.taxi.ui.login.cardata
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.taxi.domain.exception.traceErrorException

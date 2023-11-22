@@ -1,5 +1,6 @@
 package com.example.taxi.ui.login.personaldata
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,7 @@ class PersonalDataViewModel(private val getRegisterResponseUseCase: GetRegisterR
     fun fillPersonData(request: PersonDataRequest) {
         _personDataResponse.postValue(Resource(ResourceState.LOADING))
 
+        Log.d("tekshirish", "malumot: $request")
         compositeDisposable.add(getRegisterResponseUseCase.fillPersonData(request = request)
             .subscribeOn(Schedulers.io())
             .doOnSubscribe {}
@@ -32,6 +34,7 @@ class PersonalDataViewModel(private val getRegisterResponseUseCase: GetRegisterR
             .subscribe({
                 _personDataResponse.postValue(Resource(ResourceState.SUCCESS, it))
             }, { error ->
+                Log.d("tekshirish", "fillPersonData: $error")
                 _personDataResponse.postValue(
                     Resource(
                         ResourceState.ERROR,
