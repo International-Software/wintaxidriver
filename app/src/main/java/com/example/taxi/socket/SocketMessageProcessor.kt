@@ -1,12 +1,7 @@
 package com.example.taxi.socket
 
 import android.Manifest
-import android.R
-import android.R.attr.thumb
-import android.app.Notification
-import android.app.NotificationManager
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,7 +9,7 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getSystemService
+import com.example.taxi.R
 import com.example.taxi.components.service.KillStateDialogService
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.model.socket.SocketMessage
@@ -27,6 +22,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okio.IOException
+import org.json.JSONObject
 
 
 class SocketMessageProcessor(
@@ -72,11 +68,10 @@ class SocketMessageProcessor(
             SocketMessage::class.java,
             SocketOrderCancelledData::class.java
         )
-//        {"status":200,"key":"order_cancelled","data":{"order_id":622,"driver_id":null}}
+
 
         if (status == 200) {
             when (key) {
-
                 SocketConfig.ORDER_NEW -> {
                     val intent = Intent("com.example.taxi.ORDER_DATA_ACTION")
                     intent.putExtra("OrderData_new", message)
@@ -103,9 +98,20 @@ class SocketMessageProcessor(
 
 
                 }
+                SocketConfig.SEND_NOTIFICATION_NEW_ORDER ->{
+                    val jsonObject = JSONObject(message)
+                    val data = jsonObject.getJSONObject("data")
+                    val messageText = data.getString("message")
+
+                    showNotification(messageText,"Xabar")
+                }
+
                 SocketConfig.SEND_NOTIFICATION ->{
-                    Log.d("xabar", "handleSocketMessage: notif")
-                    showNotification()
+                    val jsonObject = JSONObject(message)
+                    val data = jsonObject.getJSONObject("data").getJSONObject("data")
+                    val messageText = data.getString("message")
+                    val time = data.getString("time")
+                    showNotification(messageText,"Xabar")
                 }
                 SocketConfig.ORDER_ONLY_FOR_YOU -> {
                     startForegroundServiceWithMessage(message)
@@ -129,11 +135,13 @@ class SocketMessageProcessor(
             }
         }
     }
-    fun showNotification() {
+
+    private fun showNotification(contentTex: String,title: String) {
+
         val notification = NotificationCompat.Builder(activity,"channel_notif")
-            .setSmallIcon(R.drawable.ic_input_add)
-            .setContentText("Salom")
-            .setContentTitle("Yangi Buyurtma")
+            .setSmallIcon(R.drawable.ic_message)
+            .setContentText(contentTex)
+            .setContentTitle(title)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .build()

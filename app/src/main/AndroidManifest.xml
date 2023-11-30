@@ -77,6 +77,7 @@
         <service
             android:name=".socket.SocketService"
             android:enabled="true"
+            android:foregroundServiceType="location"
             android:exported="false" />
 
         <receiver
