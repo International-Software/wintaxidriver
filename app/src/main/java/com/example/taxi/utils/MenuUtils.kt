@@ -3,6 +3,7 @@ package com.example.taxi.utils
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import com.example.taxi.R
 import com.example.taxi.domain.preference.UserPreferenceManager
@@ -11,10 +12,8 @@ object MenuUtils {
     fun getActionViewLanguage(
         context: Context,
         preferenceManager: UserPreferenceManager,
-
         ): View{
         val actionView = LayoutInflater.from(context).inflate(R.layout.item_menu_language, null)
-
         val language: TextView = actionView.findViewById(R.id.which_language)
         language.text = when(preferenceManager.getLanguage()){
             UserPreferenceManager.Language.RUSSIAN -> "Русский язык"
@@ -23,28 +22,35 @@ object MenuUtils {
             UserPreferenceManager.Language.KAZAKH -> "Қазақ тілі"
         }
 
-
         return actionView
-
     }
 
     fun getActionViewNext(
         context: Context,
     ): View {
+        return LayoutInflater.from(context).inflate(R.layout.item_action_next, null) }
 
-        return LayoutInflater.from(context).inflate(R.layout.item_action_next, null)
+    fun getActionViewMessage(
+        context: Context,
+        preferenceManager: UserPreferenceManager,
+    ): View{
+        val actionView = LayoutInflater.from(context).inflate(R.layout.item_menu_message, null)
 
-    }
-    private fun getActionViewForItem3(context: Context): View {
-        val actionView = LayoutInflater.from(context).inflate(R.layout.item_menu_language, null)
+        val badge: TextView = actionView.findViewById(R.id.message_badge)
+        val next: ImageView = actionView.findViewById(R.id.next_icon)
+        if (preferenceManager.getMessageCount() > 0){
+            badge.visibility = View.VISIBLE
+            badge.text = preferenceManager.getMessageCount().toString()
+            next.visibility = View.GONE
+        }else{
+            badge.visibility = View.GONE
+            next.visibility = View.VISIBLE
+        }
 
-//        val actionViewButton = actionView.findViewById<Button>(R.id.actionViewButton)
-//        actionViewButton.text = "Action for Item 3"
-
-        // Set any necessary listeners or modifications to the action view for Item 3
 
         return actionView
     }
+
 
 
 
@@ -61,6 +67,11 @@ class MenuClass(val context: Context, val preferenceManager: UserPreferenceManag
         Triple(
             333,"Group 7", listOf(
                 Triple(233,context.getString(R.string.taximeter),R.drawable.ic_taximeter)
+            )
+        ),
+        Triple(
+            334,"Group 8", listOf(
+                Triple(234,context.getString(R.string.message),R.drawable.ic_message)
             )
         ),
         Triple(
@@ -93,6 +104,7 @@ class MenuClass(val context: Context, val preferenceManager: UserPreferenceManag
     private val itemActionViews: Map<Int, View> = mapOf(
         456 to MenuUtils.getActionViewLanguage(context,preferenceManager),
         233 to MenuUtils.getActionViewNext(context),
+        234 to MenuUtils.getActionViewMessage(context,preferenceManager),
         987 to MenuUtils.getActionViewNext(context),
         988 to MenuUtils.getActionViewNext(context),
         989 to MenuUtils.getActionViewNext(context),

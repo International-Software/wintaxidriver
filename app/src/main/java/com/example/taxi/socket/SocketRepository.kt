@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.taxi.di.MAIN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -61,7 +62,7 @@ class SocketRepository constructor(
 
     private fun connectSocket(token: String) {
         shouldReconnect = true
-        webSocket = object : WebSocketClient(URI("wss://go-taxi.kz/connect/?token=$token")) {
+        webSocket = object : WebSocketClient(URI("wss://$MAIN/connect/?token=$token")) {
             override fun onOpen(handshakedata: ServerHandshake?) {
 //                isConnectedSocket.value = true
                 socketLive.postValue(true)

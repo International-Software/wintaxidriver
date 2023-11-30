@@ -8,6 +8,7 @@ import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.model.history.*
 import com.example.taxi.domain.model.location.LocationRequest
+import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.order.*
 import com.example.taxi.domain.model.register.RegisterData
 import com.example.taxi.domain.model.register.RegisterRequest
@@ -154,4 +155,7 @@ interface ApiService {
         @Query("order_history_id") orderHistoryId: Int,
         @Query("code") code: Int
     ): Observable<MainResponse<Any>>
+
+    @POST("notification/index")
+    fun getMessage(): Observable<MessageResponse>
 }

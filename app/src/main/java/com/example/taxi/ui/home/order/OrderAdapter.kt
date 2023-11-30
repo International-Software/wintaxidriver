@@ -96,7 +96,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
         val numberFormat = NumberFormat.getIntegerInstance(Locale.US) as DecimalFormat
         numberFormat.applyPattern("#,##0")
         val formattedNumber = numberFormat.format(number.toLong()).replace(",", " ")
-        val t = "$formattedNumber KZS"
+        val t = "$formattedNumber UZS"
         text = t
         setTextIsSelectable(false)
 

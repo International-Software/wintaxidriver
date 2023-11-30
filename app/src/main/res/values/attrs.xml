@@ -59,4 +59,7 @@
         <attr name="uncheckedBackground" format="reference" />
         <attr name="durationAnimation" format="float" />
     </declare-styleable>
+
+
+
 </resources>

@@ -33,6 +33,7 @@ import com.example.taxi.di.MAIN_URL
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.balance.BalanceData
+import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.selfie.SelfieAllData
 import com.example.taxi.domain.model.selfie.StatusModel
 import com.example.taxi.domain.model.settings.SettingsData
@@ -202,6 +203,11 @@ class DashboardFragment : Fragment() {
                     navController.navigate(R.id.taximeterFragment)
                     true
                 }
+                // 234 -> id message layout
+                234 ->{
+                    navController.navigate(R.id.messageFragment)
+                    true
+                }
                 // 987 -> id about us layout
                 987 -> {
                     navController.navigate(R.id.aboutFragment)
@@ -260,9 +266,9 @@ class DashboardFragment : Fragment() {
     private fun getAllData() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Log.d(TAG, "getAllData: Started")
                 getDashboardData()
                 getOrderData()
+
                 checkAndCompleteOrderLostNetwork()
 
             } catch (e: Exception) {
@@ -275,6 +281,7 @@ class DashboardFragment : Fragment() {
     private fun getDashboardData() {
         dashboardViewModel.getBalance()
         dashboardViewModel.getSettings()
+        dashboardViewModel.getMessage()
         dashboardViewModel.getDriverData()
     }
     private fun getOrderData() {
@@ -563,6 +570,9 @@ class DashboardFragment : Fragment() {
         dashboardViewModel.driverDataResponse.observe(viewLifecycleOwner) { resources ->
             driverUpdate(resources)
         }
+        dashboardViewModel.messageResponse.observe(viewLifecycleOwner){resources ->
+            updateMessage(resources)
+        }
 
         orderViewModel.orderResponse.observe(viewLifecycleOwner) {
             it.data?.data?.size?.let { size ->
@@ -575,6 +585,10 @@ class DashboardFragment : Fragment() {
         }
 
         // Add any additional observers you have...
+    }
+
+    private fun updateMessage(resources: Resource<MessageResponse>?) {
+
     }
 
     private fun setupView() {

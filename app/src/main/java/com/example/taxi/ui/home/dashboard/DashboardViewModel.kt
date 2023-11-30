@@ -8,6 +8,7 @@ import com.example.taxi.domain.exception.traceErrorException
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.balance.BalanceData
+import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.selfie.SelfieAllData
 import com.example.taxi.domain.model.selfie.StatusModel
 import com.example.taxi.domain.model.settings.DataNames
@@ -40,6 +41,46 @@ class DashboardViewModel(
 
     val settingsResponse: LiveData<Resource<MainResponse<List<SettingsData>>>>
         get() = _settingsResponse
+
+    private val  _messageResponse = MutableLiveData<Resource<MessageResponse>>()
+
+    val messageResponse: LiveData<Resource<MessageResponse>> get() = _messageResponse
+
+    fun getMessage(){
+        _messageResponse.postValue(Resource(ResourceState.LOADING))
+        compositeDisposable.add(
+            getMainResponseUseCase.getMessage()
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe {
+                    // Perform any setup tasks before the subscription starts
+                }
+                .doOnTerminate {
+                    // Perform any cleanup tasks after the subscription ends
+                }
+                .subscribe(
+                    { response ->
+                        viewModelScope.launch {
+                            _messageResponse.postValue(Resource(ResourceState.SUCCESS, response))
+                            if (response.data.size > userPreferenceManager.getMessageValue()){
+                                userPreferenceManager.saveMessageCount(response.data.size - userPreferenceManager.getMessageValue())
+                                userPreferenceManager.saveMessageValue(response.data.size)
+
+                            }
+                        }
+
+
+                    },
+                    { error ->
+                        _messageResponse.postValue(
+                            Resource(
+                                ResourceState.ERROR,
+                                message = traceErrorException(error).getErrorMessage()
+                            )
+                        )
+                    }
+                )
+        )
+    }
 
     fun getSettings() {
         _settingsResponse.postValue(Resource(ResourceState.LOADING))

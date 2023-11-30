@@ -6,6 +6,7 @@ object SocketConfig {
     const val ORDER_ACCEPTED = "order_accepted"
     const val ORDER_CANCELLED = "order_cancelled"
     const val ORDER_UPDATE ="order_update"
+    const val SEND_NOTIFICATION = "send_notification"
     const val RECONNECT_DELAY_MS = 3000L
 
 }

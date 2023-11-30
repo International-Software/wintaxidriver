@@ -17,7 +17,7 @@ class PhoneNumberUtil {
         fun formatMoneyNumberPlate(input: String): String {
             val regex = "(\\d)(?=(\\d{3})+$)".toRegex()
             val a =  input.replace(regex, "$1 ")
-            return "$a KZT"
+            return "$a UZS"
         }
     }
 }

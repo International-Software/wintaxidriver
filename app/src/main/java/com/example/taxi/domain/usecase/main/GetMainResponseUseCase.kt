@@ -64,4 +64,6 @@ class GetMainResponseUseCase(private val mainRepository: MainRepository) {
     fun confirmBonusPassword(orderHistoryId: Int, code: Int) = mainRepository.confirmBonusPassword(orderHistoryId,code)
 
     fun transferWithBonus(order_id: Int, money: Int) = mainRepository.transferWithBonus(order_id = order_id, money = money)
+
+    fun getMessage() = mainRepository.getMessage()
 }

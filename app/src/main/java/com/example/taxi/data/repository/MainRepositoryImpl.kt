@@ -10,6 +10,7 @@ import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.model.history.HistoryDataResponse
 import com.example.taxi.domain.model.history.Meta
 import com.example.taxi.domain.model.location.LocationRequest
+import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.order.Address
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
@@ -150,6 +151,10 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         code: Int
     ): Observable<MainResponse<Any>> {
         return apiService.confirmBonusPassword(orderHistoryId,code)
+    }
+
+    override fun getMessage(): Observable<MessageResponse> {
+        return apiService.getMessage()
     }
 
 

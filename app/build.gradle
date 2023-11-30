@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
 //        uz.insoft.AlifTaxi
-        applicationId "uz.insoft.LiderTaxiDriver"
+        applicationId "uz.insoft.hamkor"
         minSdk 24
         targetSdk 33
         versionCode 41

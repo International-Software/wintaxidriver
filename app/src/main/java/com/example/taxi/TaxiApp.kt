@@ -1,6 +1,8 @@
 package com.example.taxi
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -18,6 +20,7 @@ class TaxiApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        createNotificationChannels()
         startKoin {
             androidLogger(Level.ERROR)
             androidContext(this@TaxiApp)
@@ -28,5 +31,20 @@ class TaxiApp : Application() {
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
         MultiDex.install(this)
+    }
+
+    private fun createNotificationChannels(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "channel_notif",
+                "Channel Notif",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channel.description = "notification"
+
+
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
     }
 }

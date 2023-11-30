@@ -190,4 +190,8 @@
     <string name="bonus_summani_kiriting">Bonus summani kiriting</string>
     <string name="tasdiqlash_kodini_kiriting">Tasdiqlash kodini kiriting</string>
     <string name="qr">Qr Bonus</string>
+    <string name="message">Xabarlar</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="xabarlar_tarixi">Xabarlar tarixi</string>
 </resources>

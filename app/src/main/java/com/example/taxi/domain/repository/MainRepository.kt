@@ -9,6 +9,7 @@ import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.model.history.HistoryDataResponse
 import com.example.taxi.domain.model.history.Meta
 import com.example.taxi.domain.model.location.LocationRequest
+import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.order.Address
 import com.example.taxi.domain.model.order.OrderAccept
 import com.example.taxi.domain.model.order.OrderCompleteRequest
@@ -85,4 +86,6 @@ interface MainRepository {
     fun transferWithBonus(order_id: Int, money: Int): Observable<MainResponse<BonusResponse>>
 
     fun confirmBonusPassword(orderHistoryId: Int, code: Int): Observable<MainResponse<Any>>
+
+    fun getMessage(): Observable<MessageResponse>
 }

@@ -71,7 +71,7 @@
         app:hintAnimationEnabled="false"
         app:hintEnabled="false"
         app:prefixTextColor="@color/text_black_white"
-        app:prefixText="+7"
+        app:prefixText="+998"
         app:layout_constraintBottom_toTopOf="@+id/imageView"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="@+id/guideline3"
