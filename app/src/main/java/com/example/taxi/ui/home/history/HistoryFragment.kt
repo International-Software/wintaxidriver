@@ -2,6 +2,7 @@ package com.example.taxi.ui.home.history
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -118,6 +119,7 @@ class HistoryFragment : Fragment(), SelectPageInterface {
                 ResourceState.SUCCESS -> {
                     viewBinding.historyRecyclerView.visibility = View.VISIBLE
 
+                    Log.d("tekshirish", "updateDataHistory: ${it.data?.data}")
                     viewBinding.shimmerOrder.apply {
                         stopShimmer()
                         visibility = View.GONE

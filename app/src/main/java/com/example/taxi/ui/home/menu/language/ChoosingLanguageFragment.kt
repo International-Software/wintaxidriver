@@ -1,7 +1,6 @@
 package com.example.taxi.ui.home.menu.language
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -78,7 +77,7 @@ class ChoosingLanguageFragment : Fragment() {
                     setButtonState(buttonInfo = buttonInfos[0], false)
 
                 }
-                UserPreferenceManager.Language.UZBEK,UserPreferenceManager.Language.KAZAKH -> {
+                UserPreferenceManager.Language.UZBEK -> {
                     setButtonState(buttonInfo = buttonInfos[0], true)
                     setButtonState(buttonInfo = buttonInfos[1], false)
                     setButtonState(buttonInfo = buttonInfos[2], false)
@@ -100,7 +99,7 @@ class ChoosingLanguageFragment : Fragment() {
                             }
                         }
                         when (index) {
-                            0 -> updateLanguage(UserPreferenceManager.Language.KAZAKH)
+                            0 -> updateLanguage(UserPreferenceManager.Language.UZBEK)
                             1 -> updateLanguage(UserPreferenceManager.Language.RUSSIAN)
                             2 -> updateLanguage(UserPreferenceManager.Language.KRILL)
                         }
@@ -122,9 +121,6 @@ class ChoosingLanguageFragment : Fragment() {
 //    }
 
     private fun updateLanguage(language: UserPreferenceManager.Language) {
-        Log.e("til", "updateLanguage: $language", )
         userPrefManager.setLanguage(language)
-
-//        navigateToDashboardFragment()
     }
 }

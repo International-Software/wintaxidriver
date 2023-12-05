@@ -18,7 +18,7 @@ android {
         applicationId "uz.insoft.hamkor"
         minSdk 24
         targetSdk 33
-        versionCode 42
+        versionCode 45
         versionName "7.11.30"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

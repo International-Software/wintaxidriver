@@ -16,9 +16,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.example.taxi.R
 import com.example.taxi.databinding.DialogDetailFilterBinding
+import com.example.taxi.databinding.DialogDetailHistoryBinding
 import com.example.taxi.databinding.DialogFilterBinding
 import com.example.taxi.databinding.DialogFinishOrderBinding
 import com.example.taxi.databinding.DialogHistoryFilterBinding
+import com.example.taxi.domain.model.history.Ride
+import com.example.taxi.domain.model.history.RideAddress
+import com.example.taxi.domain.model.history.RideCreatedAt
+import com.example.taxi.domain.model.history.RideStatus
+import com.example.taxi.domain.model.history.RideType
+import com.example.taxi.domain.model.history.RideUser
 import com.example.taxi.domain.model.transfer.DataItem
 import com.example.taxi.domain.model.transfer.HistoryCreatedAt
 import com.example.taxi.domain.model.transfer.HistoryType
@@ -616,6 +623,43 @@ object DialogUtils {
 
             detailTransferReason.text = data.reason
             detailTransferTime.text = data.createdAt.datetime
+
+        }
+
+
+        return dialog
+
+    }
+
+
+    fun showDetailHistoryDialog(
+        data: Ride<RideType, RideAddress, RideUser, RideStatus, RideCreatedAt>,
+        context: Context
+    ): Dialog {
+        val dialog = Dialog(context)
+        val viewDialog = DialogDetailHistoryBinding.inflate(LayoutInflater.from(context))
+        dialog.setContentView(viewDialog.root)
+
+        dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setGravity(Gravity.BOTTOM)
+
+
+
+        with(viewDialog) {
+            dismissDialog.setOnClickListener {
+                dialog.dismiss()
+            }
+            dismissButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            driverIdFilter.text = data.id.toString()
+            detailToHistory.text = data.address.to
+            detailFromHistory.text = data.address.from
+            detailTransferTime.text = data.created_at.date
+
+            detailHistoryPrice.text = PhoneNumberUtil.formatMoneyNumberPlate(data.cost.toString())
 
         }
 

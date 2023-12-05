@@ -11,6 +11,7 @@ fun TextView.setAddress(address: String){
         "-"
     }
 }
+
 fun TextView.convertToCyrillic(content: String) {
     this.text = ConversionUtil.convertToCyrillic(content)
 }

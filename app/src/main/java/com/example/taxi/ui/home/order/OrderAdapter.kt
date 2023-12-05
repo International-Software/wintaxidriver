@@ -13,9 +13,7 @@ import com.example.taxi.domain.model.order.OrderData
 import com.example.taxi.domain.model.order.updateTextView
 import com.example.taxi.utils.ConversionUtil.calculateDistance
 import com.example.taxi.utils.convertToCyrillic
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.*
+import com.example.taxi.utils.setPriceCost
 
 open class OrderAdapter(private val list: List<OrderData<Address>>, private val location: Location?, private val receiveItem : BottomSheetInterface) :
     RecyclerView.Adapter<OrderAdapter.OrderViewHolder>() {
@@ -27,6 +25,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
         private val priceTextView: TextView = itemView.findViewById(R.id.priceTextView)
         private val distanceTextView: TextView = itemView.findViewById(R.id.distanceTextView)
         private val typeTextView: AppCompatTextView = itemView.findViewById(R.id.textView_type)
+        private val orderTime: TextView = itemView.findViewById(R.id.order_time)
 
         fun bind(order: OrderData<Address>) {
 
@@ -39,6 +38,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
                 addressToTextView.convertToCyrillic(order.address.to)
             }
 
+            orderTime.text = order.created_at.time.substring(0,5)
 
             val lat2 = location?.latitude
             val long2 = location?.longitude
@@ -64,10 +64,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
 
             }
         }
-
-
     }
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
         val itemView =
@@ -82,23 +79,5 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
     override fun onBindViewHolder(holder: OrderViewHolder, position: Int) {
         val order = list[position]
         holder.bind(order)
-    }
-
-
-
-
-     fun addItemToRecyclerView(orderItem: OrderData<Address>) {
-        (list as MutableList<OrderData<Address>>).add(0, orderItem)
-         notifyItemInserted(0)
-     }
-
-    fun TextView.setPriceCost(number: Int) {
-        val numberFormat = NumberFormat.getIntegerInstance(Locale.US) as DecimalFormat
-        numberFormat.applyPattern("#,##0")
-        val formattedNumber = numberFormat.format(number.toLong()).replace(",", " ")
-        val t = "$formattedNumber UZS"
-        text = t
-        setTextIsSelectable(false)
-
     }
 }

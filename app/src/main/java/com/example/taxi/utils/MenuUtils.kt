@@ -19,7 +19,6 @@ object MenuUtils {
             UserPreferenceManager.Language.RUSSIAN -> "Русский язык"
             UserPreferenceManager.Language.UZBEK -> "O'zbek tili"
             UserPreferenceManager.Language.KRILL -> "Узбек тили"
-            UserPreferenceManager.Language.KAZAKH -> "Қазақ тілі"
         }
 
         return actionView
@@ -118,10 +117,5 @@ class MenuClass(val context: Context, val preferenceManager: UserPreferenceManag
     fun getItemActionView(): Map<Int, View> {
         return itemActionViews
     }
-
-
-
-
-    // Implement other necessary functions or methods here
 }
 

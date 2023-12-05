@@ -192,7 +192,7 @@ class KillStateDialogService : Service() {
 
         service_recy?.adapter = ServiceOrderAdapter(data.toOrderData().services)
         data.type
-        priceTextView?.text = PhoneNumberUtil.formatMoneyNumberPlate(data.startCost.toString())
+        priceTextView?.setPriceCost(data.startCost)
         addressTextView?.convertToCyrillic(data.address.from)
         secondAddressTextView?.convertToCyrillic(data.address.to)
         comment?.text = data.comment?.ifEmpty {

@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
@@ -19,31 +18,39 @@ import com.example.taxi.databinding.ItemHistoryBinding
 import com.example.taxi.domain.model.history.*
 import com.example.taxi.domain.model.order.TypeEnum
 import com.example.taxi.utils.ConversionUtil
+import com.example.taxi.utils.DialogUtils
 import com.example.taxi.utils.PhoneNumberUtil
 import com.example.taxi.utils.convertToCyrillic
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-class HistoryAdapter(val list: List<Ride<RideType, RideAddress, RideUser, RideStatus, RideCreatedAt>>): RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+class HistoryAdapter(val list: List<Ride<RideType, RideAddress, RideUser, RideStatus, RideCreatedAt>>) :
+    RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
-    inner class HistoryViewHolder(private val binding: ItemHistoryBinding) : RecyclerView.ViewHolder(binding.root){
+    inner class HistoryViewHolder(private val binding: ItemHistoryBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         val historyTimeText = binding.historyTimeTextView
+
         @SuppressLint("SetTextI18n")
         @RequiresApi(Build.VERSION_CODES.N)
         fun bind(data: Ride<RideType, RideAddress, RideUser, RideStatus, RideCreatedAt>) {
             binding.addressTextView.convertToCyrillic(data.address.from)
             binding.addressToTextViewHistory.convertToCyrillic(data.address.to)
-            updateTextView(data.type,binding.textViewType)
-            updateStatusTextView(data.status,binding.rideStatus)
+            updateTextView(data.type, binding.textViewType)
+            updateStatusTextView(data.status, binding.rideStatus)
 
             itemView.setOnClickListener {
-                Toast.makeText(itemView.context, "${data.id}", Toast.LENGTH_SHORT).show()
+                DialogUtils.showDetailHistoryDialog(context = itemView.context, data = data).show()
             }
-            binding.priceTextView.text = PhoneNumberUtil.formatMoneyNumberPlate(data.cost.toString())
+            binding.priceTextView.text =
+                PhoneNumberUtil.formatMoneyNumberPlate(data.cost.toString())
             binding.orderTimeTextView.text = getOrderTime(data.created_at.datetime)
-            binding.distanceTextView.text = "${ConversionUtil.getDistanceWithKm(data.distance.toDouble())} ${itemView.context.getString(R.string.km)}"
+            binding.distanceTextView.text =
+                "${ConversionUtil.getDistanceWithKm(data.distance.toDouble())} ${
+                    itemView.context.getString(R.string.km)
+                }"
         }
     }
 
@@ -66,8 +73,12 @@ class HistoryAdapter(val list: List<Ride<RideType, RideAddress, RideUser, RideSt
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
 
-        val currentMonth = getMonthName(list[position].created_at.timestamp.toLong(), holder.itemView.context)
-        val previousMonth = if (position != 0) getMonthName(list[position - 1].created_at.timestamp.toLong(), holder.itemView.context) else null
+        val currentMonth =
+            getMonthName(list[position].created_at.timestamp.toLong(), holder.itemView.context)
+        val previousMonth = if (position != 0) getMonthName(
+            list[position - 1].created_at.timestamp.toLong(),
+            holder.itemView.context
+        ) else null
 
         with(holder.historyTimeText) {
             if (position == 0 || currentMonth != previousMonth) {
@@ -86,15 +97,17 @@ class HistoryAdapter(val list: List<Ride<RideType, RideAddress, RideUser, RideSt
         typeEnum?.let {
             textView.convertToCyrillic(type.name)
             textView.setTextColor(Color.parseColor(it.textColor))
-            textView.compoundDrawableTintList = ColorStateList.valueOf(Color.parseColor(it.textColor))
-            textView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(it.backgroundColor))
+            textView.compoundDrawableTintList =
+                ColorStateList.valueOf(Color.parseColor(it.textColor))
+            textView.backgroundTintList =
+                ColorStateList.valueOf(Color.parseColor(it.backgroundColor))
         }
     }
 
     fun getOrderTime(time: String): String {
         val t = time.split(" ")
 
-        return "${t[0]} ${t[1]} ${t[3  ]}"
+        return "${t[0]} ${t[1]} ${t[3]}"
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

@@ -265,17 +265,12 @@ class UserPreferenceManager(private val context: Context) {
             "la" -> {
                 Language.UZBEK
             }
-
-            "kk" -> {
-                Language.KAZAKH
-            }
-
-            "com" -> {
-                Language.KRILL
+            "ru" -> {
+                Language.RUSSIAN
             }
 
             else -> {
-                Language.RUSSIAN
+                Language.KRILL
             }
         }
     }
@@ -371,8 +366,7 @@ class UserPreferenceManager(private val context: Context) {
     enum class Language(val code: String) {
         RUSSIAN("ru"),
         UZBEK("la"),
-        KRILL("com"),
-        KAZAKH("kk")
+        KRILL("uz")
     }
 
     fun setDriverStatus(status: DriverStatus) {

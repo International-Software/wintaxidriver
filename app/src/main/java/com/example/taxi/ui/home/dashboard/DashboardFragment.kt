@@ -54,7 +54,6 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-const val TAG = "bekor"
 class DashboardFragment : Fragment() {
 
     private lateinit var viewBinding: FragmentDashboardBinding
@@ -139,7 +138,6 @@ class DashboardFragment : Fragment() {
                 try {
                     if (findNavController().currentDestination?.id == R.id.dashboardFragment) {
                         // DashboardFragment is the current fragment
-                        Log.d(TAG, "checkAndCompleteOrderLostNetwork: bu dashboard")
                         driverViewModel.completeOrderLostNetwork(
                             userPreferenceManager.getLastRace()
                         )
@@ -272,7 +270,6 @@ class DashboardFragment : Fragment() {
                 checkAndCompleteOrderLostNetwork()
 
             } catch (e: Exception) {
-                Log.e(TAG, "getAllData: Error occurred", e)
                 // Consider showing a message to the user to inform them about the error
             }
         }
@@ -291,9 +288,6 @@ class DashboardFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         isViewCreated = false
-        Log.d(TAG, "onDestroyView: ")
-//        context?.unregisterReceiver(networkReceiver)
-//        disposable.dispose()  // Dispose the observer to prevent memory leaks
     }
 
     private fun connectToSocket() {
@@ -303,8 +297,6 @@ class DashboardFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-        Log.d(TAG, "onStop: ")
-//        context?.unregisterReceiver(networkReceiver)
         lifecycleScope.cancel()
     }
 
@@ -454,8 +446,11 @@ class DashboardFragment : Fragment() {
                     viewBinding.refresh.isRefreshing = false
 
                     viewLifecycleOwner.lifecycleScope.launch {
-                        viewBinding.totalBalanceTxt.text =
-                            PhoneNumberUtil.formatMoneyNumberPlate(it.data?.data?.total.toString())
+                        it.data?.data?.total?.let { it1 ->
+                            viewBinding.totalBalanceTxt.setPriceCost(
+                                it1
+                            )
+                        }
                         stopBalanceLoading()
 
                     }
@@ -489,10 +484,6 @@ class DashboardFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-
-//        socketRepository.socketLive.observe(this){
-//            Log.d("tekshirish", "onResume: Live $it")
-//        }
         val color = if (userPreferenceManager.getToggleState()) Color.GREEN else Color.RED
         viewBinding.socketIsConnected.backgroundTintList = ColorStateList.valueOf(color)
 

@@ -1,7 +1,5 @@
 package com.example.taxi.utils
 
-import android.telephony.PhoneNumberUtils
-
 class PhoneNumberUtil {
     companion object {
         fun formatPhoneNumber(phoneNumber: String?, countryCode: String?): String? {
@@ -12,7 +10,6 @@ class PhoneNumberUtil {
             return phoneNumber
 
         }
-
 
         fun formatMoneyNumberPlate(input: String): String {
             val regex = "(\\d)(?=(\\d{3})+$)".toRegex()

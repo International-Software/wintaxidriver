@@ -21,9 +21,15 @@ data class OrderData<A>(
     val longitude1: String,
     val latitude2: String?,
     val longitude2: String?,
+    val created_at: CreatedAt,
     val comment: String?
 )
 
+data class CreatedAt(
+    val timestamp: String,
+    val date: String,
+    val time: String
+)
 
 data class Service(
     val name: String? = "",

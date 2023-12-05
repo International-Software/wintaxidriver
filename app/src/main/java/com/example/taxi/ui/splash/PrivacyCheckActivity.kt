@@ -186,4 +186,6 @@ class PrivacyCheckActivity : AppCompatActivity() {
         HomeActivity.open(this)
         finish()
     }
+
+
 }

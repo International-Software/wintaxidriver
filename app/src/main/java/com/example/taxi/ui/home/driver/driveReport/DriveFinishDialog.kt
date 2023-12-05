@@ -232,10 +232,16 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         if (isDistance > minDistance) {
             totalInCenterDistance = isDistance - (minDistance)
         }
+
+        if (isDistance < 0){
+            farCenterDistance = totalDistance
+        }else{
+            farCenterDistance /= 1000.toDouble()
+        }
         Log.d(TAG, "renderAnalyticsReportData: out masofa $farCenterDistance")
         val moneyForInDistance = (totalInCenterDistance) * costPerKm
         val moneyForFarDistance =
-            (farCenterDistance / 1000.toDouble()) * preferenceManager.getCostOutCenter()
+            (farCenterDistance) * preferenceManager.getCostOutCenter()
         Log.d(
             TAG,
             "renderAnalyticsReportData: tashqaridagi har bir km uchun narx ${preferenceManager.getCostOutCenter()}"
@@ -244,9 +250,9 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
         Log.d(TAG, "renderAnalyticsReportData: out Cost $moneyForFarDistance")
 
         val moneyTotalDistance = totalDistance * costPerKm
-//        val moneyWithKm: Int = TaxiCalculator.roundToNearestMultiple((moneyForInDistance + moneyForFarDistance).roundToInt())// This will also work
-        val moneyWithKm: Int =
-            TaxiCalculator.roundToNearestMultiple(moneyTotalDistance.roundToInt())// This will also work
+        val moneyWithKm: Int = TaxiCalculator.roundToNearestMultiple((moneyForInDistance + moneyForFarDistance).roundToInt())// This will also work
+//        val moneyWithKm: Int =
+//            TaxiCalculator.roundToNearestMultiple(moneyTotalDistance.roundToInt())// This will also work
 
         Log.d(
             TAG,
@@ -262,13 +268,8 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
 
         preferenceManager.clearPassengerPhone()
-        val allPrice =
-            if (preferenceManager.isHasDestinationSecond()) {
-                moneyWithTime + preferenceManager.getStartCost()
-            } else {
-                moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
-            }
 
+        val allPrice = moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
 
 
 
