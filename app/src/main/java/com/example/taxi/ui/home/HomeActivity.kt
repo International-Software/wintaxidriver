@@ -267,6 +267,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     override fun onStart() {
         super.onStart()
 
+        Log.d("mening", "onStart: ${userPreferenceManager.getToken()}")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS

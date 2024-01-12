@@ -21,7 +21,7 @@ data class OrderData<A>(
     val longitude1: String,
     val latitude2: String?,
     val longitude2: String?,
-    val created_at: CreatedAt,
+//    val created_at: CreatedAt,
     val comment: String?
 )
 

@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.taxi.di.MAIN
+import com.example.taxi.domain.preference.UserPreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import java.net.URI
 class SocketRepository constructor(
     val context: Context,
     private var viewModelScope: CoroutineScope? = null,
+    private val userPreferenceManager: UserPreferenceManager,
     private var socketMessageProcessor: SocketMessageProcessor? = null
 ) {
 
@@ -62,17 +64,21 @@ class SocketRepository constructor(
 
     private fun connectSocket(token: String) {
         shouldReconnect = true
+
         webSocket = object : WebSocketClient(URI("wss://$MAIN/connect/?token=$token")) {
             override fun onOpen(handshakedata: ServerHandshake?) {
 //                isConnectedSocket.value = true
                 socketLive.postValue(true)
                 isConnected = true
+                userPreferenceManager.saveToggleState(true)
+
                 Log.d("WebSocket", "Connection onOpen: ")
 
             }
 
             override fun onMessage(message: String?) {
                 Log.d("WebSocket", "onMessage: $message")
+
                 message?.let {
                     socketMessageProcessor?.handleMessage(it)
                 }
@@ -82,6 +88,7 @@ class SocketRepository constructor(
                 Log.d("WebSocket", "Connection closed: $reason ($code)")
                 isConnected = false
                 socketLive.postValue(false)
+                userPreferenceManager.saveToggleState(false)
 
 //                isConnectedSocket.value = false
                 if (shouldReconnect) {
@@ -94,6 +101,8 @@ class SocketRepository constructor(
                 Log.e("WebSocket", "Error occurred", ex)
                 isConnected = false
                 socketLive.postValue(false)
+                userPreferenceManager.saveToggleState(false)
+
 //                isConnectedSocket.postValue(false)
                 if (shouldReconnect) {
                     reconnectSocket(token)
@@ -125,6 +134,8 @@ class SocketRepository constructor(
 
     fun disconnectSocket() {
         shouldReconnect = false
+        userPreferenceManager.saveToggleState(false)
+
         handler.removeCallbacksAndMessages(null)
         reconnectJob?.cancel()
         webSocket?.close()

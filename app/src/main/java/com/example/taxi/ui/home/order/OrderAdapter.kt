@@ -38,7 +38,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
                 addressToTextView.convertToCyrillic(order.address.to)
             }
 
-            orderTime.text = order.created_at.time.substring(0,5)
+//            orderTime.text = order.created_at.time.substring(0,5)
 
             val lat2 = location?.latitude
             val long2 = location?.longitude

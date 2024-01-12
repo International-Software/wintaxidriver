@@ -36,6 +36,7 @@ class SocketService : android.app.Service() {
 
     private var isAckReceived = true
     private val orderViewModel: OrderViewModel by inject()
+    private val userPreferenceManager: UserPreferenceManager by inject()
     private val compositeDisposable = CompositeDisposable()
     private var hasLocationChanged = false
     private var lastSentAccuracy = 0
@@ -122,6 +123,7 @@ class SocketService : android.app.Service() {
             context = this,
 //            socketViewModel = socketViewModel,
             viewModelScope = CoroutineScope(Dispatchers.IO),
+            userPreferenceManager = userPreferenceManager,
             socketMessageProcessor = socketMessageProcessor
         )
         locationEngine = LocationEngineProvider.getBestLocationEngine(this)

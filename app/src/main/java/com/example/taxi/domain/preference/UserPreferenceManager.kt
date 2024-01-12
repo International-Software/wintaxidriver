@@ -47,7 +47,7 @@ class UserPreferenceManager(private val context: Context) {
         const val LAST_RACE_COST = "last_race_cost"
         const val LAST_RACE_WAIT_COST = "last_race_wait_cost"
         const val LAST_RACE_WAIT_TIME = "last_race_wait_time"
-        private const val KEY_TOGGLE_STATE = "ToggleState"
+        const val KEY_TOGGLE_STATE = "ToggleState"
         const val IS_TAXIMETER = "is_taximeter"
         const val ORDER_ID = "order_id"
 
@@ -63,12 +63,16 @@ class UserPreferenceManager(private val context: Context) {
         Log.d("narx", "savePriceSettings: ichkarida ${order.start_cost}")
         Log.d("narx", "savePriceSettings: har bir km ${order.getMinCost()}")
         with(prefs.edit()) {
-            putInt(COST_PER_KM, order.getCostPerKm())
+//
+            if (order.getCostPerKm() == 0) putInt(COST_PER_KM, 2000) else putInt(
+                COST_PER_KM, order.getCostPerKm()
+            )
+
             putInt(MIN_DISTANCE, order.getMinDistance())
             if (order.start_cost != 0) putInt(START_COST, order.start_cost) else putInt(
-                START_COST,
-                order.getMinCost()
+                START_COST, order.getMinCost()
             )
+//            putInt(START_COST, 6000)
 
             putInt(COST_OUT_CENTER, order.getCostPerKmOutside())
             putInt(MIN_WAIT_TIME, order.getMinWaitTime())
@@ -81,7 +85,11 @@ class UserPreferenceManager(private val context: Context) {
             putString(DESTINATION1_LAT, order.latitude1)
             putString(DESTINATION2_LAT, order.latitude2)
             putInt(ORDER_ID, order.id)
-            putInt(COST_WAIT_TIME_PER_MINUTE, order.getCostMinWaitTimePerMinute())
+//
+            if (order.getCostMinWaitTimePerMinute() == 0) putInt(
+                COST_WAIT_TIME_PER_MINUTE, 500
+            ) else putInt(COST_WAIT_TIME_PER_MINUTE, order.getCostMinWaitTimePerMinute())
+
             putString(DESTINATION2, order.address.to)
         }.apply()
     }
@@ -265,6 +273,7 @@ class UserPreferenceManager(private val context: Context) {
             "la" -> {
                 Language.UZBEK
             }
+
             "ru" -> {
                 Language.RUSSIAN
             }
@@ -352,21 +361,16 @@ class UserPreferenceManager(private val context: Context) {
     }
 
     enum class DistanceUnit {
-        KILOMETERS,
-        MILES
+        KILOMETERS, MILES
     }
 
 
     enum class ThemeStyle {
-        AUTO,
-        LIGHT,
-        DARK
+        AUTO, LIGHT, DARK
     }
 
     enum class Language(val code: String) {
-        RUSSIAN("ru"),
-        UZBEK("la"),
-        KRILL("uz")
+        RUSSIAN("ru"), UZBEK("la"), KRILL("uz")
     }
 
     fun setDriverStatus(status: DriverStatus) {
@@ -384,10 +388,7 @@ class UserPreferenceManager(private val context: Context) {
 //    }
 
     enum class DriverStatus {
-        ACCEPTED,
-        ARRIVED,
-        STARTED,
-        COMPLETED
+        ACCEPTED, ARRIVED, STARTED, COMPLETED
     }
 
 
@@ -468,40 +469,42 @@ class UserPreferenceManager(private val context: Context) {
     fun saveMessageValue(value: Int) {
         prefs.edit().putInt("message_value", value).apply()
     }
-    fun saveMessageCount(count: Int){
-        prefs.edit().putInt("message_count",count).apply()
+
+    fun saveMessageCount(count: Int) {
+        prefs.edit().putInt("message_count", count).apply()
     }
-    fun getMessageCount(): Int = prefs.getInt("message_count",0)
+
+    fun getMessageCount(): Int = prefs.getInt("message_count", 0)
 
     fun getMessageValue(): Int = prefs.getInt("message_value", 0)
 
 
-fun getPauseTime(): Long {
-    return prefs.getLong("pause_time", 0L)
-}
+    fun getPauseTime(): Long {
+        return prefs.getLong("pause_time", 0L)
+    }
 
-fun saveLastRaceId(raceId: Int) {
-    prefs.edit().putInt(LAST_RACE_ID, raceId).apply()
-}
+    fun saveLastRaceId(raceId: Int) {
+        prefs.edit().putInt(LAST_RACE_ID, raceId).apply()
+    }
 
-fun saveLastRace(order: OrderCompleteRequest, raceId: Int) {
-    prefs.edit().putInt(LAST_RACE_DISTANCE, order.distance).apply()
-    prefs.edit().putInt(LAST_RACE_COST, order.cost).apply()
-    prefs.edit().putInt(LAST_RACE_WAIT_COST, order.wait_cost).apply()
-    prefs.edit().putInt(LAST_RACE_WAIT_TIME, order.wait_time).apply()
-    prefs.edit().putInt(LAST_RACE_ID, raceId).apply()
-}
+    fun saveLastRace(order: OrderCompleteRequest, raceId: Int) {
+        prefs.edit().putInt(LAST_RACE_DISTANCE, order.distance).apply()
+        prefs.edit().putInt(LAST_RACE_COST, order.cost).apply()
+        prefs.edit().putInt(LAST_RACE_WAIT_COST, order.wait_cost).apply()
+        prefs.edit().putInt(LAST_RACE_WAIT_TIME, order.wait_time).apply()
+        prefs.edit().putInt(LAST_RACE_ID, raceId).apply()
+    }
 
-fun getLastRaceId() = prefs.getInt(LAST_RACE_ID, -1)
+    fun getLastRaceId() = prefs.getInt(LAST_RACE_ID, -1)
 
-fun getLastRace(): OrderCompleteRequest {
-    return OrderCompleteRequest(
-        distance = prefs.getInt(LAST_RACE_DISTANCE, 0),
-        cost = prefs.getInt(LAST_RACE_COST, 0),
-        wait_cost = prefs.getInt(LAST_RACE_WAIT_COST, 0),
-        wait_time = prefs.getInt(LAST_RACE_WAIT_TIME, 0)
-    )
-}
+    fun getLastRace(): OrderCompleteRequest {
+        return OrderCompleteRequest(
+            distance = prefs.getInt(LAST_RACE_DISTANCE, 0),
+            cost = prefs.getInt(LAST_RACE_COST, 0),
+            wait_cost = prefs.getInt(LAST_RACE_WAIT_COST, 0),
+            wait_time = prefs.getInt(LAST_RACE_WAIT_TIME, 0)
+        )
+    }
 
 
 }

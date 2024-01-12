@@ -269,8 +269,12 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
         preferenceManager.clearPassengerPhone()
 
-        val allPrice = moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
-
+        val allPrice =
+            if (preferenceManager.isHasDestinationSecond()) {
+                moneyWithTime + preferenceManager.getStartCost()
+            } else {
+                moneyWithTime + moneyWithKm + preferenceManager.getStartCost()
+            }
 
 
         viewBinding.waitTimeTxt.text = ConversionUtil.convertSecondsToMinutes(waitTime.toInt())
@@ -357,6 +361,7 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
                 android.R.anim.fade_out
             )
             preferenceManager.saveStatusIsTaximeter(false)
+            dismiss()
             startActivity(intent)
             currentActivity.overridePendingTransition(
                 android.R.anim.fade_in,

@@ -76,6 +76,8 @@ class SocketMessageProcessor(
                     val intent = Intent("com.example.taxi.ORDER_DATA_ACTION")
                     intent.putExtra("OrderData_new", message)
                     activity.sendBroadcast(intent)
+                    showNotification("Пришёл новый заказ...","Cообщение")
+
                 }
                 SocketConfig.ORDER_UPDATE ->{
                     val intent = Intent("com.example.taxi.ORDER_DATA_ACTION")

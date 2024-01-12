@@ -96,7 +96,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:text="Asadbek"
+
                     android:layout_marginTop="@dimen/_35sdp"
                     android:layout_width="match_parent"
                     android:textColor="@color/black"

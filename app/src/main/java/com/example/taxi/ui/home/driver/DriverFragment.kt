@@ -3,6 +3,7 @@ package com.example.taxi.ui.home.driver
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -1086,17 +1087,40 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     private fun findRoute(lat: String?, long: String?) {
-        val uri =
-            Uri.parse("google.navigation:q=${lat},${long}")
+
+        /** for google**/
+//        val uri = Uri.parse("google.navigation:q=${lat},${long}")
+
+        /** for yandex **/
+        val uri = Uri.parse("geo:$lat,$long?z=12") // z is zoom level
+
 
         // Create an Intent from uri. Set the action to ACTION_VIEW
         val mapIntent = Intent(Intent.ACTION_VIEW, uri)
 
         // Make the Intent explicit by setting the Google Maps package
-        mapIntent.setPackage("com.google.android.apps.maps")
+//        mapIntent.setPackage("com.google.android.apps.maps")
+        mapIntent.setPackage("ru.yandex.yandexmaps")
+
 
         // Attempt to start an activity that can handle the Intent
-        startActivity(mapIntent)
+        mapIntent.setPackage("ru.yandex.yandexmaps")
+
+// Attempt to start an activity that can handle the Intent
+        try {
+            startActivity(mapIntent)
+        } catch (e: ActivityNotFoundException) {
+            // Yandex Maps is not installed, redirect to Google Play Store or another mapping service
+            val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse("market://details?id=ru.yandex.yandexmaps")
+                setPackage("com.android.vending")
+            }
+            try {
+                startActivity(playStoreIntent)
+            } catch (ex: ActivityNotFoundException) {
+                // Google Play Store is not available, handle this case or notify the user
+            }
+        }
 //        val currentLocation = navigationLocationProvider.lastLocation
 ////        val originPoint = originLocation?.let {
 ////            Point.fromLngLat(it.longitude, it.latitude)

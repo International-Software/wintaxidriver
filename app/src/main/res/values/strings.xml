@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Hamkor Taxi(Driver)</string>
+    <string name="app_name" translatable="false">Win Taxi(Driver)</string>
     <string name="tizimga_kirish">Tizimga kirish</string>
     <string name="tizimga_kirish_uchun_telefon_raqamingizni_kiriting">Tizimga kirish uchun telefon raqamingizni kiriting</string>
     <string name="telefon_raqamingiz">Telefon raqamingiz</string>
@@ -191,7 +191,6 @@
     <string name="tasdiqlash_kodini_kiriting">Tasdiqlash kodini kiriting</string>
     <string name="qr">Qr Bonus</string>
     <string name="message">Xabarlar</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="xabarlar_tarixi">Xabarlar tarixi</string>
     <string name="about_order">Buyurtma haqida</string>

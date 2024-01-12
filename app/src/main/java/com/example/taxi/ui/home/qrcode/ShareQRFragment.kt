@@ -91,7 +91,7 @@ class ShareQRFragment : Fragment() {
             )
             .build()
         val driverId = userPreferenceManager.getDriverID()
-        val data = QrData.Url("https://play.google.com/store/apps/details?id=uz.insoft.AlifTaxi&referrer=$driverId")
+        val data = QrData.Url("https://play.google.com/store/apps/details?id=uz.insoft.win_taxi&referrer=$driverId")
 //        val data = QrData.Url("$driverId")
         val drawable : Drawable = QrCodeDrawable(data, options)
         viewBinding.imageQR.setImageDrawable(drawable)

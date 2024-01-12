@@ -6,8 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -48,6 +48,7 @@ class InputPasswordFragment : Fragment() {
     private lateinit var referrerClient: InstallReferrerClient
 
     private var step = 1
+    var refererId: Int? = null
 
     private lateinit var imm: InputMethodManager
 
@@ -77,7 +78,7 @@ class InputPasswordFragment : Fragment() {
             intervalMillis = INTERVAL_TIME,
             oonTick = {
                 viewBinding.countDownTextView.text =
-                    if ((it / 1000) >= 10) "00:${it / 1000}" else "00:0x${it / 1000}"
+                    if ((it / 1000) >= 10) "00:${it / 1000}" else "00:0${it / 1000}"
             },
             oonFinish = { updateCountDownTextView() }
         ).apply { start() }
@@ -101,10 +102,11 @@ class InputPasswordFragment : Fragment() {
                         val response: ReferrerDetails = referrerClient.installReferrer
                         Toast.makeText(requireContext(), "$response", Toast.LENGTH_SHORT).show()
                         val referrerUrl = response.installReferrer
-                        val referrerClickTime = response.referrerClickTimestampSeconds
-                        val appInstallTime = response.installBeginTimestampSeconds
-                        val instantExperienceLaunched = response.googlePlayInstantParam
 
+                        Toast.makeText(requireContext(), "$referrerUrl", Toast.LENGTH_SHORT).show()
+                        val uri = Uri.parse(referrerUrl)
+                        refererId = uri.getQueryParameter("referrer")?.toIntOrNull()
+                        Toast.makeText(requireContext(), "$refererId", Toast.LENGTH_SHORT).show()
                         // Use the referrerUrl as needed for your app.
                     }
                     InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
@@ -136,7 +138,7 @@ class InputPasswordFragment : Fragment() {
 
             PinViewUtils.setPinViewTextChangedListener(pinView) {
                 inputPasswordViewModel.confirmPassword(
-                    ConfirmationRequest(preferenceManager.getTokenForPhone().orEmpty(), it.toInt())
+                    ConfirmationRequest(preferenceManager.getTokenForPhone().orEmpty(), it.toInt()),refererId
                 )
             }
         }

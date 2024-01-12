@@ -18,8 +18,8 @@ android {
         applicationId "uz.insoft.win_taxi"
         minSdk 24
         targetSdk 33
-        versionCode 45
-        versionName "7.11.30"
+        versionCode 51
+        versionName "8.1.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

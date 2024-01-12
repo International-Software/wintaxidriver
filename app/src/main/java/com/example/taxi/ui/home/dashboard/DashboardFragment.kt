@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.net.ConnectivityManager
@@ -61,6 +62,17 @@ class DashboardFragment : Fragment() {
     private lateinit var soundManager: SoundManager
     private lateinit var networkReceiver: NetworkReceiver
 
+    private lateinit var prefs: SharedPreferences
+    private val preferenceChangeListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == UserPreferenceManager.KEY_TOGGLE_STATE) {
+                // Do something when START_COST changes
+                val defValue = sharedPreferences.getBoolean(UserPreferenceManager.KEY_TOGGLE_STATE,false)
+                updateSocket(defValue)
+
+            }
+        }
+
     val navController by lazy {
         findNavController()
     }
@@ -94,6 +106,7 @@ class DashboardFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        prefs = userPreferenceManager.getSharedPreferences()
         registerSocketStatusReceiver()
 
     }
@@ -166,6 +179,7 @@ class DashboardFragment : Fragment() {
             context = requireContext(),
 //            socketViewModel = socketViewModel,
             socketMessageProcessor = socketMessageProcessor,
+            userPreferenceManager = userPreferenceManager,
             viewModelScope = socketViewModel.viewModelScope
         )
 
@@ -483,6 +497,7 @@ class DashboardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
         val color = if (userPreferenceManager.getToggleState()) Color.GREEN else Color.RED
         viewBinding.socketIsConnected.backgroundTintList = ColorStateList.valueOf(color)
@@ -495,6 +510,8 @@ class DashboardFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        prefs.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
+
         requireActivity().unregisterReceiver(socketStatusReceiver)
     }
 
@@ -654,7 +671,7 @@ class DashboardFragment : Fragment() {
 
         viewBinding.isReadyForWork.setOnToggledListener { _, isOn ->
 
-            userPreferenceManager.saveToggleState(isOn)
+//            userPreferenceManager.saveToggleState(isOn)
             val intent = Intent(requireActivity(), SocketService::class.java).apply {
                 putExtra("TOKEN", userPreferenceManager.getToken())
                 putExtra("IS_READY_FOR_WORK", isOn)

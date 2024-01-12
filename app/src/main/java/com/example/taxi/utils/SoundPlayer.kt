@@ -3,6 +3,7 @@ package com.example.taxi.utils
 import android.content.Context
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.util.Log
 import com.example.taxi.R
 
 class SoundPlayer(private val soundType: SoundType, private val context: Context) {
@@ -31,7 +32,6 @@ class SoundPlayer(private val soundType: SoundType, private val context: Context
     fun playRequestSound(){
         val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0)
-
         val soundResId = R.raw.alif_request
         mediaPlayer = MediaPlayer.create(context, soundResId)
         mediaPlayer?.isLooping = true

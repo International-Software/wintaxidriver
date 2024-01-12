@@ -25,10 +25,10 @@ class InputPasswordViewModel(private val getRegisterResponseUseCase: GetRegister
     private val _confirmResponse = MutableLiveData<Resource<MainResponse<UserData<IsCompletedModel>>>>()
     val confirmResponse: LiveData<Resource<MainResponse<UserData<IsCompletedModel>>>> get() = _confirmResponse
 
-    fun confirmPassword(request: ConfirmationRequest) {
+    fun confirmPassword(request: ConfirmationRequest, refererId: Int?) {
         _confirmResponse.postValue(Resource(ResourceState.LOADING))
         compositeDisposable
-            .add(getRegisterResponseUseCase.confirmPassword(request = request)
+            .add(getRegisterResponseUseCase.confirmPassword(request = request, parentId = refererId)
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe {}
                 .doOnTerminate {}
