@@ -56,7 +56,7 @@ class KillStateDialogService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(
             PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "myApp::MyWakelockTag"
@@ -143,7 +143,7 @@ class KillStateDialogService : Service() {
                 wakeLock?.release()
                 soundPlayer.stopSound()
 
-            }, 10000)
+            }, 15000)
 
             startForeground(notificationId, createNotification())
         } else {
@@ -203,75 +203,75 @@ class KillStateDialogService : Service() {
             ?.let { convertToKm(it) }
             ?.let { "%.2f".format(it) }
             ?.plus(" km")
-}
-
-
-private fun setupClickListeners(data: SocketOnlyForYouData) {
-    val cancelOrderButton = dialogView?.findViewById<TextView>(R.id.cancelOrderButton)
-    val acceptButton = dialogView?.findViewById<FrameLayout>(R.id.accept_button)
-
-    cancelOrderButton?.setOnClickListener {
-        dialogView?.visibility = View.GONE
-        soundPlayer.stopSound()
-        stopSelf()
     }
 
-    acceptButton?.setOnClickListener {
-        val intent = Intent(applicationContext, HomeActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("navigate_to_order", true)
-        intent.putExtra("order_id", data.id)
-        intent.putExtra("lat1", data.latitude1)
-        intent.putExtra("lat2", data.latitude2)
-        intent.putExtra("long1", data.longitude1)
-        intent.putExtra("long2", data.longitude2)
-        Log.d(
-            "lokatsiya",
-            "setupClickListeners: long2 = ${data.longitude2} , lat2 = ${data.latitude2}"
+
+    private fun setupClickListeners(data: SocketOnlyForYouData) {
+        val cancelOrderButton = dialogView?.findViewById<TextView>(R.id.cancelOrderButton)
+        val acceptButton = dialogView?.findViewById<FrameLayout>(R.id.accept_button)
+
+        cancelOrderButton?.setOnClickListener {
+            dialogView?.visibility = View.GONE
+            soundPlayer.stopSound()
+            stopSelf()
+        }
+
+        acceptButton?.setOnClickListener {
+            val intent = Intent(applicationContext, HomeActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.putExtra("navigate_to_order", true)
+            intent.putExtra("order_id", data.id)
+            intent.putExtra("lat1", data.latitude1)
+            intent.putExtra("lat2", data.latitude2)
+            intent.putExtra("long1", data.longitude1)
+            intent.putExtra("long2", data.longitude2)
+            Log.d(
+                "lokatsiya",
+                "setupClickListeners: long2 = ${data.longitude2} , lat2 = ${data.latitude2}"
+            )
+            dialogView?.visibility = View.GONE
+            soundPlayer.stopSound()
+            startActivity(intent)
+            stopSelf()
+        }
+    }
+
+
+    private fun animateProgressBar() {
+        val progressBar = dialogView?.findViewById<ProgressBar>(R.id.progress_bar)
+        val objectAnimator = ObjectAnimator.ofInt(
+            progressBar, "progress",
+            progressBar!!.progress, 0
+        ).setDuration(15000)
+
+        objectAnimator.addUpdateListener { valueAnimator ->
+            val progress = valueAnimator.animatedValue as Int
+            progressBar.progress = progress
+        }
+        objectAnimator.start()
+    }
+
+    private fun createNotification(): Notification {
+        val contentTitle = ""
+        val contentText = ""
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, HomeActivity::class.java),
+            flags
         )
-        dialogView?.visibility = View.GONE
-        soundPlayer.stopSound()
-        startActivity(intent)
-        stopSelf()
+        val notificationBuilder = NotificationCompat.Builder(this, notificationChannelId)
+            .setSmallIcon(R.drawable.ic_admin)
+            .setContentTitle(contentTitle)
+            .setContentText(contentText)
+            .setContentIntent(contentIntent)
+            .setAutoCancel(true)
+
+        return notificationBuilder.build()
     }
-}
-
-
-private fun animateProgressBar() {
-    val progressBar = dialogView?.findViewById<ProgressBar>(R.id.progress_bar)
-    val objectAnimator = ObjectAnimator.ofInt(
-        progressBar, "progress",
-        progressBar!!.progress, 0
-    ).setDuration(10000)
-
-    objectAnimator.addUpdateListener { valueAnimator ->
-        val progress = valueAnimator.animatedValue as Int
-        progressBar.progress = progress
-    }
-    objectAnimator.start()
-}
-
-private fun createNotification(): Notification {
-    val contentTitle = ""
-    val contentText = ""
-    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    } else {
-        PendingIntent.FLAG_UPDATE_CURRENT
-    }
-    val contentIntent = PendingIntent.getActivity(
-        this,
-        0,
-        Intent(this, HomeActivity::class.java),
-        flags
-    )
-    val notificationBuilder = NotificationCompat.Builder(this, notificationChannelId)
-        .setSmallIcon(R.drawable.ic_admin)
-        .setContentTitle(contentTitle)
-        .setContentText(contentText)
-        .setContentIntent(contentIntent)
-        .setAutoCancel(true)
-
-    return notificationBuilder.build()
-}
 }
