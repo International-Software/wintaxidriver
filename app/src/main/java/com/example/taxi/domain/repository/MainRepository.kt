@@ -3,6 +3,7 @@ package com.example.taxi.domain.repository
 import com.example.taxi.domain.model.BonusResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.about.ResponseAbout
 import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.checkAccess.AccessModel
@@ -88,4 +89,7 @@ interface MainRepository {
     fun confirmBonusPassword(orderHistoryId: Int, code: Int): Observable<MainResponse<Any>>
 
     fun getMessage(): Observable<MessageResponse>
+
+    fun paymentClick(amount: Int) :  Observable<MainResponse<PaymentUrl>>
+    fun paymentPayme(amount: Int) :  Observable<MainResponse<PaymentUrl>>
 }

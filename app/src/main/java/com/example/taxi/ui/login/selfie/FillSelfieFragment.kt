@@ -24,6 +24,7 @@ import com.example.taxi.domain.model.selfie.SelfieAllData
 import com.example.taxi.domain.model.selfie.StatusModel
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.ui.home.HomeActivity
+import com.example.taxi.utils.DialogUtils
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
 import com.tapadoo.alerter.Alerter
@@ -81,6 +82,7 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                     }
                 }
                 ResourceState.SUCCESS -> {
+                    selfieViewModel.clearFile()
                     resource.data?.let { complete ->
                         if (complete.data.is_completed.string) {
                             UserPreferenceManager(requireContext()).setRegisterComplete()
@@ -93,7 +95,15 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                         }
                     }
                 }
-                ResourceState.ERROR -> {}
+                ResourceState.ERROR -> {
+                    selfieViewModel.clearFile()
+                    DialogUtils.createChangeDialog(
+                        activity = requireActivity(),
+                        title = "Xatolik",
+                        message = "${resource.message}",
+                        color =  R.color.tred
+                    )
+                }
             }
         }
     }
@@ -129,6 +139,7 @@ class FillSelfieFragment : Fragment(), ImagePickerResultListener {
                         startForProfileImageResult.launch(intent)
                     }
             }
+
 
             nextDataCarFbn.setOnClickListener {
                 selfieViewModel.fillSelfie(

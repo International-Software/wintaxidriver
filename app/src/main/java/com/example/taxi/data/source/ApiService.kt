@@ -3,6 +3,7 @@ package com.example.taxi.data.source
 import com.example.taxi.domain.model.BonusResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.about.ResponseAbout
 import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.checkAccess.AccessModel
@@ -158,4 +159,14 @@ interface ApiService {
 
     @POST("notification/index")
     fun getMessage(): Observable<MessageResponse>
+
+    @GET("payment/click")
+    fun paymentClick(
+        @Query("amount") amount: Int
+    ): Observable<MainResponse<PaymentUrl>>
+
+    @GET("payment/payme")
+    fun paymentPayme(
+        @Query("amount") amount: Int
+    ): Observable<MainResponse<PaymentUrl>>
 }

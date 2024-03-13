@@ -1,5 +1,6 @@
 package com.example.taxi.ui.home.dashboard
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.taxi.domain.exception.traceErrorException
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.message.MessageResponse
 import com.example.taxi.domain.model.selfie.SelfieAllData
@@ -46,6 +48,18 @@ class DashboardViewModel(
 
     val messageResponse: LiveData<Resource<MessageResponse>> get() = _messageResponse
 
+    private val _paymentType = MutableLiveData<Boolean>().apply {
+        value = false
+    }
+
+    private var _paymentProgress = MutableLiveData<Resource<MainResponse<PaymentUrl>>>()
+    val paymentProgress: LiveData<Resource<MainResponse<PaymentUrl>>> get() =  _paymentProgress
+    val paymentType: LiveData<Boolean> get() = _paymentType
+
+    fun clearPaymentProgress(){
+        _paymentProgress = MutableLiveData<Resource<MainResponse<PaymentUrl>>>()
+    }
+
     fun getMessage(){
         _messageResponse.postValue(Resource(ResourceState.LOADING))
         compositeDisposable.add(
@@ -80,6 +94,14 @@ class DashboardViewModel(
                     }
                 )
         )
+    }
+
+    fun paymentPayme(){
+        _paymentType.postValue(true)
+    }
+
+    fun paymentClick(){
+        _paymentType.postValue(false)
     }
 
     fun getSettings() {
@@ -185,5 +207,35 @@ class DashboardViewModel(
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
+    }
+
+    fun payment(toInt: Int) {
+        _paymentProgress.postValue(Resource(ResourceState.LOADING))
+        val a = if (paymentType.value == true) getMainResponseUseCase.paymentPayme(toInt) else getMainResponseUseCase.paymentClick(toInt)
+        compositeDisposable.add(a
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe {
+                    // Perform any setup tasks before the subscription starts
+                }
+                .doOnTerminate {
+                    // Perform any cleanup tasks after the subscription ends
+                }
+                .subscribe(
+                    { response ->
+
+                        Log.d("tekshirish", "payment: ${response.data.url}")
+                        _paymentProgress.postValue(Resource(ResourceState.SUCCESS, response))
+                    },
+                    { error ->
+                        Log.d("tekshirish", "payment: ${error.message}")
+                        _paymentProgress.postValue(
+                            Resource(
+                                ResourceState.ERROR,
+                                message = traceErrorException(error).getErrorMessage()
+                            )
+                        )
+                    }
+                )
+        )
     }
 }

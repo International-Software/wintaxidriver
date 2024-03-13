@@ -26,69 +26,65 @@ class SelfieViewModel(private val getRegisterResponseUseCase: GetRegisterRespons
     ViewModel() {
     private val compositeDisposable = CompositeDisposable()
 
-    private val _selfieResponse = MutableLiveData<Resource<MainResponse<SelfieAllData<IsCompletedModel,StatusModel>>>>();
+    private var _selfieResponse = MutableLiveData<Resource<MainResponse<SelfieAllData<IsCompletedModel,StatusModel>>>>();
     val selfieResponse get() = _selfieResponse
 
 
     fun fillSelfie(
         selfieUri: Uri, licensePhotoUri: Uri, contentResolver: ContentResolver
     ) {
-       _selfieResponse.postValue(Resource(ResourceState.LOADING))
+        _selfieResponse.postValue(Resource(ResourceState.LOADING))
 
         val selfieFile = getFileFromUri(selfieUri, contentResolver)
         val licensePhotoFile = getFileFromUri(licensePhotoUri, contentResolver)
-        val selfieRequestBody =
-            selfieFile?.let { it.asRequestBody("image/*".toMediaTypeOrNull()) }
-        val licensePhotoRequestBody =
-            licensePhotoFile?.let { it.asRequestBody("image/*".toMediaTypeOrNull()) }
 
-        val selfiePart =
-            selfieRequestBody?.let {
-                MultipartBody.Part.createFormData("selfie", selfieFile.name,
-                    it
-                )
-            }
-        val licensePhotoPart = licensePhotoRequestBody?.let {
-            MultipartBody.Part.createFormData(
-                "licensePhoto", licensePhotoFile.name, it
-            )
+        val selfieRequestBody = selfieFile?.asRequestBody("image/*".toMediaTypeOrNull())
+        val licensePhotoRequestBody = licensePhotoFile?.asRequestBody("image/*".toMediaTypeOrNull())
+
+        val selfiePart = selfieRequestBody?.let {
+            MultipartBody.Part.createFormData("selfie", selfieFile.name, it)
         }
 
-        selfiePart?.let {
-            licensePhotoPart?.let { it1 ->
-                getRegisterResponseUseCase.fillSelfie(it, it1)
-                    .subscribeOn(Schedulers.io())
-                    .doOnSubscribe {}
-                    .doOnTerminate {}
-                    .subscribe({  response ->
-                        Log.e("tekshirish", "fillSelfie: $response", )
-                        viewModelScope.launch {
-                            _selfieResponse.postValue(Resource(ResourceState.SUCCESS, response))
+        val licensePhotoPart = licensePhotoRequestBody?.let {
+            MultipartBody.Part.createFormData("licensePhoto", licensePhotoFile.name, it)
+        }
 
-                        }
-                    }, {
-                            error ->
-                        Log.e("tekshirish", "fillSelfie: $error", )
+        if (selfiePart != null && licensePhotoPart != null) {
+            getRegisterResponseUseCase.fillSelfie(selfiePart, licensePhotoPart)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe { /* Optionally handle subscription start */ }
+                .doOnTerminate { /* Optionally handle termination */ }
+                .subscribe({ response ->
+                    Log.e("tekshirish", "fillSelfie: $response")
+                    viewModelScope.launch {
+                        _selfieResponse.postValue(Resource(ResourceState.SUCCESS, response))
+                    }
+                }, { error ->
+                    val apiError = traceErrorException(error)
+                    val errorMessage = apiError.message ?: "An unknown error occurred"
 
-                        _selfieResponse.postValue(
-                            Resource(
-                                ResourceState.ERROR,
-                                message = traceErrorException(error).getErrorMessage()
-                            )
-                        )
-                    })
-            }
-        }?.let {
-            compositeDisposable.add(
-                it
+                    Log.e("tekshirish", "Error in fillSelfie: $errorMessage", error)
+                    _selfieResponse.postValue(Resource(ResourceState.ERROR, message = errorMessage))
+                }).also { compositeDisposable.add(it) }
+        }else{
+            _selfieResponse.postValue(
+                Resource(
+                    ResourceState.ERROR,
+                    message = "Suratlarni yuklashda xatolik"
+                )
             )
         }
 
     }
 
+    fun clearFile(){
+        _selfieResponse = MutableLiveData<Resource<MainResponse<SelfieAllData<IsCompletedModel,StatusModel>>>>()
+    }
+
     override fun onCleared() {
         compositeDisposable.dispose()
         super.onCleared()
+        compositeDisposable.clear()
     }
 
     private fun getFileFromUri(uri: Uri, contentResolver: ContentResolver): File? {

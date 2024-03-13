@@ -12,3 +12,7 @@ data class MainResponse<T>(
 data class BonusResponse(
     val order_history_id: Int
 )
+
+data class PaymentUrl(
+    val url: String
+)

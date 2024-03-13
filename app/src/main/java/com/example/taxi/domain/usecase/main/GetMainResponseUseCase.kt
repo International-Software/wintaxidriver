@@ -1,10 +1,13 @@
 package com.example.taxi.domain.usecase.main
 
+import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.tarif.ModeRequest
 import com.example.taxi.domain.model.transfer.TransferRequest
 import com.example.taxi.domain.repository.MainRepository
+import io.reactivex.Observable
 
 class GetMainResponseUseCase(private val mainRepository: MainRepository) {
 
@@ -66,4 +69,7 @@ class GetMainResponseUseCase(private val mainRepository: MainRepository) {
     fun transferWithBonus(order_id: Int, money: Int) = mainRepository.transferWithBonus(order_id = order_id, money = money)
 
     fun getMessage() = mainRepository.getMessage()
+
+    fun paymentClick(amount: Int) = mainRepository.paymentClick(amount)
+    fun paymentPayme(amount: Int) = mainRepository.paymentPayme(amount)
 }

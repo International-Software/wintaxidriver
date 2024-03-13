@@ -73,7 +73,7 @@ class TransferMoneyFragment : Fragment() {
         EditTextIdUtils.setEditTextListenerForButton(viewBinding.edMoneyValue) {
             val money = it.toIntOrNull()
             if (money != null) {
-                viewBinding.sendMoneyButton.isEnabled = money > 1000
+                viewBinding.sendMoneyButton.isEnabled = money >= 1000
             } else {
                 viewBinding.sendMoneyButton.isEnabled = false
             }

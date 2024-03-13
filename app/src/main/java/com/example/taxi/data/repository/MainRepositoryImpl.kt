@@ -4,6 +4,7 @@ import com.example.taxi.data.source.ApiService
 import com.example.taxi.domain.model.BonusResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
+import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.about.ResponseAbout
 import com.example.taxi.domain.model.balance.BalanceData
 import com.example.taxi.domain.model.checkAccess.AccessModel
@@ -150,11 +151,19 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         orderHistoryId: Int,
         code: Int
     ): Observable<MainResponse<Any>> {
-        return apiService.confirmBonusPassword(orderHistoryId,code)
+        return apiService.confirmBonusPassword(orderHistoryId, code)
     }
 
     override fun getMessage(): Observable<MessageResponse> {
         return apiService.getMessage()
+    }
+
+    override fun paymentClick(amount: Int): Observable<MainResponse<PaymentUrl>> {
+        return apiService.paymentClick(amount)
+    }
+
+    override fun paymentPayme(amount: Int): Observable<MainResponse<PaymentUrl>> {
+        return apiService.paymentPayme(amount)
     }
 
 
