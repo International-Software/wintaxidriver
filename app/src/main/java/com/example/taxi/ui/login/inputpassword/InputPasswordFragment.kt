@@ -100,13 +100,10 @@ class InputPasswordFragment : Fragment() {
                     InstallReferrerClient.InstallReferrerResponse.OK -> {
                         // Connection established.
                         val response: ReferrerDetails = referrerClient.installReferrer
-                        Toast.makeText(requireContext(), "$response", Toast.LENGTH_SHORT).show()
                         val referrerUrl = response.installReferrer
 
-                        Toast.makeText(requireContext(), "$referrerUrl", Toast.LENGTH_SHORT).show()
                         val uri = Uri.parse(referrerUrl)
                         refererId = uri.getQueryParameter("referrer")?.toIntOrNull()
-                        Toast.makeText(requireContext(), "$refererId", Toast.LENGTH_SHORT).show()
                         // Use the referrerUrl as needed for your app.
                     }
                     InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
@@ -167,7 +164,6 @@ class InputPasswordFragment : Fragment() {
             ""
         }
     }
-
 
     private fun navigateUp() {
         findNavController().navigateUp()

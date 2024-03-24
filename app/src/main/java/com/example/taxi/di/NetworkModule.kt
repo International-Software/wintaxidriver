@@ -19,8 +19,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-private const val TIME_OUT = 30L
-const val MAIN = "my.baraka-taxi.uz"
+private const val TIME_OUT = 80L
+const val MAIN = "bekjaantaxi.uz"
 const val MAIN_URL: String = "https://$MAIN"
 const val BASE_URL: String = "$MAIN_URL/api/driver/"
 val NetworkModule = module {

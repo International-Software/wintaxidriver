@@ -31,7 +31,7 @@ object TaxiCalculator {
     }
 
      fun roundToNearestMultiple(number: Int): Int {
-       val multiple = 500
+       val multiple = 200
         val remainder = number % multiple
         return if (remainder < multiple / 2) {
             number - remainder

@@ -8,12 +8,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.login.inputphone.InputPhoneFragment">
 
-    <View
+    <ImageView
         android:id="@+id/view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="?actionBarSize"
-        android:background="#D9D9D9"
+        android:scaleType="centerCrop"
+        android:src="@drawable/logo_copy"
         app:layout_constraintDimensionRatio="1:.35"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"
