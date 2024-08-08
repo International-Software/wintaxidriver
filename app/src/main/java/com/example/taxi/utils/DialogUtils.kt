@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
@@ -53,7 +54,7 @@ object DialogUtils {
         }
     }
 
-     fun loadingDialog(context: Context): Dialog {
+    fun loadingDialog(context: Context): Dialog {
         val dialog = Dialog(context)
         dialog.setContentView(R.layout.dialog_loading)
         dialog.window?.apply {
@@ -68,6 +69,32 @@ object DialogUtils {
 
         return dialog
     }
+
+
+    fun checkSuccessDialog(
+        context: Context,
+        onSuccessAction: () -> Unit = {},
+    ): Dialog {
+        val dialog = Dialog(context)
+        dialog.setContentView(R.layout.dialog_success)
+        dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        dialog.setCancelable(false)
+        val exit = dialog.findViewById<MaterialButton>(R.id.btn_error_exit_suc)
+        dialog.findViewById<TextView>(R.id.txt_error_desc).text = context.getString(R.string.success_check_photo)
+        dialog.findViewById<TextView>(R.id.txt_error_balance).visibility = View.GONE
+        val moneyTextView = dialog.findViewById<TextView>(R.id.txt_balance_num)
+        moneyTextView.visibility = View.GONE
+
+        exit.setOnClickListener {
+            onSuccessAction()
+            dialog.dismiss()
+        }
+
+        return dialog
+    }
+
     fun blockDialog(context: Context): Dialog {
         val dialog = Dialog(context)
         dialog.setContentView(R.layout.dialog_block_user)
@@ -100,7 +127,7 @@ object DialogUtils {
             .show()
     }
 
-    fun showIsSocketConnect(context: Context){
+    fun showIsSocketConnect(context: Context) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(context.getString(R.string.you_are_work))
         builder.setMessage(context.getString(R.string.you_are_connect_to_socket))
@@ -191,7 +218,7 @@ object DialogUtils {
 
         dialog.setCancelable(true)
         val exit = dialog.findViewById<MaterialButton>(R.id.btn_error_exit_cancel)
-          exit.setOnClickListener {
+        exit.setOnClickListener {
 
             dialog.dismiss()
         }
@@ -315,10 +342,12 @@ object DialogUtils {
             viewDialog.fromButton.text = dataRange[0]
             viewDialog.toButton.text = dataRange[1]
         }
-         viewDialog.autoTypeData.setText(type[typeOld])
+        viewDialog.autoTypeData.setText(type[typeOld])
 
-        if (viewDialog.fromButton.text.isEmpty()) viewDialog.fromButton.text = context.getString(R.string.from)
-        if (viewDialog.toButton.text.isEmpty()) viewDialog.toButton.text = context.getString(R.string.to)
+        if (viewDialog.fromButton.text.isEmpty()) viewDialog.fromButton.text =
+            context.getString(R.string.from)
+        if (viewDialog.toButton.text.isEmpty()) viewDialog.toButton.text =
+            context.getString(R.string.to)
 
 
         val adapter = ArrayAdapter(
@@ -384,13 +413,13 @@ object DialogUtils {
                     .setDuration(1000)
                     .show()
             } else {
-                if(newDateRange[0].isNotEmpty() || newDateRange[1].isNotEmpty() || selectedTypeName != 0){
-                    if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty()){
-                        range(dataRange,selectedTypeName)
-                    }else{
+                if (newDateRange[0].isNotEmpty() || newDateRange[1].isNotEmpty() || selectedTypeName != 0) {
+                    if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty()) {
+                        range(dataRange, selectedTypeName)
+                    } else {
                         range(newDateRange, selectedTypeName)
                     }
-                } else if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty() && selectedTypeName == 0){
+                } else if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty() && selectedTypeName == 0) {
 
                     if (dataRange.isNotEmpty()) {
 
@@ -399,7 +428,7 @@ object DialogUtils {
                         } else {
                             removeFilter()
                         }
-                    }else{
+                    } else {
                         dialog.dismiss()
                     }
                 }
@@ -440,8 +469,10 @@ object DialogUtils {
             viewDialog.toButton.text = dataRange[1]
         }
 
-        if (viewDialog.fromButton.text.isEmpty()) viewDialog.fromButton.text = context.getString(R.string.from)
-        if (viewDialog.toButton.text.isEmpty()) viewDialog.toButton.text = context.getString(R.string.to)
+        if (viewDialog.fromButton.text.isEmpty()) viewDialog.fromButton.text =
+            context.getString(R.string.from)
+        if (viewDialog.toButton.text.isEmpty()) viewDialog.toButton.text =
+            context.getString(R.string.to)
 
         val type = arrayOf(
             context.getString(R.string.all),
@@ -541,7 +572,7 @@ object DialogUtils {
 
 
         viewDialog.acceptOrder.setOnClickListener {
-            if( newDateRange.isNullOrEmpty()){
+            if (newDateRange.isNullOrEmpty()) {
                 Alerter.create(context as Activity)
                     .setText(context.getString(R.string.enter_range))
                     .setBackgroundColorRes(R.color.red)
@@ -550,21 +581,21 @@ object DialogUtils {
 
             } else {
 
-                if (newDateRange[0].isNotEmpty() || newDateRange[1].isNotEmpty() || selectedTypeName != 0 || selectedStatusName != 0){
-                    if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty()){
-                        range(dataRange,selectedTypeName,selectedStatusName)
-                    }else{
-                        range(newDateRange, selectedTypeName,selectedStatusName)
+                if (newDateRange[0].isNotEmpty() || newDateRange[1].isNotEmpty() || selectedTypeName != 0 || selectedStatusName != 0) {
+                    if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty()) {
+                        range(dataRange, selectedTypeName, selectedStatusName)
+                    } else {
+                        range(newDateRange, selectedTypeName, selectedStatusName)
                     }
 //                    range(newDateRange, selectedTypeName, selectedStatusName)
-                }else if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty() && selectedTypeName == 0 && selectedStatusName == 0){
-                    if(dataRange.isNotEmpty()){
-                        if (dataRange[0].isNotEmpty() && dataRange[1].isNotEmpty()){
-                        range(dataRange,selectedTypeName,selectedStatusName)
-                    }else{
-                        removeFilter()
-                    }
-                    }else{
+                } else if (newDateRange[0].isEmpty() && newDateRange[1].isEmpty() && selectedTypeName == 0 && selectedStatusName == 0) {
+                    if (dataRange.isNotEmpty()) {
+                        if (dataRange[0].isNotEmpty() && dataRange[1].isNotEmpty()) {
+                            range(dataRange, selectedTypeName, selectedStatusName)
+                        } else {
+                            removeFilter()
+                        }
+                    } else {
                         dialog.dismiss()
                     }
 
@@ -611,12 +642,14 @@ object DialogUtils {
                     }
 
                 }
+
                 OUT_COME -> {
                     detailTransferValue.apply {
                         setTextColor(context.getColor(R.color.red))
                         text = "-${PhoneNumberUtil.formatMoneyNumberPlate(data.value.toString())}"
                     }
                 }
+
                 else -> {}
             }
             detailTransferBeforeValue.text = data.total.toString()
@@ -654,7 +687,7 @@ object DialogUtils {
                 dialog.dismiss()
             }
 
-            driverIdFilter.text = data.id.toString()
+            driverIdFilter.text = data.order_id.toString()
             detailToHistory.text = data.address.to
             detailFromHistory.text = data.address.from
             detailTransferTime.text = data.created_at.date

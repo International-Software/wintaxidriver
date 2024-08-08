@@ -1,55 +1,33 @@
 package com.example.soundmodule
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.SoundPool
+import android.media.MediaPlayer
 
-class SoundManager(context: Context) {
-
-    private val soundPool: SoundPool
-    private val soundMap: HashMap<Int, Int>
-    private val activeStreams: MutableList<Int> = mutableListOf()
+class SoundManager(val context: Context) {
 
 
-    init {
-        val audioAttributes = AudioAttributes.Builder()
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+    private var mediaPlayer: MediaPlayer? = null
 
-        soundPool = SoundPool.Builder()
-            .setMaxStreams(1)
-            .setAudioAttributes(audioAttributes)
-            .build()
+    private fun playSoundInternal(soundResId: Int) {
+        // Release any existing MediaPlayer
+        mediaPlayer?.release()
 
-        soundMap = HashMap()
-        // Example sounds, add your own sound resource IDs here
-        soundMap[R.raw.siz_liniyadasiz] = soundPool.load(context, R.raw.siz_liniyadasiz, 1)
-        soundMap[R.raw.siz_oflaynsiz] = soundPool.load(context, R.raw.siz_oflaynsiz, 1)
-        soundMap[R.raw.kettik] = soundPool.load(context, R.raw.kettik, 1)
-        soundMap[R.raw.safar_boshlandi_xavfsizlik_kamari] =
-            soundPool.load(context, R.raw.safar_boshlandi_xavfsizlik_kamari, 1)
-
-    }
-
-    private fun playSoundInternal(soundId: Int) {
-        // Stop all active streams
-        stopActiveStreams()
-        // Play the new sound
-        soundMap[soundId]?.let { sound ->
-            val streamId = soundPool.play(sound, 1.0f, 1.0f, 1, 0, 1.0f)
-            activeStreams.add(streamId)
+        // Create a new MediaPlayer for the given sound resource
+        mediaPlayer = MediaPlayer.create(context, soundResId).apply {
+            setOnCompletionListener {
+                it.release()
+            }
+            start()
         }
-    }
-
-    private fun stopActiveStreams() {
-        for (streamId in activeStreams) {
-            soundPool.stop(streamId)
-        }
-        activeStreams.clear()
     }
 
     fun playSoundYouAreOnline() {
         playSoundInternal(R.raw.siz_liniyadasiz)
+    }
+
+
+    fun playSoundFinish() {
+        playSoundInternal(R.raw.finish)
     }
 
     fun playSoundYouAreOffline() {
@@ -57,10 +35,25 @@ class SoundManager(context: Context) {
     }
 
     fun playSoundJourneyBeginWithBelt() {
-        playSoundInternal(R.raw.safar_boshlandi_xavfsizlik_kamari)
+        playSoundInternal(R.raw.letsgo)
     }
 
     fun playSoundLetsGo() {
         playSoundInternal(R.raw.kettik)
+    }
+
+    fun playSoundCancelOrder() {
+        playSoundInternal(R.raw.buyurtma_bekor_qilindi)
+    }
+
+    fun playSoundStartTaximeter() {
+        playSoundInternal(R.raw.taxometr_boshlandi)
+    }
+
+    // Call this method to release resources when the SoundManager is no longer needed
+    fun release() {
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 }

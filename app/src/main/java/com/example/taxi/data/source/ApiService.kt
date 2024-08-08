@@ -1,6 +1,7 @@
 package com.example.taxi.data.source
 
 import com.example.taxi.domain.model.BonusResponse
+import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.PaymentUrl
@@ -143,7 +144,7 @@ interface ApiService {
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
 
     @GET("order/current")
-    fun getOrderCurrent(): Observable<MainResponse<Any>>
+    fun getOrderCurrent(): Observable<MainResponse<OrderAccept<UserModel>>>
 
     @GET("bonus/transfer")
     fun getTransferBonus(
@@ -160,13 +161,36 @@ interface ApiService {
     @POST("notification/index")
     fun getMessage(): Observable<MessageResponse>
 
-    @GET("payment/click")
+    @GET("driver/get-click-url")
     fun paymentClick(
         @Query("amount") amount: Int
     ): Observable<MainResponse<PaymentUrl>>
 
-    @GET("payment/payme")
+    @GET("driver/get-payme-url")
     fun paymentPayme(
         @Query("amount") amount: Int
     ): Observable<MainResponse<PaymentUrl>>
+
+
+    @GET("driver/get-uzum-url")
+    fun paymentUzum(
+        @Query("amount") amount: Int
+    ): Observable<MainResponse<PaymentUrl>>
+
+
+    @Multipart
+    @POST("photo-control/create")
+    fun photoControl(
+        @Part img_front: MultipartBody.Part,
+        @Part img_back: MultipartBody.Part,
+        @Part img_left: MultipartBody.Part,
+        @Part img_right: MultipartBody.Part,
+        @Part img_front_chair: MultipartBody.Part,
+        @Part img_back_chair: MultipartBody.Part,
+        @Part img_number: MultipartBody.Part,
+        @Part img_license: MultipartBody.Part
+    ): Observable<MainResponse<Any>>
+
+    @GET("photo-control/check")
+    fun checkPhotoControl(): Observable<MainResponse<CheckResponse>>
 }

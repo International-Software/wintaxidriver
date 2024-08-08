@@ -25,6 +25,8 @@ import com.example.taxi.domain.usecase.main.GetMainResponseUseCase
 import com.example.taxi.network.NetworkViewModel
 import com.example.taxi.repositeries.DriveRepository
 import com.example.taxi.socket.SocketMessageProcessor
+import com.example.taxi.translate.TranslateApi
+import com.example.taxi.ui.check.CheckViewModel
 import com.example.taxi.ui.home.HomeViewModel
 import com.example.taxi.ui.home.SocketViewModel
 import com.example.taxi.ui.home.dashboard.DashboardViewModel
@@ -48,6 +50,7 @@ import org.koin.dsl.module
 val koinModule = module {
 
     single { DriveService() }
+    single { TranslateApi() }
 
     single { DriveLocalityAddService(get(), get()) }
 
@@ -119,13 +122,13 @@ val koinModule = module {
 //    viewModel { HomeViewModel(get()) }
     viewModel { OrderViewModel(getMainResponseUseCase = get()) }
     viewModel { DriverViewModel(mainResponseUseCase = get()) }
-    viewModel { DashboardViewModel(getMainResponseUseCase = get(), userPreferenceManager = get()) }
+    viewModel { DashboardViewModel(getMainResponseUseCase = get(), userPreferenceManager = get(),get()) }
     viewModel { TransferMoneyViewModel(getMainResponseUseCase = get()) }
     viewModel { TransferHistoryViewModel(getMainResponseUseCase = get()) }
 //    viewModel { SplashViewModel(get()) }
     viewModel { DriveReportViewModel(get(), get(), get(), get()) }
-
-    viewModel{NetworkViewModel(get())}
+    viewModel{CheckViewModel(get())}
+    viewModel{NetworkViewModel(get(),get())}
 //    factory { GetRegisterResponseUseCase(registerRepository = get()) }
     factory { GetMainResponseUseCase(mainRepository = get()) }
     factory { PrivacyPolicyService(get()) }

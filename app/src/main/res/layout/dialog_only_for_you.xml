@@ -227,6 +227,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_10sdp"
+                android:alpha=".8"
                 android:textColor="@color/text_black_white"
                 android:text="@string/yo_lovchi_izohi" />
 
@@ -235,8 +236,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="4"
-                android:paddingHorizontal="@dimen/_5sdp"
-                android:textColor="@color/text_black_white" />
+                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_marginVertical="@dimen/_5sdp"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:textColor="@color/tred" />
 
             <FrameLayout
                 android:id="@+id/accept_button"

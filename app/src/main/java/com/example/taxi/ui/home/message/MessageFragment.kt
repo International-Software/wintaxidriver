@@ -50,13 +50,14 @@ class MessageFragment : Fragment() {
                     startLoading()
                 }
                 ResourceState.SUCCESS ->{
+                    stopLoading()
                     viewBinding.messageRecyclerView.adapter = it.data?.data?.let { it1 ->
                          MessageAdapter(
                             it1
                         )
                     }
                     userPreferenceManager.saveMessageCount(0)
-                    stopLoading()
+
                 }
                 ResourceState.ERROR ->{
                     stopLoading()
@@ -66,12 +67,15 @@ class MessageFragment : Fragment() {
     }
 
     private fun stopLoading(){
+        viewBinding.messageRecyclerView.visibility = View.VISIBLE
+
         with(viewBinding.shimmerOrder){
             stopShimmer()
             visibility = View.GONE
         }
     }
     private fun startLoading(){
+        viewBinding.messageRecyclerView.visibility = View.GONE
         viewBinding.shimmerOrder.apply {
             startShimmer()
             visibility = View.VISIBLE

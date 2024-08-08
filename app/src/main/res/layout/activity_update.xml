@@ -28,7 +28,7 @@
         android:textColor="@color/text_black_white"
 
         android:paddingStart="@dimen/_15sdp"
-        android:text="Win taxi ilovasini yangi versiyaga yangilashingiz lozim."
+        android:text="Bekjaan taxi(Driver) ilovasini yangi versiyaga yangilashingiz lozim."
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
 

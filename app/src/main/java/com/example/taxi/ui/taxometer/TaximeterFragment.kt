@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.soundmodule.SoundManager
 import com.example.taxi.R
 import com.example.taxi.databinding.FragmentDriverBinding
 import com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus
@@ -54,7 +55,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.locationcomponent.LocationComponentPlugin
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.tapadoo.alerter.Alerter
 import kotlinx.coroutines.launch
@@ -63,18 +63,20 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
-    private lateinit var locationComponent: LocationComponentPlugin
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-    private var currentBottomStatus = DriveAction.ARRIVED
+    private var currentBottomStatus = DriveAction.TAX_STARTED
     private lateinit var locationTracker: LocationTracker
     private val driverViewModel: DriverViewModel by sharedViewModel()
+
 
     private val preferenceManager: UserPreferenceManager by inject()
     private val homeViewModel: HomeViewModel by sharedViewModel()
     private var lastStatus = -1
     private var seconds: Int = 0
     private val TIMER_MESSAGE_CODE = 1
+
     private val handlerTimer = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             if (msg.what == TIMER_MESSAGE_CODE) {
@@ -100,6 +102,23 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     lateinit var viewBinding: FragmentDriverBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val isTax = arguments?.getBoolean("is_taxo", false)
+        if (isTax == true) {
+            if (homeViewModel.dashboardLiveData.value?.isPaused() == true){
+                homeViewModel.startDrive()
+
+            }else{
+                homeViewModel.startDrive()
+            }
+            driverViewModel.completeTaximeter()
+            preferenceManager.saveStatusIsTaximeter(true)
+            preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.STARTED)
+            preferenceManager.saveLastRaceId(-1)
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -107,6 +126,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         // Inflate the layout for this fragment
         viewBinding = FragmentDriverBinding.inflate(inflater, container, false)
         setUpSomeUiConfig()
+
         return viewBinding.root
     }
 
@@ -155,7 +175,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         val llBottomSheet = view.findViewById<FrameLayout>(R.id.bottom_sheet)
 
         val bottomSheetBehavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(llBottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         bottomSheetBehavior.isHideable = false
 
@@ -194,29 +214,21 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         viewBinding.bottomDialogTaxometer.swipeButton.onSwipedOnListener = {
             when (currentBottomStatus) {
 
-
-                DriveAction.STARTED -> {
-                    viewBinding.bottomDialogTaxometer.swipeButton.checkedText =
-                        getString(R.string.downloading)
-                    viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
-                        getString(R.string.finish)
-                    setFinishDialog()
-
-                }
-
-                DriveAction.ACCEPT -> {
-                    Log.d("taxometer", "onViewCreated: accept")
-                    preferenceManager.saveStatusIsTaximeter(true)
+                DriveAction.TAX_STARTED -> {
                     viewBinding.bottomDialogTaxometer.swipeButton.checkedText =
                         getString(R.string.downloading)
                     viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
                         getString(R.string.finish)
                     driverViewModel.acceptWithTaximeter()
+
                 }
 
-                DriveAction.COMPLETED -> {
-                    Log.d("taxometer", "onViewCreated: complete")
-
+                DriveAction.TAX_COMPLETED -> {
+                    viewBinding.bottomDialogTaxometer.swipeButton.checkedText =
+                        getString(R.string.downloading)
+                    viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
+                        getString(R.string.finish)
+                    setFinishDialog()
 
                 }
             }
@@ -252,20 +264,22 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         )
 
 
-
         val finishButton: MaterialButton = dialog.findViewById(R.id.button_finish_order)
         val cancelButton: MaterialButton = dialog.findViewById(R.id.button_cancel_order)
 
         finishButton.setOnClickListener {
 
-//            homeViewModel.startDrive()
+            homeViewModel.startDrive()
+
+            preferenceManager.saveStatusIsTaximeter(false)
 
             preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.COMPLETED)
-
+            SoundManager(requireContext()).playSoundFinish()
             homeViewModel.stopDrive()
+
             viewBinding.parentContainer.keepScreenOn = false
+            driverViewModel.acceptTaximeter()
             dialog.dismiss()
-            driverViewModel.completedOrder()
 
         }
         cancelButton.setOnClickListener {
@@ -291,7 +305,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
             setDashboardStatus(it)
         }
 
-        driverViewModel.orderStartCompleteLiveData.observe(viewLifecycleOwner) {
+        driverViewModel.orderSCTaximeter.observe(viewLifecycleOwner) {
             setBottomSheetSetting(it)
         }
 
@@ -319,18 +333,23 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                             }
                         }
                     }
+                    driverViewModel.acceptTaximeter()
+
                     viewBinding.bottomDialogTaxometer.swipeButton.isChecked = false
 //                    orderViewModel.clearAcceptOrderData()
                 }
 
                 ResourceState.SUCCESS -> {
                     viewBinding.bottomDialogTaxometer.swipeButton.isChecked = false
+                    SoundManager(requireContext()).playSoundStartTaximeter()
 
                     val orderSettings = resource.data?.data
                     orderSettings?.let { it1 -> preferenceManager.savePriceSettings(it1) }
-                    driverViewModel.startedOrder()
+                    driverViewModel.completeTaximeter()
                     homeViewModel.startDrive()
+                    preferenceManager.saveStatusIsTaximeter(true)
                     preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.STARTED)
+
                     preferenceManager.saveLastRaceId(-1)
 
                 }
@@ -443,7 +462,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                     viewBinding.bottomDialogTaxometer.currentDetailTime.text =
                         getString(R.string.pulli_kutish)
 
-
+                    seconds = dashboardData.getPauseTime()
 //                    viewBinding.timeCard.visibility = View.VISIBLE
                     viewBinding.bottomDialogTaxometer.progressTimeTextView.visibility = View.VISIBLE
                     viewBinding.bottomDialogTaxometer.timeWorkTextView.visibility = View.GONE
@@ -471,37 +490,42 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     private fun setBottomSheetSetting(state: Int?) {
-
-        Log.d("taxometer", "onViewCreated: $state")
-
         if (currentBottomStatus != state) {
             currentBottomStatus = state!!
         }
         when (state) {
-            DriveAction.ARRIVED -> {
+
+            DriveAction.TAX_STARTED -> {
+                viewBinding.bottomDialogTaxometer.timeWorkTextView.visibility = View.GONE
+                viewBinding.bottomDialogTaxometer.progressTimeTextView.visibility = View.GONE
+                viewBinding.bottomDialogTaxometer.linearLayoutWitPause.visibility = View.GONE
+                viewBinding.bottomDialogTaxometer.currentDetailTime.text =
+                    getString(R.string.taximeter)
+                viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
+                    getString(R.string.lets_go)
+                viewBinding.parentContainer.keepScreenOn = false
+
+            }
+
+            DriveAction.TAX_COMPLETED -> {
                 viewBinding.bottomDialogTaxometer.timeWorkTextView.visibility = View.VISIBLE
                 viewBinding.bottomDialogTaxometer.progressTimeTextView.visibility = View.GONE
                 viewBinding.bottomDialogTaxometer.linearLayoutWitPause.visibility = View.VISIBLE
                 viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
                     getString(R.string.finish)
                 viewBinding.parentContainer.keepScreenOn = true
-
             }
 
-            DriveAction.STARTED -> {
-                viewBinding.bottomDialogTaxometer.timeWorkTextView.visibility = View.VISIBLE
-                viewBinding.bottomDialogTaxometer.progressTimeTextView.visibility = View.GONE
-                viewBinding.bottomDialogTaxometer.linearLayoutWitPause.visibility = View.VISIBLE
-                viewBinding.bottomDialogTaxometer.swipeButton.uncheckedText =
-                    getString(R.string.finish)
-                viewBinding.parentContainer.keepScreenOn = true
-
-            }
         }
     }
 
     override fun onLocationChanged(location: Location?) {
 
+    }
+
+
+    override fun onPause() {
+        super.onPause()
     }
 
     override fun onDistanceChanged(distance: Float) {

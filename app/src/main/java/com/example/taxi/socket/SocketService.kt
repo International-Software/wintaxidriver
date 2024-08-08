@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -30,7 +31,7 @@ import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
 
 
-class SocketService : android.app.Service() {
+class SocketService : Service() {
 
     // Initialize your dependencies here, e.g., ViewModel, CoroutineScope, SocketMessageProcessor
 
@@ -41,6 +42,7 @@ class SocketService : android.app.Service() {
     private var hasLocationChanged = false
     private var lastSentAccuracy = 0
     private var lastSentAngle = 0
+    private  var mediaPlayer: MediaPlayer? = null
 
     private val handler = Handler(Looper.getMainLooper())
     private val locationSenderRunnable: Runnable = object : Runnable {
@@ -48,7 +50,6 @@ class SocketService : android.app.Service() {
             if (hasLocationChanged && lastSentLocation != null) {
                 hasLocationChanged = false
 
-                Log.d("LocationUpdateFailure", "run: ")
                 socketMessageProcessor.sendLocation(
                     LocationRequest(
                         latitude = lastSentLocation!!.latitude(),
@@ -112,7 +113,11 @@ class SocketService : android.app.Service() {
         createNotificationChannel()
         val filter = IntentFilter()
         filter.addAction("com.example.SEND_TO_SOCKET")
-        registerReceiver(receiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        }else{
+            registerReceiver(receiver, filter)
+        }
         // Create a notification for the foreground service
         val notification = Notification() // Replace with your own notification
         startForeground(NOTIFICATION_ID, createNotification())
@@ -124,7 +129,8 @@ class SocketService : android.app.Service() {
 //            socketViewModel = socketViewModel,
             viewModelScope = CoroutineScope(Dispatchers.IO),
             userPreferenceManager = userPreferenceManager,
-            socketMessageProcessor = socketMessageProcessor
+            socketMessageProcessor = socketMessageProcessor,
+            onMessageReceived = { playSound() }
         )
         locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         startLocationUpdates()
@@ -246,9 +252,9 @@ class SocketService : android.app.Service() {
         }
 
         return notificationBuilder
-            .setContentTitle("Socket Service")
-            .setContentText("Running")
-            .setSmallIcon(R.drawable.ic_car)
+            .setContentTitle("Bekjaan Taxi(Driver)")
+            .setContentText("Dastur ayni paytda ishlamoqda...")
+            .setSmallIcon(R.drawable.ic_bekjaanlogo)
             .setContentIntent(pendingIntent)
             .build()
     }
@@ -262,11 +268,6 @@ class SocketService : android.app.Service() {
 
 
     private fun checkAndUpdateCPUWake() {
-//        if (preferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED) {
-//            releaseWakelock()
-//        } else {
-//            acquireWakeLock()
-//        }
         acquireWakeLock()
     }
 
@@ -279,6 +280,34 @@ class SocketService : android.app.Service() {
     private fun acquireWakeLock() {
         if (wakeLock.isHeld.not()) {
             wakeLock.acquire(TimeUnit.HOURS.toMillis(2))
+        }
+    }
+
+    private fun releaseMediaPlayer() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+    }
+
+    private fun playSound() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(this, R.raw.alif_message).apply {
+                setOnCompletionListener {
+                    // Release media player after playback complete
+                    releaseMediaPlayer()
+                }
+                setOnErrorListener { mp, what, extra ->
+                    // Handle error, log it, and optionally retry or release the player
+                    Log.e("MediaPlayer", "Error occurred: What $what, Extra $extra")
+                    releaseMediaPlayer()
+                    true  // Return true if the error was handled
+                }
+            }
+        }
+        try {
+            mediaPlayer?.start()
+        } catch (e: IllegalStateException) {
+            Log.e("MediaPlayer", "Failed to start mediaPlayer: ${e.message}")
+            releaseMediaPlayer()  // Attempt to release and reset media player if it fails to start
         }
     }
 }

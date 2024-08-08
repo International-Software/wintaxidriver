@@ -19,6 +19,7 @@ data class DashboardData(
     private val averageSpeed: Double,
     private val distance: Int,
     private val runningTime: Long,
+    private val pauseTime: Long,
     private val status: Int,
     private val gpsSignalStrength: Int,
 ) : Parcelable {
@@ -39,6 +40,7 @@ data class DashboardData(
         parcel.readDouble(),
         parcel.readInt(),
         parcel.readLong(),
+        parcel.readLong(),
         parcel.readInt(),
         parcel.readInt()
     ) {
@@ -57,6 +59,7 @@ data class DashboardData(
     @RequiresApi(Build.VERSION_CODES.N)
     fun getDistanceText() = conversionUtil.getDistance(distance.toDouble())
 
+
     @RequiresApi(Build.VERSION_CODES.N)
     fun convertToKm(metr: Int) = conversionUtil.getDistance(metr.toDouble())
     @RequiresApi(Build.VERSION_CODES.N)
@@ -73,6 +76,10 @@ data class DashboardData(
         }
 
         return clockUtils.getTimeFromMillis(runningTime)
+    }
+
+    fun getPauseTime(): Int{
+        return (pauseTime / 1000).toInt()
     }
 
     fun getStatus(): Int {
@@ -93,6 +100,7 @@ data class DashboardData(
     companion object {
         fun empty() = DashboardData(
             runningTime = 0L,
+            pauseTime = 0L,
             currentSpeed = 0.0,
             topSpeed = 0.0,
             averageSpeed = 0.0,

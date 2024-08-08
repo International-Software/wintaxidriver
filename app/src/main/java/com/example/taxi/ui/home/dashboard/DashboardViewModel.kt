@@ -18,15 +18,21 @@ import com.example.taxi.domain.model.settings.SettingsData
 import com.example.taxi.domain.model.settings.getItemValueByName
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.domain.usecase.main.GetMainResponseUseCase
+import com.example.taxi.translate.TranslateApi
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class DashboardViewModel(
     private val getMainResponseUseCase: GetMainResponseUseCase,
-    private val userPreferenceManager: UserPreferenceManager
+    private val userPreferenceManager: UserPreferenceManager,
+    private val translateApi: TranslateApi
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
@@ -38,29 +44,30 @@ class DashboardViewModel(
     val balanceResponse: LiveData<Resource<MainResponse<BalanceData>>>
         get() = _balanceResponse
 
-    private val  _driverDataResponse = MutableLiveData<Resource<MainResponse<SelfieAllData<IsCompletedModel, StatusModel>>>>()
+    private val _driverDataResponse =
+        MutableLiveData<Resource<MainResponse<SelfieAllData<IsCompletedModel, StatusModel>>>>()
     val driverDataResponse get() = _driverDataResponse
 
     val settingsResponse: LiveData<Resource<MainResponse<List<SettingsData>>>>
         get() = _settingsResponse
 
-    private val  _messageResponse = MutableLiveData<Resource<MessageResponse>>()
+    private val _messageResponse = MutableLiveData<Resource<MessageResponse>>()
 
     val messageResponse: LiveData<Resource<MessageResponse>> get() = _messageResponse
 
-    private val _paymentType = MutableLiveData<Boolean>().apply {
-        value = false
+    private val _paymentType = MutableLiveData<Int>().apply {
+        value = 1
     }
 
     private var _paymentProgress = MutableLiveData<Resource<MainResponse<PaymentUrl>>>()
-    val paymentProgress: LiveData<Resource<MainResponse<PaymentUrl>>> get() =  _paymentProgress
-    val paymentType: LiveData<Boolean> get() = _paymentType
+    val paymentProgress: LiveData<Resource<MainResponse<PaymentUrl>>> get() = _paymentProgress
+    val paymentType: LiveData<Int> get() = _paymentType
 
-    fun clearPaymentProgress(){
+    fun clearPaymentProgress() {
         _paymentProgress = MutableLiveData<Resource<MainResponse<PaymentUrl>>>()
     }
 
-    fun getMessage(){
+    fun getMessage() {
         _messageResponse.postValue(Resource(ResourceState.LOADING))
         compositeDisposable.add(
             getMainResponseUseCase.getMessage()
@@ -74,12 +81,23 @@ class DashboardViewModel(
                 .subscribe(
                     { response ->
                         viewModelScope.launch {
-                            _messageResponse.postValue(Resource(ResourceState.SUCCESS, response))
-                            if (response.data.size > userPreferenceManager.getMessageValue()){
-                                userPreferenceManager.saveMessageCount(response.data.size - userPreferenceManager.getMessageValue())
-                                userPreferenceManager.saveMessageValue(response.data.size)
-
+                            // Check if the user's preferred language is Russian
+                            if (userPreferenceManager.getLanguage().code == "ru") {
+                                // Launch all translation jobs
+                                val jobs = response.data.map { message ->
+                                    async {
+                                        val translatedText = translateApi.translateSuspend(
+                                            message.message,
+                                            "uz",
+                                            "ru"
+                                        )
+                                        message.message = translatedText ?: message.message
+                                    }
+                                }
+                                jobs.forEach { it.await() }
                             }
+                            _messageResponse.postValue(Resource(ResourceState.SUCCESS, response))
+                            updateMessagePreferences(response.data.size)
                         }
 
 
@@ -96,12 +114,39 @@ class DashboardViewModel(
         )
     }
 
-    fun paymentPayme(){
-        _paymentType.postValue(true)
+    private suspend fun TranslateApi.translateSuspend(
+        text: String,
+        sourceLang: String,
+        targetLang: String
+    ): String? {
+        return suspendCancellableCoroutine { continuation ->
+            translate(text, sourceLang, targetLang).whenComplete { result, throwable ->
+                if (throwable != null) {
+                    continuation.resumeWithException(throwable)
+                } else {
+                    continuation.resume(result)
+                }
+            }
+        }
     }
 
-    fun paymentClick(){
-        _paymentType.postValue(false)
+    private fun updateMessagePreferences(currentMessageCount: Int) {
+        if (currentMessageCount > userPreferenceManager.getMessageValue()) {
+            userPreferenceManager.saveMessageCount(currentMessageCount - userPreferenceManager.getMessageValue())
+            userPreferenceManager.saveMessageValue(currentMessageCount)
+        }
+    }
+
+    fun paymentPayme() {
+        _paymentType.postValue(2)
+    }
+
+    fun paymentUzum() {
+        _paymentType.postValue(3)
+    }
+
+    fun paymentClick() {
+        _paymentType.postValue(1)
     }
 
     fun getSettings() {
@@ -119,7 +164,7 @@ class DashboardViewModel(
                     { response ->
                         viewModelScope.launch {
                             _settingsResponse.postValue(Resource(ResourceState.SUCCESS, response))
-                            setPhoneNumber( response?.getItemValueByName(DataNames.PHONE_NUMBER))
+                            setPhoneNumber(response?.getItemValueByName(DataNames.PHONE_NUMBER))
                             setAllSettings(response)
                         }
 
@@ -141,7 +186,7 @@ class DashboardViewModel(
         val centerLat = response?.getItemValueByName(DataNames.CENTER_LATITUDE)
         val centerLong = response?.getItemValueByName(DataNames.CENTER_LONGITUDE)
         val centerRadius = response?.getItemValueByName(DataNames.CENTER_RADIUS)
-        userPreferenceManager.setSettings(centerLat,centerLong,centerRadius)
+        userPreferenceManager.setSettings(centerLat, centerLong, centerRadius)
     }
 
     private fun setPhoneNumber(itemValueByName: String?) {
@@ -150,7 +195,7 @@ class DashboardViewModel(
         }
     }
 
-    fun getDriverData(){
+    fun getDriverData() {
         _driverDataResponse.postValue(Resource(ResourceState.LOADING))
         compositeDisposable.add(
             getMainResponseUseCase.getDriverData()
@@ -163,7 +208,58 @@ class DashboardViewModel(
                 }
                 .subscribe(
                     { response ->
-                        _driverDataResponse.postValue(Resource(ResourceState.SUCCESS, response))
+
+                        viewModelScope.launch {
+                            // Check if the user's preferred language is Russian
+                            if (userPreferenceManager.getLanguage().code == "ru") {
+                                // Launch all translation jobs
+                                try {
+                                    if (response.data.status.string.lowercase() == "tasdiqlanmagan" || response.data.status.string.lowercase() == "tasdiqlangan") {
+                                        response.data.status.string =
+                                            if (response.data.status.string.lowercase() == "tasdiqlanmagan") "Не подтверждено" else "Подтверждено"
+                                        _driverDataResponse.postValue(
+                                            Resource(
+                                                ResourceState.SUCCESS,
+                                                response
+                                            )
+                                        )
+
+                                    } else {
+                                        val m = translateApi.translateSuspend(
+                                            response.data.status.string,
+                                            "uz",
+                                            "ru"
+                                        )
+                                        Log.d("tekshirish", "getDriverData: $m")
+                                        response.data.status.string = m.toString()
+                                        _driverDataResponse.postValue(
+                                            Resource(
+                                                ResourceState.SUCCESS,
+                                                response
+                                            )
+                                        )
+                                    }
+
+                                } catch (e: Exception) {
+                                    _driverDataResponse.postValue(
+                                        Resource(
+                                            ResourceState.SUCCESS,
+                                            response
+                                        )
+                                    )
+
+                                }
+                            } else {
+                                _driverDataResponse.postValue(
+                                    Resource(
+                                        ResourceState.SUCCESS,
+                                        response
+                                    )
+                                )
+
+                            }
+                        }
+
                     },
                     { error ->
                         _driverDataResponse.postValue(
@@ -211,31 +307,37 @@ class DashboardViewModel(
 
     fun payment(toInt: Int) {
         _paymentProgress.postValue(Resource(ResourceState.LOADING))
-        val a = if (paymentType.value == true) getMainResponseUseCase.paymentPayme(toInt) else getMainResponseUseCase.paymentClick(toInt)
-        compositeDisposable.add(a
-                .subscribeOn(Schedulers.io())
-                .doOnSubscribe {
-                    // Perform any setup tasks before the subscription starts
-                }
-                .doOnTerminate {
-                    // Perform any cleanup tasks after the subscription ends
-                }
-                .subscribe(
-                    { response ->
+        val a = when (paymentType.value) {
+            1 -> getMainResponseUseCase.paymentClick(toInt)
+            2 -> getMainResponseUseCase.paymentPayme(toInt)
+            3 -> getMainResponseUseCase.paymentUzum(toInt)
+            else -> getMainResponseUseCase.paymentClick(toInt)
+        }
 
-                        Log.d("tekshirish", "payment: ${response.data.url}")
-                        _paymentProgress.postValue(Resource(ResourceState.SUCCESS, response))
-                    },
-                    { error ->
-                        Log.d("tekshirish", "payment: ${error.message}")
-                        _paymentProgress.postValue(
-                            Resource(
-                                ResourceState.ERROR,
-                                message = traceErrorException(error).getErrorMessage()
-                            )
+        compositeDisposable.add(a
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe {
+                // Perform any setup tasks before the subscription starts
+            }
+            .doOnTerminate {
+                // Perform any cleanup tasks after the subscription ends
+            }
+            .subscribe(
+                { response ->
+
+                    Log.d("tekshirish", "payment: ${response.data.url}")
+                    _paymentProgress.postValue(Resource(ResourceState.SUCCESS, response))
+                },
+                { error ->
+                    Log.d("tekshirish", "payment: ${error.message}")
+                    _paymentProgress.postValue(
+                        Resource(
+                            ResourceState.ERROR,
+                            message = traceErrorException(error).getErrorMessage()
                         )
-                    }
-                )
+                    )
+                }
+            )
         )
     }
 }

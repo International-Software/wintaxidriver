@@ -108,6 +108,10 @@ class CurrentDrive {
     fun getTotalTime() = (lastPingTime - startTime) - pauseCalculator.getPausedTime(lastPingTime)
 
 
+    fun getPauseTime(): Long{
+        return if(startTime > 0) pauseCalculator.getPausedTime(System.currentTimeMillis()
+        )else 0
+    }
 
     fun getRunningTime(): Long {
         return if (startTime > 0) (System.currentTimeMillis() - startTime) - pauseCalculator.getPausedTime(

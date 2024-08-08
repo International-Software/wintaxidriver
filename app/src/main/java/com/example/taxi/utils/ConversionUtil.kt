@@ -45,7 +45,7 @@ object ConversionUtil {
 
 
     fun convertToCyrillic(input: String): String {
-        if (userPreferenceManager.getLanguage() != UserPreferenceManager.Language.KRILL) {
+        if (userPreferenceManager.getLanguage() == UserPreferenceManager.Language.UZBEK ) {
             return input
         }
 

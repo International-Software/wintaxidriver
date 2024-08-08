@@ -20,7 +20,6 @@ import android.os.*
 import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -40,6 +39,7 @@ import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.domain.preference.UserPreferenceManager.Companion.START_COST
 import com.example.taxi.network.NO_CONNECT
+import com.example.taxi.network.NetworkMonitor
 import com.example.taxi.network.NetworkReceiver
 import com.example.taxi.network.NetworkViewModel
 import com.example.taxi.socket.SocketConfig
@@ -83,11 +83,8 @@ import java.util.concurrent.TimeUnit
 class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
 
-    private companion object {
-        private const val BUTTON_ANIMATION_DURATION = 1500L
-
-    }
-
+    private lateinit var networkMonitor: NetworkMonitor
+    private var soundPlayed = false
     lateinit var soundManager: SoundManager
     private lateinit var locationTracker: LocationTracker
     private val networkViewModel: NetworkViewModel by viewModel()
@@ -340,26 +337,35 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
         viewBinding = FragmentDriverBinding.inflate(inflater, container, false)
         preferenceManager.saveStatusIsTaximeter(false)
 
+
         networkReceiver = NetworkReceiver { isConnected ->
             if (isConnected) {
                 networkViewModel.getOrderCurrent()
             }
         }
         val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        requireContext().registerReceiver(networkReceiver, filter)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireContext().registerReceiver(
+                networkReceiver, filter,
+                Context.RECEIVER_EXPORTED
+            )
+        } else {
+            requireContext().registerReceiver(networkReceiver, filter)
+        }
 
         networkViewModel.response.observe(viewLifecycleOwner) { response ->
-            when (response.state) {
+            when (response?.state) {
                 ResourceState.SUCCESS -> {
 
                 }
 
                 ResourceState.ERROR -> {
                     if (response.message == NO_CONNECT) {
-                        Log.d("bekor", "onCreateView: buyurtma bekor qilind: ${response.message} ")
+                        networkViewModel.clearNetworkData()
                         val intent = Intent("com.example.taxi.ORDER_DATA_ACTION")
                         intent.putExtra(SocketConfig.ORDER_CANCELLED, NO_CONNECT)
                         context?.sendBroadcast(intent)
+
 
                     }
 
@@ -367,6 +373,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 }
 
                 ResourceState.LOADING -> {}
+                else -> {}
             }
         }
 
@@ -378,7 +385,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        networkMonitor = NetworkMonitor(requireContext())
         soundManager = SoundManager(requireContext())
 //        viewModel = ViewModelProvider(this)[TimerViewModel::class.java]
 //        viewModel.timeLiveData.observe(viewLifecycleOwner) { (time, message) ->
@@ -397,7 +404,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
         val llBottomSheet = view.findViewById<FrameLayout>(R.id.bottom_sheet)
 
         val bottomSheetBehavior: BottomSheetBehavior<*> = BottomSheetBehavior.from(llBottomSheet)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         bottomSheetBehavior.isHideable = false
 
@@ -774,7 +781,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.COMPLETED)
             clearRouteAndStopNavigation()
             handlerTimer.removeMessages(TIMER_MESSAGE_CODE)
-
+            SoundManager(requireContext()).playSoundFinish()
             homeViewModel.stopDrive()
             viewBinding.parentContainer.keepScreenOn = false
             dialog.dismiss()
@@ -903,11 +910,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 viewBinding.bottomDialog.timeRemainingTextView.visibility = View.GONE
 
                 if (locationDestination2 != null) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Buyurtma ozgartirildi",
-                        Toast.LENGTH_SHORT
-                    ).show()
+
                     changeDestination(
                         destination = Point.fromLngLat(
                             locationDestination2!!.placeLongitude,
@@ -915,8 +918,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                         )
                     )
                 } else {
-                    Toast.makeText(requireContext(), "Ikkinchi manzil yoq", Toast.LENGTH_SHORT)
-                        .show()
                     clearRouteAndStopNavigation()
                 }
 
@@ -1079,11 +1080,11 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     private fun changeDestination(destination: Point) {
-//       viewBinding.buttonNavigator.visibility = View.VISIBLE
-        findRoute(
-            preferenceManager.getDestination2Lat(),
-            preferenceManager.getDestination2Long(),
-        )
+        viewBinding.buttonNavigator.visibility = View.VISIBLE
+//        findRoute(
+//            preferenceManager.getDestination2Lat(),
+//            preferenceManager.getDestination2Long(),
+//        )
     }
 
     private fun findRoute(lat: String?, long: String?) {
@@ -1092,34 +1093,33 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 //        val uri = Uri.parse("google.navigation:q=${lat},${long}")
 
         /** for yandex **/
-        val uri = Uri.parse("geo:$lat,$long?z=12") // z is zoom level
+//        val uri = Uri.parse("geo:$lat,$long?z=12") // z is zoom level
+
+        /** for yandex navigator **/
+        val uri = Uri.parse("yandexnavi://build_route_on_map?lat_to=$lat&lon_to=$long")
 
 
+        val navigationIntent = Intent(Intent.ACTION_VIEW, uri).apply {
+            // Set the package to specifically use Yandex Navigator
+            setPackage("ru.yandex.yandexnavi")
+        }
         // Create an Intent from uri. Set the action to ACTION_VIEW
-        val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-
-        // Make the Intent explicit by setting the Google Maps package
-//        mapIntent.setPackage("com.google.android.apps.maps")
-        mapIntent.setPackage("ru.yandex.yandexmaps")
-
-
-        // Attempt to start an activity that can handle the Intent
-        mapIntent.setPackage("ru.yandex.yandexmaps")
-
-// Attempt to start an activity that can handle the Intent
         try {
-            startActivity(mapIntent)
+            startActivity(navigationIntent)
         } catch (e: ActivityNotFoundException) {
-            // Yandex Maps is not installed, redirect to Google Play Store or another mapping service
-            val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("market://details?id=ru.yandex.yandexmaps")
-                setPackage("com.android.vending")
-            }
+            // Handle the case where Yandex Navigator is not installed
             try {
+                // Redirect to the Google Play Store to download Yandex Navigator
+                val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse("market://details?id=ru.yandex.yandexnavi")
+                    setPackage("com.android.vending")
+                }
                 startActivity(playStoreIntent)
             } catch (ex: ActivityNotFoundException) {
-                // Google Play Store is not available, handle this case or notify the user
+                // Handle the case where Google Play Store is not available
+                // You might want to notify the user or log this issue
             }
+
         }
 //        val currentLocation = navigationLocationProvider.lastLocation
 ////        val originPoint = originLocation?.let {
@@ -1256,6 +1256,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onResume() {
         super.onResume()
+        networkMonitor.register()
         prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
         if (timerManager == null && preferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.STARTED) {
             timerManager = TimerManager(requireContext()) { time, state ->
@@ -1268,6 +1269,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onPause() {
         super.onPause()
+        networkMonitor.unregister()
         prefs.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
     }
 
@@ -1359,7 +1361,10 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             when (response.state) {
                 ResourceState.SUCCESS -> {
                     preferenceManager.saveLastRaceId(-1)
-                    soundManager.playSoundJourneyBeginWithBelt()
+                    if (!soundPlayed) {
+                        soundManager.playSoundJourneyBeginWithBelt()
+                        soundPlayed = true
+                    }
                     viewBinding.bottomDialog.swipeButton.isChecked = false
                     driverViewModel.startedOrder()
                     if (LocationPermissionUtils.isBasicPermissionGranted(requireContext())

@@ -42,7 +42,6 @@ class DriveBackGroundService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        Log.d("orqafon", "onCreate: yaratildi")
         driveService.registerCallback(
             dashboardDataCallback = { dashboardData ->
 

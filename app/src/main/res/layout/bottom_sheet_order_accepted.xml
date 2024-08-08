@@ -206,16 +206,16 @@
 
 
 
-                <TextView
-                    android:id="@+id/comment_textView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="vertical"
-                    android:maxLines="7"
-                    android:paddingHorizontal="@dimen/_5sdp"
-                    android:textColor="@color/black" />
-
-            
+            <TextView
+                android:id="@+id/comment_textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="4"
+                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_marginVertical="@dimen/_5sdp"
+                android:layout_marginEnd="@dimen/_5sdp"
+                android:textColor="@color/tred" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/accept_order"

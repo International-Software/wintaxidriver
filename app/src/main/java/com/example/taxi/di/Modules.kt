@@ -56,9 +56,9 @@ val viewModelModule: Module = module {
     viewModel { HomeViewModel(get()) }
     viewModel { OrderViewModel(getMainResponseUseCase = get()) }
     viewModel { DriverViewModel(mainResponseUseCase = get()) }
-    viewModel { DashboardViewModel(getMainResponseUseCase = get(), userPreferenceManager = get()) }
+    viewModel { DashboardViewModel(getMainResponseUseCase = get(), userPreferenceManager = get(),get()) }
     viewModel { HistoryViewModel(getMainResponseUseCase = get()) }
-    viewModel { NetworkViewModel(getMainResponseUseCase = get()) }
+    viewModel { NetworkViewModel(getMainResponseUseCase = get(),get()) }
 }
 
 // Declare a module for the use cases.

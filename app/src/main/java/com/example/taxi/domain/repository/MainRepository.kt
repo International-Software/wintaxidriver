@@ -1,6 +1,7 @@
 package com.example.taxi.domain.repository
 
 import com.example.taxi.domain.model.BonusResponse
+import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.PaymentUrl
@@ -26,6 +27,7 @@ import com.example.taxi.domain.model.transfer.HistoryMeta
 import com.example.taxi.domain.model.transfer.ResponseTransferHistory
 import com.example.taxi.domain.model.transfer.TransferRequest
 import io.reactivex.Observable
+import okhttp3.MultipartBody
 
 interface MainRepository {
 
@@ -82,7 +84,7 @@ interface MainRepository {
 
     fun getAbout(): Observable<MainResponse<ResponseAbout>>
     fun getFAQ(): Observable<MainResponse<ResponseAbout>>
-    fun getCurrentOrder(): Observable<MainResponse<Any>>
+    fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel>>>
 
     fun transferWithBonus(order_id: Int, money: Int): Observable<MainResponse<BonusResponse>>
 
@@ -90,6 +92,21 @@ interface MainRepository {
 
     fun getMessage(): Observable<MessageResponse>
 
-    fun paymentClick(amount: Int) :  Observable<MainResponse<PaymentUrl>>
-    fun paymentPayme(amount: Int) :  Observable<MainResponse<PaymentUrl>>
+    fun paymentClick(amount: Int): Observable<MainResponse<PaymentUrl>>
+    fun paymentPayme(amount: Int): Observable<MainResponse<PaymentUrl>>
+    fun paymentUzum(amount: Int): Observable<MainResponse<PaymentUrl>>
+
+    fun photoControl(
+        img_front: MultipartBody.Part,
+        img_back: MultipartBody.Part,
+        img_left: MultipartBody.Part,
+        img_right: MultipartBody.Part,
+        img_front_chair: MultipartBody.Part,
+        img_back_chair: MultipartBody.Part,
+        img_number: MultipartBody.Part,
+        img_license: MultipartBody.Part
+    ): Observable<MainResponse<Any>>
+
+    fun checkPhotoControl(): Observable<MainResponse<CheckResponse>>
+
 }

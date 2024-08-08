@@ -103,6 +103,7 @@ class OrderFragment : Fragment(), BottomSheetInterface {
                 ResourceState.LOADING -> {}
 
                 ResourceState.ERROR -> {
+
                     dialog?.dismiss()
                     activity?.let { it1 ->
                         resource.message?.let { it2 ->
@@ -116,10 +117,11 @@ class OrderFragment : Fragment(), BottomSheetInterface {
                             }
                         }
                     }
-//                    orderViewModel.clearAcceptOrderData()
+
                 }
 
                 ResourceState.SUCCESS -> {
+
                     dialog?.dismiss()
                     val orderSettings = resource.data?.data
                     orderSettings?.let { it1 -> preferenceManager.savePriceSettings(it1) }
@@ -185,7 +187,14 @@ class OrderFragment : Fragment(), BottomSheetInterface {
                 }
 
                 ResourceState.ERROR -> {
-
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        DialogUtils.createChangeDialog(
+                            activity = requireActivity(),
+                            title = "Xatolik!",
+                            message = resource.message,
+                            color = R.color.tred
+                        )
+                    }
                 }
             }
         }
@@ -247,7 +256,7 @@ class OrderFragment : Fragment(), BottomSheetInterface {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setGravity(Gravity.CENTER)
         }
-        dialog?.setCancelable(false)
+//        dialog?.setCancelable(false)
     }
 
     private fun noOrderShow() {
@@ -430,6 +439,8 @@ class OrderFragment : Fragment(), BottomSheetInterface {
     override fun onDestroyView() {
         super.onDestroyView()
         dialog?.dismiss()
+        orderViewModel.clearOrder()
+
         stopStandardLocationUpdates()
         stopHuaweiLocationUpdates()
     }

@@ -14,6 +14,7 @@ data class SelfieAllData<T,S>(
     val type: TypeModel,
     val status: S,
     val step: StepModel,
+    val is_advertising: Int?,
     val is_completed: T
 )
 
@@ -29,7 +30,7 @@ data class TypeModel(
 
 data class StatusModel(
     val int: Int,
-    val string: String
+    var string: String
 )
 
 data class StepModel(

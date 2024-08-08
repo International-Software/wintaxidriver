@@ -80,4 +80,13 @@
         android:name="com.example.taxi.ui.home.message.MessageFragment"
         android:label="fragment_message"
         tools:layout="@layout/fragment_message" />
+    <fragment
+        android:id="@+id/checkDriverFragment"
+        android:name="com.example.taxi.ui.check.CheckDriverFragment"
+        android:label="CheckDriverFragment" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.taxi.ui.home.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>

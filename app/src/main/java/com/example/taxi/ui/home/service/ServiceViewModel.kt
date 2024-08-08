@@ -1,5 +1,6 @@
 package com.example.taxi.ui.home.service
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -36,6 +37,7 @@ class ServiceViewModel(private val getMainResponseUseCase: GetMainResponseUseCas
                 }
                 .subscribe(
                     { response ->
+                        Log.d("xizmat", "getService: $response")
                         _serviceResponse.postValue(Resource(ResourceState.SUCCESS, response))
                     },
                     { error ->

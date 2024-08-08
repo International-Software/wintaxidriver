@@ -3,6 +3,7 @@ package com.example.taxi.ui.home
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -23,24 +24,31 @@ import android.util.Log
 import android.util.Rational
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import com.example.soundmodule.SoundManager
 import com.example.taxi.R
 import com.example.taxi.components.service.ActivityMessenger
 import com.example.taxi.components.service.DriveBackGroundService
 import com.example.taxi.components.service.KillStateDialogService
 import com.example.taxi.databinding.ActivityHomeBinding
+import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.DashboardData
+import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.socket.SocketMessage
 import com.example.taxi.domain.model.socket.SocketOnlyForYouData
 import com.example.taxi.domain.model.socket.toOrderData
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.network.NO_CONNECT
+import com.example.taxi.network.NetworkViewModel
 import com.example.taxi.socket.SocketConfig
+import com.example.taxi.ui.check.CheckViewModel
 import com.example.taxi.ui.home.DriveAction.PAUSE
 import com.example.taxi.ui.home.DriveAction.START
 import com.example.taxi.ui.home.DriveAction.STOP
@@ -49,6 +57,8 @@ import com.example.taxi.ui.home.driver.driveReport.DriveFinishDialog
 import com.example.taxi.ui.home.driver.driveReport.DriveReportViewModel
 import com.example.taxi.ui.home.order.OrderViewModel
 import com.example.taxi.utils.DialogUtils
+import com.example.taxi.utils.Resource
+import com.example.taxi.utils.ResourceState
 import com.example.taxi.utils.ViewUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -60,21 +70,25 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.text.DecimalFormat
 
 private const val MY_REQUEST_CODE = 999
 
 class HomeActivity : AppCompatActivity(), ServiceConnection {
     private val OVERLAY_PERMISSION_REQUEST_CODE = 5
     private val userPreferenceManager: UserPreferenceManager by inject()
-    private val notificationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
     private val orderViewModel: OrderViewModel by viewModel()
     private val viewModel: HomeViewModel by viewModel()
     private lateinit var navController: NavController
-
+    lateinit var soundManager: SoundManager
     private val driveReportViewModel: DriveReportViewModel by viewModel()
     private val driverViewModel: DriverViewModel by viewModel()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+    private val networkViewModel: NetworkViewModel by viewModel()
+    private val checkViewModel: CheckViewModel by viewModel()
 
     //    private lateinit var locationEngine: LocationEngine
     lateinit var viewBinding: ActivityHomeBinding
@@ -92,10 +106,11 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
             if (((driverId > 0 && userPreferenceManager.getDriverID() == driverId) && id > 0) || orderStatus == NO_CONNECT) {
                 userPreferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.COMPLETED)
-                viewModel.stopDrive()
+                userPreferenceManager.setIsOrderCancel(true)
                 userPreferenceManager.clearPassengerPhone()
                 userPreferenceManager.timeClear()
-                userPreferenceManager.setIsOrderCancel(true)
+                viewModel.stopDrive()
+
                 navigateToDashboardActivity()
             }
 
@@ -132,12 +147,28 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 //        injectFeature()
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.taxi.ORDER_DATA_ACTION")
-        registerReceiver(receiver, filter)
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(receiver, filter)
+        }
+
+
         viewBinding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        soundManager = SoundManager(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
         val appUpdateManager = AppUpdateManagerFactory.create(this)
+
+
+
+        checkViewModel.checkResponse.observe(this) {
+            updateUserCheck(it)
+        }
 
         // Returns an intent object that you use to check for an update.
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
@@ -162,20 +193,43 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             supportFragmentManager.findFragmentById(R.id.homeFragNavHost) as NavHostFragment
         navController = navHostFragment.navController
 
+
+        val getData = intent.getBooleanExtra("navigate_to_order_fragment", false)
+        if (getData) {
+            val navOptions = NavOptions.Builder().setPopUpTo(R.id.homeFragNavHost, true).build()
+            val bundle = Bundle()
+            navController.navigate(R.id.orderFragment, bundle, navOptions)
+        }
         if (intent.getBooleanExtra("navigate_to_order", false)) {
             val lat1 = intent.getStringExtra("lat1")
             val lat2 = intent.getStringExtra("lat2")
             val long1 = intent.getStringExtra("long1")
             val long2 = intent.getStringExtra("long2")
             val orderId = intent.getIntExtra("order_id", -1)
-            Log.d("lokatsiya", "olindi: long2 = ${long2} , lat2 = ${lat2}")
 
             navigateToOrderFragment(orderId, lat1, long1, lat2, long2)
         }
 
 
+        checkViewModel.driverCheck()
         driveReportViewModel.checkAndUpdateDrive()
 
+//        networkViewModel.driverStatus.observe(this){
+//            when(it.state){
+//                ResourceState.ERROR ->{}
+//                ResourceState.SUCCESS ->{
+//                    if(it.data?.data?.type?.number == 4){
+//                        val currentDestinationId = navController.currentDestination?.id
+//                        if(currentDestinationId != R.id.taximeterFragment){
+//
+//                            navController.navigate(R.id.taximeterFragment)
+//
+//                        }
+//                    }
+//                }
+//                ResourceState.LOADING ->{}
+//            }
+//        }
 
         startService(Intent(this, DriveBackGroundService::class.java))
 
@@ -188,7 +242,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
                 PAUSE -> {
                     activityMessenger.pauseDrive()
-                    viewBinding.root.keepScreenOn = false
+                    viewBinding.root.keepScreenOn = true
                 }
 
                 STOP -> {
@@ -203,6 +257,29 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
 
     }
+
+    private fun updateUserCheck(resource: Resource<MainResponse<CheckResponse>>?) {
+        val currentDestinationId = navController.currentDestination?.id
+
+        Log.d("foto", "updateUserCheck: ${resource?.data?.data?.check}")
+        when (resource?.state) {
+            ResourceState.LOADING -> {}
+            ResourceState.SUCCESS -> {
+
+                if (resource.data?.data?.check == true) {
+
+                    if (userPreferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED && currentDestinationId != R.id.driverFragment && currentDestinationId != R.id.taximeterFragment) {
+
+                        navController.navigate(R.id.checkDriverFragment)
+                    }
+                }
+            }
+
+            ResourceState.ERROR -> {}
+            else -> {}
+        }
+    }
+
 
 //    private fun completeOrderUi(data: Resource<MainResponse<Any>>?) {
 //        when(data?.state){
@@ -246,12 +323,10 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     }
 
     private fun requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(
-                Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")
-            )
-            startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE)
-        }
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")
+        )
+        startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE)
     }
 
     companion object {
@@ -262,12 +337,34 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             activity.finish()
         }
     }
+    private fun showBackgroundLocationRationale() {
+        AlertDialog.Builder(this)
+            .setTitle("Background Location Permission")
+            .setMessage("This app requires background location access to provide location-based services even when the app is not in use.")
+            .setPositiveButton("Allow") { _, _ ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                        1
+                    )
+                }
+            }
+            .show()
+    }
+
 
 
     override fun onStart() {
         super.onStart()
+//        networkViewModel.getOrderCurrent()
 
-        Log.d("mening", "onStart: ${userPreferenceManager.getToken()}")
+//        showBackgroundLocationRationale()
+//        val intent = Intent().apply {
+//            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+//            data = Uri.fromParts("package", packageName, null)
+//        }
+//        startActivity(intent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS
@@ -277,220 +374,210 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             }
         }
 
-            if (userPreferenceManager.getIsOrderCancel()) {
-                val d = DialogUtils.orderCancelDialog(this)
-                d.show()
-                if (d.isShowing) {
-                    userPreferenceManager.setIsOrderCancel(false)
-                }
+        if (userPreferenceManager.getIsOrderCancel()) {
+            val d = DialogUtils.orderCancelDialog(this)
 
+            soundManager.playSoundCancelOrder()
+            d.show()
+            if (d.isShowing) {
+                userPreferenceManager.setIsOrderCancel(false)
             }
-            bindService(
-                Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
-            )
-            val currentDestinationId = navController.currentDestination?.id
-            if (userPreferenceManager.getStatusIsTaximeter()) {
+
+        }
+        bindService(
+            Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
+        )
+        Log.d("taxometr", "onStart: ${userPreferenceManager.getStatusIsTaximeter()}")
+        val currentDestinationId = navController.currentDestination?.id
+        if (userPreferenceManager.getStatusIsTaximeter()) {
+            driverViewModel.completeTaximeter()
+            viewModel.startDrive()
+            val bundle = Bundle()
+            Log.d("taxometr", "updateStatus: ip")
+
+            bundle.putBoolean("is_taxo", true)
+//            navController.navigate(R.id.taximeterFragment, bundle)
+
+        } else {
+            if (currentDestinationId != R.id.driverFragment) {
                 if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED) {
+
                     when (userPreferenceManager.getDriverStatus()) {
                         UserPreferenceManager.DriverStatus.STARTED -> {
-                            Log.d("taxometer", "onStart: start")
                             driverViewModel.startedOrder()
-                            Log.d("xatolik", "onStart:start ishladi ")
                         }
 
-                        UserPreferenceManager.DriverStatus.ARRIVED -> {
-                            driverViewModel.arrivedOrder()
-                            Log.d("taxometer", "onStart: arrive")
-
-                        }
-
-                        UserPreferenceManager.DriverStatus.ACCEPTED -> {
-                            driverViewModel.acceptedOrder()
-                            Log.d("taxometer", "onStart: accept")
-
-                        }
-
+                        UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
+                        UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
                         else -> {}
                     }
-                    navController.navigate(R.id.taximeterFragment)
-                }
-            } else {
-                if (currentDestinationId != R.id.driverFragment) {
-                    if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED) {
-                        when (userPreferenceManager.getDriverStatus()) {
-                            UserPreferenceManager.DriverStatus.STARTED -> {
-                                driverViewModel.startedOrder()
-                                Log.d("xatolik", "onStart:start ishladi ")
-                            }
-
-                            UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
-                            UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
-                            else -> {}
-                        }
-                        navController.navigate(R.id.driverFragment)
-                    }
+                    navController.navigate(R.id.driverFragment)
                 }
             }
         }
+    }
 
-        override fun onDestroy() {
-            super.onDestroy()
-            unregisterReceiver(receiver)
+    override fun onDestroy() {
+        super.onDestroy()
+        checkViewModel.clearSelfie()
+        unregisterReceiver(receiver)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(this)
+    }
+
+    private fun onStatusUpdate(dashboardData: DashboardData) {
+        viewModel.updateDashboardData(dashboardData)
+    }
+
+    private fun onDriveFinished(raceId: Long) {
+        driveReportViewModel.setInitData(driveId = raceId)
+
+        val dialog = DriveFinishDialog(raceId = raceId, driveReportViewModel)
+        dialog.show(supportFragmentManager, "DriveFinishDialog")
+    }
+
+    override fun onPostCreate(
+        savedInstanceState: Bundle?,
+        persistentState: PersistableBundle?
+    ) {
+        super.onPostCreate(savedInstanceState, persistentState)
+
+
+        viewModel.syncServices()
+    }
+
+    override fun onServiceDisconnected(name: ComponentName?) {
+        activityMessenger.onDisconnect()
+    }
+
+    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        activityMessenger.onConnect(Messenger(service))
+        activityMessenger.handShake()
+    }
+
+    override fun onBackPressed() {
+        if (!checkAndEnterPipMode()) {
+            super.onBackPressed()
         }
+    }
 
-        override fun onStop() {
-            super.onStop()
-            unbindService(this)
-        }
 
-        private fun onStatusUpdate(dashboardData: DashboardData) {
-            viewModel.updateDashboardData(dashboardData)
-        }
-
-        private fun onDriveFinished(raceId: Long) {
-            driveReportViewModel.setInitData(driveId = raceId)
-            val dialog = DriveFinishDialog(raceId = raceId, driveReportViewModel)
-            dialog.show(supportFragmentManager, "DriveFinishDialog")
-        }
-
-        override fun onPostCreate(
-            savedInstanceState: Bundle?,
-            persistentState: PersistableBundle?
+    private fun checkAndEnterPipMode(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && packageManager.hasSystemFeature(
+                PackageManager.FEATURE_PICTURE_IN_PICTURE
+            )
         ) {
-            super.onPostCreate(savedInstanceState, persistentState)
-
-
-            viewModel.syncServices()
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            activityMessenger.onDisconnect()
-        }
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            activityMessenger.onConnect(Messenger(service))
-            activityMessenger.handShake()
-        }
-
-        override fun onBackPressed() {
-            if (!checkAndEnterPipMode()) {
-                super.onBackPressed()
-            }
-        }
-
-
-        private fun checkAndEnterPipMode(): Boolean {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && packageManager.hasSystemFeature(
-                    PackageManager.FEATURE_PICTURE_IN_PICTURE
+            if (viewModel.dashboardLiveData.value?.isRunning() == true || userPreferenceManager.getDriverStatus().name != UserPreferenceManager.DriverStatus.COMPLETED.name) {
+                return enterPictureInPictureMode(
+                    PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1)).build()
                 )
-            ) {
-                if (viewModel.dashboardLiveData.value?.isRunning() == true || userPreferenceManager.getDriverStatus().name != UserPreferenceManager.DriverStatus.COMPLETED.name) {
-                    return enterPictureInPictureMode(
-                        PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1)).build()
-                    )
-                }
             }
-
-            return false
         }
 
-        override fun onUserLeaveHint() {
-            checkAndEnterPipMode()
-        }
+        return false
+    }
 
-        @SuppressLint("NewApi", "MissingSuperCall")
-        override fun onPictureInPictureModeChanged(
-            isInPictureInPictureMode: Boolean, newConfig: Configuration
-        ) {
-            if (isInPictureInPictureMode) {
-                viewBinding.priceTxtMini.visibility = View.VISIBLE
-                viewBinding.homeFragNavHost.visibility = View.GONE
+    override fun onUserLeaveHint() {
+        checkAndEnterPipMode()
+    }
+
+    @SuppressLint("NewApi", "MissingSuperCall")
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean, newConfig: Configuration
+    ) {
+        if (isInPictureInPictureMode) {
+            viewBinding.priceTxtMini.visibility = View.VISIBLE
+            viewBinding.homeFragNavHost.visibility = View.GONE
 //            viewBinding.bottomNavigation.visibility = View.GONE
-                viewModel.dashboardLiveData.observe(this) {
-                    viewBinding.priceTxtMini.text = (it.getDistanceText()).toString()
-                }
-            } else {
-                viewBinding.priceTxtMini.visibility = View.GONE
-                viewBinding.homeFragNavHost.visibility = View.VISIBLE
+            viewModel.dashboardLiveData.observe(this) {
+                val formattedNumber = DecimalFormat("#.##").format(it.getDistanceText())
+                viewBinding.priceTxtMini.text = formattedNumber.toString()
+            }
+        } else {
+            viewBinding.priceTxtMini.visibility = View.GONE
+            viewBinding.homeFragNavHost.visibility = View.VISIBLE
 //            viewBinding.bottomNavigation.visibility = View.VISIBLE
-                viewModel.dashboardLiveData.removeObservers(this)
+            viewModel.dashboardLiveData.removeObservers(this)
+        }
+    }
+
+    private fun startKillStateDialogService() {
+        val intent = Intent(this, KillStateDialogService::class.java)
+        ContextCompat.startForegroundService(this, intent)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (hasOverlayPermission()) {
+                startKillStateDialogService()
+            } else {
+                // Overlay permission not granted, handle accordingly (e.g., show error message)
             }
         }
+    }
 
-        private fun startKillStateDialogService() {
-            val intent = Intent(this, KillStateDialogService::class.java)
-            ContextCompat.startForegroundService(this, intent)
-        }
-
-
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-            super.onActivityResult(requestCode, resultCode, data)
-            if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
-                if (hasOverlayPermission()) {
-                    startKillStateDialogService()
-                } else {
-                    // Overlay permission not granted, handle accordingly (e.g., show error message)
-                }
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startKillStateDialogService()
+            } else {
+                // Permission not granted, handle accordingly (e.g., show error message)
             }
         }
+    }
 
-        override fun onRequestPermissionsResult(
-            requestCode: Int, permissions: Array<String>, grantResults: IntArray
-        ) {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-            if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startKillStateDialogService()
-                } else {
-                    // Permission not granted, handle accordingly (e.g., show error message)
-                }
-            }
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.getBooleanExtra("navigate_to_order", false) == true) {
+            val lat1 = intent.getStringExtra("lat1")
+            val lat2 = intent.getStringExtra("lat2")
+            val long1 = intent.getStringExtra("long1")
+            val long2 = intent.getStringExtra("long2")
+            val orderId = intent.getIntExtra("order_id", -1)
+            Log.d("lokatsiya", "ichida: long2 = ${long2} , lat2 = ${lat2}")
+
+            navigateToOrderFragment(orderId, lat1, long1, lat2, long2)
+        }
+    }
+
+    private fun navigateToOrderFragment(
+        id: Int, lat1: String?, long1: String?, lat2: String?, long2: String?
+    ) {
+        Log.d("lokatsiya", "funksiya: long2 = ${long2} , lat2 = ${lat2}")
+
+        val bundle = Bundle().apply {
+            putInt("order_id", id)
+            putString("lat1", lat1)
+            putString("lat2", lat2)
+            putString("long1", long1)
+            putString("long2", long2)
         }
 
-        override fun onNewIntent(intent: Intent?) {
-            super.onNewIntent(intent)
-            if (intent?.getBooleanExtra("navigate_to_order", false) == true) {
-                val lat1 = intent.getStringExtra("lat1")
-                val lat2 = intent.getStringExtra("lat2")
-                val long1 = intent.getStringExtra("long1")
-                val long2 = intent.getStringExtra("long2")
-                val orderId = intent.getIntExtra("order_id", -1)
-                Log.d("lokatsiya", "ichida: long2 = ${long2} , lat2 = ${lat2}")
+        val navOptions = NavOptions.Builder().setPopUpTo(R.id.homeFragNavHost, true).build()
+        navController.navigate(R.id.orderFragment, bundle, navOptions)
+    }
 
-                navigateToOrderFragment(orderId, lat1, long1, lat2, long2)
-            }
-        }
+    override fun attachBaseContext(newBase: Context) {
+        val newContext = ViewUtils.setLanguage(newBase, userPreferenceManager.getLanguage())
+        super.attachBaseContext(newContext)
+    }
 
-        private fun navigateToOrderFragment(
-            id: Int, lat1: String?, long1: String?, lat2: String?, long2: String?
-        ) {
-            Log.d("lokatsiya", "funksiya: long2 = ${long2} , lat2 = ${lat2}")
-
-            val bundle = Bundle().apply {
-                putInt("order_id", id)
-                putString("lat1", lat1)
-                putString("lat2", lat2)
-                putString("long1", long1)
-                putString("long2", long2)
-            }
-
-            val navOptions = NavOptions.Builder().setPopUpTo(R.id.homeFragNavHost, true).build()
-            navController.navigate(R.id.orderFragment, bundle, navOptions)
-        }
-
-        override fun attachBaseContext(newBase: Context) {
-            val newContext = ViewUtils.setLanguage(newBase, userPreferenceManager.getLanguage())
-            super.attachBaseContext(newContext)
-        }
-
-        private fun navigateToDashboardActivity() {
-            val intent = Intent(this, HomeActivity::class.java)
-            finish()
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-            startActivity(intent)
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-
-        }
-
+    private fun navigateToDashboardActivity() {
+        val intent = Intent(this, HomeActivity::class.java)
+        finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        startActivity(intent)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
 
     }
+
+
+}

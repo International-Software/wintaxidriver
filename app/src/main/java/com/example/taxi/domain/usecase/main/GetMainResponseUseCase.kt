@@ -1,13 +1,14 @@
 package com.example.taxi.domain.usecase.main
 
+import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.MainResponse
-import com.example.taxi.domain.model.PaymentUrl
 import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.model.order.OrderCompleteRequest
 import com.example.taxi.domain.model.tarif.ModeRequest
 import com.example.taxi.domain.model.transfer.TransferRequest
 import com.example.taxi.domain.repository.MainRepository
 import io.reactivex.Observable
+import okhttp3.MultipartBody
 
 class GetMainResponseUseCase(private val mainRepository: MainRepository) {
 
@@ -50,26 +51,58 @@ class GetMainResponseUseCase(private val mainRepository: MainRepository) {
             request = request
         )
 
-    fun getHistory(page: Int,from: String? = null, to: String? = null, type: Int? = null, status: Int? = null) = mainRepository.getHistory(page = page,from = from, to = to,type = type, status = status)
+    fun getHistory(
+        page: Int,
+        from: String? = null,
+        to: String? = null,
+        type: Int? = null,
+        status: Int? = null
+    ) = mainRepository.getHistory(page = page, from = from, to = to, type = type, status = status)
 
     fun getDriverNameById(driver_id: Int) = mainRepository.getDriverById(driver_id = driver_id)
 
     fun transferMoney(request: TransferRequest) = mainRepository.transferMoney(request = request)
 
     fun getTransferHistory(page: Int, from: String? = null, to: String? = null, type: Int? = null) =
-        mainRepository.getTransferHistory(page = page, from, to,type)
+        mainRepository.getTransferHistory(page = page, from, to, type)
 
     fun getAbout() = mainRepository.getAbout()
     fun getFAQ() = mainRepository.getFAQ()
 
-     fun getOrderCurrent() = mainRepository.getCurrentOrder()
+    fun getOrderCurrent() = mainRepository.getCurrentOrder()
 
-    fun confirmBonusPassword(orderHistoryId: Int, code: Int) = mainRepository.confirmBonusPassword(orderHistoryId,code)
+    fun confirmBonusPassword(orderHistoryId: Int, code: Int) =
+        mainRepository.confirmBonusPassword(orderHistoryId, code)
 
-    fun transferWithBonus(order_id: Int, money: Int) = mainRepository.transferWithBonus(order_id = order_id, money = money)
+    fun transferWithBonus(order_id: Int, money: Int) =
+        mainRepository.transferWithBonus(order_id = order_id, money = money)
 
     fun getMessage() = mainRepository.getMessage()
 
     fun paymentClick(amount: Int) = mainRepository.paymentClick(amount)
     fun paymentPayme(amount: Int) = mainRepository.paymentPayme(amount)
+    fun paymentUzum(amount: Int) = mainRepository.paymentUzum(amount)
+
+    fun photoControl(
+        img_front: MultipartBody.Part,
+        img_back: MultipartBody.Part,
+        img_left: MultipartBody.Part,
+        img_right: MultipartBody.Part,
+        img_front_chair: MultipartBody.Part,
+        img_back_chair: MultipartBody.Part,
+        img_number: MultipartBody.Part,
+        img_license: MultipartBody.Part
+    ) = mainRepository.photoControl(
+        img_front,
+        img_back,
+        img_left,
+        img_right,
+        img_front_chair,
+        img_back_chair,
+        img_number,
+        img_license
+    )
+
+    fun checkPhotoControl() = mainRepository.checkPhotoControl()
+
 }

@@ -98,15 +98,29 @@
                 android:background="@drawable/shape_cirlce_active"
                 android:backgroundTint="@color/red" />
 
-            <ImageView
+
+            <FrameLayout
                 android:id="@+id/call_btn"
+                android:layout_width="@dimen/_30sdp"
+                android:foreground="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:background="@drawable/bg_shape_dispetcher"
+                android:layout_alignParentEnd="true"
+                android:focusable="true"
+
+                android:layout_centerVertical="true"
+                android:layout_height="@dimen/_30sdp">
+
+            <ImageView
+
                 android:layout_width="@dimen/_26sdp"
                 android:layout_height="@dimen/_26sdp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
                 android:contentDescription="@string/icon"
-                android:src="@drawable/ic_calling" />
+                android:layout_gravity="center"
+                android:padding="@dimen/_2sdp"
+                android:src="@drawable/ic_dispetcher" />
 
+            </FrameLayout>
         </RelativeLayout>
 
 
@@ -139,8 +153,7 @@
                     android:layout_marginHorizontal="@dimen/_5sdp"
                     android:layout_marginBottom="@dimen/_3sdp"
                     android:contentDescription="@string/icon"
-                    android:src="@drawable/ic_list_bullet"
-                    app:tint="@color/white" />
+                    android:src="@drawable/ic_speaker" />
 
                 <TextView
                     android:id="@+id/order_count_textView"
@@ -162,7 +175,7 @@
             app:cardCornerRadius="@dimen/_8sdp"
             android:clickable="true"
             android:focusable="true"
-            app:cardBackgroundColor="@color/card_color"
+            app:cardBackgroundColor="@color/tarif_color"
             android:background="?selectableItemBackground"
             app:cardElevation="@dimen/_3sdp"
             app:layout_constraintBottom_toTopOf="@+id/guideline13"
@@ -197,8 +210,9 @@
             android:layout_height="0dp"
             android:clickable="true"
             android:focusable="true"
+
             android:background="?selectableItemBackground"
-            app:cardBackgroundColor="@color/card_color"
+            app:cardBackgroundColor="@color/tarif_color"
 
             android:id="@+id/button_xizmatlar"
             app:cardCornerRadius="@dimen/_8sdp"
@@ -302,7 +316,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:cardCornerRadius="@dimen/_8sdp"
-            app:cardBackgroundColor="@color/card_color"
+            app:cardBackgroundColor="@color/tarif_color"
 
             app:cardElevation="@dimen/_3sdp"
             app:layout_constraintBottom_toTopOf="@+id/guideline18"

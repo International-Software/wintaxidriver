@@ -7,7 +7,9 @@ import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.taxi.di.MAIN
+import com.example.taxi.domain.model.socket.SocketMessage
 import com.example.taxi.domain.preference.UserPreferenceManager
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,11 +18,13 @@ import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import java.net.URI
 
+
 class SocketRepository constructor(
     val context: Context,
     private var viewModelScope: CoroutineScope? = null,
     private val userPreferenceManager: UserPreferenceManager,
-    private var socketMessageProcessor: SocketMessageProcessor? = null
+    private var socketMessageProcessor: SocketMessageProcessor? = null,
+    private val onMessageReceived: () -> Unit
 ) {
 
     private var webSocket: WebSocketClient? = null
@@ -77,8 +81,12 @@ class SocketRepository constructor(
             }
 
             override fun onMessage(message: String?) {
-                Log.d("WebSocket", "onMessage: $message")
 
+                val gson = Gson()
+                val orderResponse = gson.fromJson(message, SocketMessage::class.java)
+                if (orderResponse.key == "order_new" && userPreferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED){
+                    onMessageReceived()
+                }
                 message?.let {
                     socketMessageProcessor?.handleMessage(it)
                 }

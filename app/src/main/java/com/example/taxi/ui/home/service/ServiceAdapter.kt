@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.LifecycleOwner
@@ -25,7 +26,7 @@ class ServiceAdapter(
     inner class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleName: TextView = itemView.findViewById(R.id.service_title_txt)
         val servicePrice: TextView = itemView.findViewById(R.id.service_price)
-
+        val serviceImage: ImageView = itemView.findViewById(R.id.imageView3)
         //        val price: TextView = itemView.findViewById(R.id.textView2p)
         val switchEnabled: SwitchCompat = itemView.findViewById(R.id.service_switch)
     }
@@ -44,7 +45,8 @@ class ServiceAdapter(
             titleName.convertToCyrillic(list[position].name)
             servicePrice.text = PhoneNumberUtil.formatMoneyNumberPlate(list[position].cost)
             switchEnabled.isChecked = list[position].value == "1"
-
+            val drawableId = ModeDrawableMapper.getDrawableId(list[position].id.toInt())
+            holder.serviceImage.setImageResource(drawableId)
             switchEnabled.setOnCheckedChangeListener { _, _ ->
                 setSwitch(
                     position = position,
@@ -84,5 +86,22 @@ class ServiceAdapter(
                 color = switchEnabled.isChecked
             )
         }
+    }
+}
+
+object ModeDrawableMapper {
+    private val drawableIds = mapOf(
+        1 to R.drawable.ic_aircondition,
+        4 to R.drawable.ic_tom_bagaj,
+        5 to R.drawable.ic_pere_gruz,
+        8 to R.drawable.ic_mashina_tortish,
+        3 to R.drawable.ic_salonga_yuk,
+        6 to R.drawable.ic_yuk_xona,
+        7 to R.drawable.ic_delivery
+        // Add other mappings here
+    )
+
+    fun getDrawableId(modeId: Int): Int {
+        return drawableIds[modeId] ?: R.drawable.ic_settings // Default drawable if mode ID is not found
     }
 }

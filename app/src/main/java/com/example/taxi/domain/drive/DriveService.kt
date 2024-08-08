@@ -100,6 +100,7 @@ class DriveService {
         return currentDrive?.let {
             DashboardData(
                 runningTime = it.getRunningTime(),
+                pauseTime = it.getPauseTime(),
                 currentSpeed = it.getCurrentSpeed().toDouble(),
                 topSpeed = it.getTopSpeed().toDouble(),
                 averageSpeed = it.getAverageSpeed(),

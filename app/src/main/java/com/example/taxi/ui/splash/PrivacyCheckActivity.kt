@@ -1,17 +1,13 @@
 package com.example.taxi.ui.splash
 
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.taxi.R
 import com.example.taxi.domain.model.FORBIDDEN_ERROR_MESSAGE
 import com.example.taxi.domain.model.checkAccess.AccessModel
 import com.example.taxi.domain.preference.UserPreferenceManager
@@ -29,13 +25,12 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PrivacyCheckActivity : AppCompatActivity() {
     private val viewModel: SplashViewModel by viewModel()
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private var app_detail = ""
     private val permissionActivityResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (LocationPermissionUtils.isLocationEnabled(this)
-                && LocationPermissionUtils.isBasicPermissionGranted(this)
-                && Settings.canDrawOverlays(this)
-            ) {
+
+            if (allPermissionsAndSettingsGranted()) {
                 nextActivity()
             }
         }
@@ -46,8 +41,17 @@ class PrivacyCheckActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         ViewUtils.setTheme(userPreferenceManager.getTheme())
         checkAccess()
-        checkOverlayPermission()
 
+
+    }
+
+    private fun allPermissionsAndSettingsGranted(): Boolean {
+        // Your logic to check if all required permissions and settings are granted/enabled
+        return LocationPermissionUtils.isBasicPermissionGranted(this)
+                && LocationPermissionUtils.isBackgroundPermissionGranted(this)
+                && LocationPermissionUtils.isLocationEnabled(this)
+                && LocationPermissionUtils.isPowerSavingModeEnabled(this)
+                && Settings.canDrawOverlays(this)
     }
 
     private fun checkAccess() {
@@ -89,13 +93,27 @@ class PrivacyCheckActivity : AppCompatActivity() {
         super.attachBaseContext(newContext)
     }
 
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // Permissions granted, start the foreground service
+                if (allPermissionsAndSettingsGranted()) {
+                    nextActivity()
+                }
+            }
+        }
+    }
+
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        if (LocationPermissionUtils.isBasicPermissionGranted(this)
-            && LocationPermissionUtils.isLocationEnabled(this)
-            && Settings.canDrawOverlays(this)
-        ) {
+        if (allPermissionsAndSettingsGranted()) {
             nextActivity()
         } else {
             permissionActivityResultLauncher.launch(
@@ -106,39 +124,19 @@ class PrivacyCheckActivity : AppCompatActivity() {
             )
         }
 
+
     }
 
-    private fun checkOverlayPermission() {
-        if (!Settings.canDrawOverlays(this)) {
-            showOverlayPermissionDialog()
-        }
-    }
 
     override fun onResume() {
         super.onResume()
-        if (LocationPermissionUtils.isBasicPermissionGranted(this)
-            && LocationPermissionUtils.isLocationEnabled(this)
-            && Settings.canDrawOverlays(this)
-        ) {
+
+        if (allPermissionsAndSettingsGranted()) {
             nextActivity()
         }
+
     }
 
-    private fun showOverlayPermissionDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.neеded_permission))
-            .setMessage(getString(R.string.draw_permission))
-            .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
-                val intent = Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-            }
-            .create()
-            .show()
-    }
 
     private fun nextActivity() {
         if (userPreferenceManager.getRegisterComplete()) {

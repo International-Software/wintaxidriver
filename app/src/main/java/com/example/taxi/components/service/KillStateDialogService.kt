@@ -1,10 +1,14 @@
 package com.example.taxi.components.service
 
+import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
@@ -22,9 +26,16 @@ import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taxi.R
+import com.example.taxi.domain.model.order.Type
+import com.example.taxi.domain.model.order.TypeEnum
 import com.example.taxi.domain.model.socket.SocketMessage
 import com.example.taxi.domain.model.socket.SocketOnlyForYouData
 import com.example.taxi.domain.model.socket.toOrderData
@@ -44,11 +55,12 @@ class KillStateDialogService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val notificationId = 1
     private var wakeLock: PowerManager.WakeLock? = null
-
+    private val LOCATION_PERMISSION_REQUEST_CODE = 1001
     private lateinit var soundPlayer: SoundPlayer
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
+
     private val notificationChannelId = "KillStateDialogChannel"
 
     override fun onBind(intent: Intent?) = null
@@ -74,6 +86,7 @@ class KillStateDialogService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         dialogView?.let { windowManager?.removeView(it) }
+        soundPlayer.stopSound()
         handler.removeCallbacksAndMessages(null)
     }
 
@@ -115,6 +128,7 @@ class KillStateDialogService : Service() {
         }
     }
 
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Retrieve the message from the intent extras
         val message = intent?.getStringExtra("message")
@@ -145,7 +159,21 @@ class KillStateDialogService : Service() {
 
             }, 15000)
 
-            startForeground(notificationId, createNotification())
+            if (allPermissionsGranted()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                    startForeground(
+                        notificationId,
+                        createNotification(),
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                    )
+                } else {
+                    startForeground(notificationId, createNotification())
+                }
+            }else{
+                Toast.makeText(this, "Ruxsat", Toast.LENGTH_SHORT).show()
+            }
+
         } else {
             dialogView?.visibility = View.GONE
             soundPlayer.stopSound()
@@ -156,6 +184,16 @@ class KillStateDialogService : Service() {
         return START_STICKY
     }
 
+    private fun allPermissionsGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= 34) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
+    }
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = getString(R.string.notification_channel_name)
@@ -178,11 +216,22 @@ class KillStateDialogService : Service() {
         soundPlayer.playRequestSound()
     }
 
-
+    fun updateTextView(type: Type, textView: AppCompatTextView) {
+        val typeEnum = TypeEnum.values().find { it.ordinal + 1 == type.number }
+        typeEnum?.let {
+            textView.text = ConversionUtil.convertToCyrillic(type.name)
+            textView.setTextColor(Color.parseColor(it.textColor))
+            textView.compoundDrawableTintList = ColorStateList.valueOf(Color.parseColor(it.textColor))
+            textView.backgroundTintList = ColorStateList.valueOf(Color.parseColor(it.backgroundColor))
+        }
+    }
     @SuppressLint("MissingPermission")
     private fun setupViews(data: SocketOnlyForYouData) {
         val priceTextView = dialogView?.findViewById<TextView>(R.id.priceTextView_dialog)
         val addressTextView = dialogView?.findViewById<TextView>(R.id.addressTextView_dialog)
+        val typeTv = dialogView?.findViewById<AppCompatTextView>(R.id.textView_type_dialog)
+        val t = Type(data.type.number,data.type.name)
+        typeTv?.let { updateTextView(t, it) }
         val secondAddressTextView =
             dialogView?.findViewById<TextView>(R.id.secondDestinationAddress)
         val distanceTextView = dialogView?.findViewById<TextView>(R.id.distanceTextView_dialog)
@@ -235,6 +284,7 @@ class KillStateDialogService : Service() {
             stopSelf()
         }
     }
+
 
 
     private fun animateProgressBar() {

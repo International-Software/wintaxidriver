@@ -1,29 +1,49 @@
 package com.example.taxi.ui.permission
 
+import android.Manifest
+import android.app.ActionBar.LayoutParams
 import android.app.Activity
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.drawable.ColorDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.View
+import android.provider.Settings
+import android.view.Gravity
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.example.taxi.R
 import com.example.taxi.databinding.ActivityPermissionCheckBinding
-import com.example.taxi.utils.DialogUtils
 import com.example.taxi.utils.LocationPermissionUtils
+import com.google.android.material.button.MaterialButton
 
 class PermissionCheckActivity : AppCompatActivity() {
-    private val reqForLocation = 21
     private var isPromptMode = false
-    private var mayBeDenied = false
+
+    private lateinit var viewBinding: ActivityPermissionCheckBinding
+
+    private val locationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            if (result) handleLocationPermissionGranted()
+        }
+
+    private val backgroundLocationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            if (result) checkAndProceed()
+        }
+
+    private val batteryOptimizationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) checkAndProceed()
+        }
 
     private val locationSettingActivityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == Activity.RESULT_OK) {
-                LocationPermissionUtils.compute(this)
-                finish()
-            }
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) handleLocationSettingsEnabled()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,111 +55,149 @@ class PermissionCheckActivity : AppCompatActivity() {
         if (isPromptMode) {
             checkAndAsk()
         } else {
-            val viewBinding = ActivityPermissionCheckBinding.inflate(layoutInflater)
+            viewBinding = ActivityPermissionCheckBinding.inflate(layoutInflater)
             setContentView(viewBinding.root)
-            viewBinding.permissionMessage.text = getString(R.string.bg_permission_message)
-            viewBinding.askAllow.visibility = View.VISIBLE
-            viewBinding.notAllow.visibility = View.GONE
-            viewBinding.allowBtn.setOnClickListener {
-                checkAndAsk()
+            if (!LocationPermissionUtils.isBackgroundPermissionGranted(this) || !LocationPermissionUtils.isBasicPermissionGranted(this)){
+                showPermissionExplanationDialog()
             }
-
-            viewBinding.cancelBtn.setOnClickListener {
-                viewBinding.askAllow.visibility = View.GONE
-                viewBinding.notAllow.visibility = View.VISIBLE
-
-            }
-
-            viewBinding.againPermissionButton.setOnClickListener{
-                checkAndAsk()
-            }
+            viewBinding.buttonConfirmPermissions.setOnClickListener { checkAndAsk() }
         }
-    }
-
-    private fun askPermissionWithExplanation() {
-        val message = getString(
-            R.string.need_your_bg_location_permission
-        )
-
-        DialogUtils.createDialog(
-            context = this,
-            title = getString(R.string.location_permission),
-            message = message,
-            positiveAction = getString(R.string.grant_access),
-            negativeAction = getString(R.string.cancel),
-            onSuccessAction = {
-                if (shouldShowRationalePermission()) {
-                    askPermission()
-                } else {
-                    locationSettingActivityResultLauncher.launch(LocationPermissionUtils.getAppPermissionSettingPageIntent())
-                }
-            },
-            onNegativeAction = {
-                finish()
-            }).show()
-    }
-
-    private fun check() = LocationPermissionUtils.isBasicPermissionGranted(this)
-
-    private fun checkAndAsk() {
-
-        if (check()) {
-            LocationPermissionUtils.askEnableLocationRequest(this, ::locationEnabled)
-        } else {
-            if (shouldShowRationalePermission()) {
-                askPermissionWithExplanation()
-            } else {
-                mayBeDenied = true
-                askPermission()
-            }
-        }
-    }
-
-    private fun askPermission() {
-        val permissions = LocationPermissionUtils.getBasicPermissions()
-
-        requestPermissions(permissions, reqForLocation)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == reqForLocation) {
-            if (check()) {
-                if (LocationPermissionUtils.isLocationEnabled(this)) {
-                    proceed()
-                } else {
-                    LocationPermissionUtils.askEnableLocationRequest(this, ::locationEnabled)
-                }
-            } else {
-                if (!shouldShowRationalePermission()) {
-                    askPermissionWithExplanation()
-                } else {
-                    cancel()
-                }
-            }
-        }
-    }
-
-    private fun shouldShowRationalePermission() =
-        LocationPermissionUtils.shouldShowRationaleBasicPermission(this)
-
-    private fun locationEnabled(ignore: Boolean) {
-        Log.i("LOC", ignore.toString())
-        checkAndProceed()
     }
 
     override fun onResume() {
         super.onResume()
+        updateStatusImages()
+        checkAndProceed()
+    }
+
+    private fun checkAndAsk() {
+        when {
+            checkPermissions() -> handlePermissionsGranted()
+            shouldShowRationalePermission() -> showPermissionExplanationDialog()
+            else -> requestPermissions()
+        }
+    }
+
+    private fun checkPermissions(): Boolean =
+        LocationPermissionUtils.isBasicPermissionGranted(this) &&
+                LocationPermissionUtils.isBackgroundPermissionGranted(this) &&
+                Settings.canDrawOverlays(this) &&
+                LocationPermissionUtils.isPowerSavingModeEnabled(this)
+
+    private fun shouldShowRationalePermission(): Boolean =
+        LocationPermissionUtils.shouldShowRationaleBasicPermission(this)
+
+    private fun requestPermissions() {
+        when {
+            !LocationPermissionUtils.isBasicPermissionGranted(this) ->
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            !LocationPermissionUtils.isLocationEnabled(this) -> LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
+            !LocationPermissionUtils.isBackgroundPermissionGranted(this) ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }
+            !Settings.canDrawOverlays(this) -> showOverlayPermissionDialog()
+            !LocationPermissionUtils.isPowerSavingModeEnabled(this) -> showBatteryPermissionDialog()
+        }
+    }
+
+    private fun showPermissionExplanationDialog() {
+        val dialog = Dialog(this).apply {
+            setContentView(R.layout.dialog_ask_permission)
+            window?.apply {
+                setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+                setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+                setGravity(Gravity.CENTER)
+            }
+        }
+
+        dialog.findViewById<MaterialButton>(R.id.button_permissions).setOnClickListener {
+            dialog.dismiss()
+            requestPermissions()
+        }
+
+        dialog.findViewById<MaterialButton>(R.id.button_skip).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showOverlayPermissionDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.neеded_permission))
+            .setMessage(getString(R.string.draw_permission))
+            .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                startActivity(intent)
+            }
+            .create()
+            .show()
+    }
+
+    private fun showBatteryPermissionDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.neеded_permission))
+            .setMessage(getString(R.string.battery_permission))
+            .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
+                requestIgnoreBatteryOptimizations()
+            }
+            .create()
+            .show()
+    }
+
+    private fun updateStatusImages() {
+        updateImageView(viewBinding.imgBattery, LocationPermissionUtils.isPowerSavingModeEnabled(this))
+        updateImageView(viewBinding.imgOverlay, Settings.canDrawOverlays(this))
+        updateImageView(viewBinding.imgLocation, LocationPermissionUtils.isBasicPermissionGranted(this))
+        updateImageView(viewBinding.imgGps, LocationPermissionUtils.isLocationEnabled(this) && LocationPermissionUtils.isBackgroundPermissionGranted(this))
+    }
+
+    private fun updateImageView(imageView: ImageView, isActive: Boolean) {
+        val paddingInPx = (6 * resources.displayMetrics.density + 0.5f).toInt()
+
+        imageView.apply {
+            setImageResource(if (isActive) R.drawable.ic_check else R.drawable.ic_cancel_settings)
+            setPadding(if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx)
+        }
+    }
+
+    private fun handlePermissionsGranted() {
+        if(!LocationPermissionUtils.isLocationEnabled(this)){
+            LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
+        }else if (!Settings.canDrawOverlays(this)) {
+            showOverlayPermissionDialog()
+        } else if (!LocationPermissionUtils.isPowerSavingModeEnabled(this)) {
+            showBatteryPermissionDialog()
+        }
+    }
+
+    private fun handleLocationPermissionGranted() {
+        if (checkPermissions()) {
+            LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
+        } else {
+            requestPermissions()
+        }
+    }
+
+    private fun handleLocationSettingsEnabled() {
+        LocationPermissionUtils.compute(this)
+        finish()
+    }
+
+    private fun requestIgnoreBatteryOptimizations() {
+        if (!LocationPermissionUtils.isPowerSavingModeEnabled(this)) {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:$packageName"))
+            batteryOptimizationResultLauncher.launch(intent)
+        }
+    }
+
+    private fun locationEnabled() {
         checkAndProceed()
     }
 
     private fun checkAndProceed() {
-        if (check() && LocationPermissionUtils.isLocationEnabled(this)) {
+        if (checkPermissions()) {
             proceed()
         }
     }
@@ -155,16 +213,12 @@ class PermissionCheckActivity : AppCompatActivity() {
     }
 
     companion object {
-
         private const val IS_PROMPT_MODE = "IS_PROMPT_MODE"
 
-        fun getOpenIntent(
-            context: Context,
-            isPromptMode: Boolean = false
-        ): Intent {
-            val intent = Intent(context, PermissionCheckActivity::class.java)
-            intent.putExtra(IS_PROMPT_MODE, isPromptMode)
-            return intent
+        fun getOpenIntent(context: Context, isPromptMode: Boolean = false): Intent {
+            return Intent(context, PermissionCheckActivity::class.java).apply {
+                putExtra(IS_PROMPT_MODE, isPromptMode)
+            }
         }
     }
 }

@@ -117,6 +117,7 @@
                         android:layout_width="match_parent"
                         android:maxLines="1"
                         android:maxLength="30"
+                        android:singleLine="true"
                         android:layout_height="wrap_content"
                         android:hint="@string/input" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -141,6 +142,7 @@
                     app:boxCornerRadiusTopStart="8dp"
                     app:hintAnimationEnabled="false"
                     app:hintEnabled="false"
+
                     app:layout_constraintVertical_bias=".7"
                     app:startIconDrawable="@drawable/ic_profile"
                     app:startIconTint="#B6B6B6">
@@ -150,6 +152,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:maxLines="1"
+                        android:singleLine="true"
                         android:maxLength="30"
                         android:hint="@string/input" />
                 </com.google.android.material.textfield.TextInputLayout>

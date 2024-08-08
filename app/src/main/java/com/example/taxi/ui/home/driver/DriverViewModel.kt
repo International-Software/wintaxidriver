@@ -31,12 +31,15 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
         value = DriveAction.ACCEPT
     }
 
+    val orderSCTaximeter = MutableLiveData<Int>()
+
 
     private val _transferWithBonus = MutableLiveData<Resource<MainResponse<BonusResponse>>>()
     val transferWithBonus: LiveData<Resource<MainResponse<BonusResponse>>> get() = _transferWithBonus
 
-    private var _acceptWithTaximeter = MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>>()
-    val acceptWithTaximeter:LiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>> get() = _acceptWithTaximeter
+    private var _acceptWithTaximeter =
+        MutableLiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>>()
+    val acceptWithTaximeter: LiveData<Event<Resource<MainResponse<OrderAccept<UserModel>>>>> get() = _acceptWithTaximeter
 
     private var _startOrder = MutableLiveData<Resource<MainResponse<Any>>>()
     val startOrder: LiveData<Resource<MainResponse<Any>>> = _startOrder
@@ -51,16 +54,17 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
     val completeOrderLostNetwork: LiveData<Resource<MainResponse<Any>>> get() = _completeOrderLostNetwork
 
     private var _confirmationCode = MutableLiveData<Resource<MainResponse<Any>>>()
-    val confirmationCode :LiveData<Resource<MainResponse<Any>>> get() = _confirmationCode
+    val confirmationCode: LiveData<Resource<MainResponse<Any>>> get() = _confirmationCode
 
-    fun confirmBonusPassword(orderHistoryId: Int, code: Int){
+    fun confirmBonusPassword(orderHistoryId: Int, code: Int) {
         _confirmationCode.postValue(Resource(ResourceState.LOADING))
-        compositeDisposable.add(mainResponseUseCase.confirmBonusPassword(orderHistoryId,code).subscribeOn(Schedulers.io())
-            .doOnSubscribe {  }
-            .doOnTerminate{}
+        compositeDisposable.add(mainResponseUseCase.confirmBonusPassword(orderHistoryId, code)
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { }
+            .doOnTerminate {}
             .subscribe({ response ->
-                _confirmationCode.postValue(Resource(ResourceState.SUCCESS,response))
-            },{error ->
+                _confirmationCode.postValue(Resource(ResourceState.SUCCESS, response))
+            }, { error ->
                 val errorMessage = if (error is HttpException) {
                     try {
                         val errorBody = error.response()?.errorBody()?.string()
@@ -72,18 +76,25 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
                 } else {
                     "An error occurred"
                 }
-                _confirmationCode.postValue(Resource(ResourceState.ERROR, message = errorMessage))
-            }))
+                _confirmationCode.postValue(
+                    Resource(
+                        ResourceState.ERROR,
+                        message = errorMessage
+                    )
+                )
+            })
+        )
     }
 
-    fun transferWithBonus(order_id: Int, money: Int){
+    fun transferWithBonus(order_id: Int, money: Int) {
         _transferWithBonus.postValue(Resource(ResourceState.LOADING))
-        compositeDisposable.add(mainResponseUseCase.transferWithBonus(order_id,money).subscribeOn(Schedulers.io())
-            .doOnSubscribe {  }
-            .doOnTerminate{}
+        compositeDisposable.add(mainResponseUseCase.transferWithBonus(order_id, money)
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe { }
+            .doOnTerminate {}
             .subscribe({ response ->
-                _transferWithBonus.postValue(Resource(ResourceState.SUCCESS,response))
-            },{error ->
+                _transferWithBonus.postValue(Resource(ResourceState.SUCCESS, response))
+            }, { error ->
                 val errorMessage = if (error is HttpException) {
                     try {
                         val errorBody = error.response()?.errorBody()?.string()
@@ -95,8 +106,14 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
                 } else {
                     "An error occurred"
                 }
-                _transferWithBonus.postValue(Resource(ResourceState.ERROR, message = errorMessage))
-            }))
+                _transferWithBonus.postValue(
+                    Resource(
+                        ResourceState.ERROR,
+                        message = errorMessage
+                    )
+                )
+            })
+        )
 
     }
 
@@ -173,44 +190,46 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
     }
 
 
-    fun acceptWithTaximeter(){
-            _acceptWithTaximeter.postValue(Event(Resource(ResourceState.LOADING)))
-            compositeDisposable.add(
-                mainResponseUseCase.acceptWithTaximeter()
-                    .timeout(10, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .doOnSubscribe {}
-                    .doOnTerminate {}
-                    .subscribe({ response ->
-                        Log.d("zakaz", "acceptWithTaximeter:re  $response")
-                        _acceptWithTaximeter.postValue(Event(Resource(ResourceState.SUCCESS, response)))
-                    }, { error ->
-                        Log.d("zakaz", "acceptWithTaximeter:e  $error")
+    fun acceptWithTaximeter() {
+        _acceptWithTaximeter.postValue(Event(Resource(ResourceState.LOADING)))
+        compositeDisposable.add(
+            mainResponseUseCase.acceptWithTaximeter()
+                .timeout(10, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .doOnSubscribe {}
+                .doOnTerminate {}
+                .subscribe({ response ->
+                    Log.d("zakaz", "acceptWithTaximeter:re  $response")
+                    _acceptWithTaximeter.postValue(Event(Resource(ResourceState.SUCCESS, response)))
+                }, { error ->
+                    Log.d("zakaz", "acceptWithTaximeter:e  $error")
 
-                        val errorMessage = when (error) {
-                            is HttpException -> {
-                                try {
-                                    val errorBody = error.response()?.errorBody()?.string()
-                                    val mainResponse = Gson().fromJson(errorBody, MainResponse::class.java)
-                                    mainResponse.message
-                                } catch (e: Exception) {
-                                    R.string.cannot_connect_to_server
-                                }
+                    val errorMessage = when (error) {
+                        is HttpException -> {
+                            try {
+                                val errorBody = error.response()?.errorBody()?.string()
+                                val mainResponse =
+                                    Gson().fromJson(errorBody, MainResponse::class.java)
+                                mainResponse.message
+                            } catch (e: Exception) {
+                                R.string.cannot_connect_to_server
                             }
-                            is IOException -> R.string.no_internet
-                            else -> R.string.unknow_error
                         }
-                        _acceptWithTaximeter.postValue(
-                            Event(
-                                Resource(
-                                    ResourceState.ERROR,
-                                    message = errorMessage.toString()
-                                )
+
+                        is IOException -> R.string.no_internet
+                        else -> R.string.unknow_error
+                    }
+                    _acceptWithTaximeter.postValue(
+                        Event(
+                            Resource(
+                                ResourceState.ERROR,
+                                message = errorMessage.toString()
                             )
                         )
+                    )
 
-                    })
-            )
+                })
+        )
 
     }
 
@@ -236,7 +255,6 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
     }
 
 
-
     fun completeOrderForBonus(orderCompleteRequest: OrderCompleteRequest) {
         compositeDisposable.add(mainResponseUseCase.completeOrder(orderCompleteRequest)
             .subscribeOn(Schedulers.io())
@@ -246,7 +264,7 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
                 Log.d("driverxatolik", "completeOrderForBonus: ")
 //                _completeOrder.postValue(Resource(ResourceState.SUCCESS, response))
 
-            }, {error ->
+            }, { error ->
                 Log.d("driverxatolik", "completeOrderForBonus:x $error")
 
 //                _completeOrder.postValue(
@@ -272,8 +290,16 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
         orderStartCompleteLiveData.postValue(DriveAction.STARTED)
     }
 
-    fun  completedOrder() {
+    fun completedOrder() {
         orderStartCompleteLiveData.postValue(DriveAction.COMPLETED)
+    }
+
+    fun acceptTaximeter() {
+        orderSCTaximeter.postValue(DriveAction.TAX_STARTED)
+    }
+
+    fun completeTaximeter() {
+        orderSCTaximeter.postValue(DriveAction.TAX_COMPLETED)
     }
 
 

@@ -103,15 +103,20 @@ class LocationProvider: LocationListener, GnssStatus.Callback() {
     private fun isValidLocation(location: Location): Boolean {
 
         if (location.time < startTime) {
+            Log.d("tekshirish", "isValidLocation: vaqt")
              return false
         }
 
         if (currentGPSStrength == 0) {
 //            getLastKnownLocation()
+
+            Log.d("tekshirish", "isValidLocation: gps")
+
             return false
         }
 
         if (location.accuracy <= 0 || location.accuracy > 20) {
+            Log.d("tekshirish", "isValidLocation: accuracy")
 
             return false
         }

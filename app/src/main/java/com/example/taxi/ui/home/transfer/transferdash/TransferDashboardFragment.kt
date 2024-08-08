@@ -39,11 +39,12 @@ class TransferDashboardFragment : Fragment() {
     lateinit var viewBinding: FragmentTransferDashboardBinding
     private val dashboardViewModel: DashboardViewModel by sharedViewModel()
     lateinit var dialog: Dialog
-    var clickButton: MaterialCardView? = null
-    var payMeButton: MaterialCardView? = null
-    var edMoneyValue: EditText? = null
-    var sendMoneyButton: MaterialButton? = null
-    var loadingDialog: Dialog? = null
+    private var clickButton: MaterialCardView? = null
+    private var payMeButton: MaterialCardView? = null
+    private var uzumButton: MaterialCardView? = null
+    private var edMoneyValue: EditText? = null
+    private var sendMoneyButton: MaterialButton? = null
+    private var loadingDialog: Dialog? = null
 
     val navController: NavController by lazy {
         findNavController()
@@ -111,21 +112,21 @@ class TransferDashboardFragment : Fragment() {
             ResourceState.SUCCESS -> {
                 loadingDialog?.dismiss()
                 dialog.dismiss()
-                dashboardViewModel.clearPaymentProgress()
                 val url = resource.data?.data?.url
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse(url)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
+//                dashboardViewModel.clearPaymentProgress()
+
             }
             ResourceState.ERROR -> {
                 loadingDialog?.dismiss()
                 dialog.dismiss()
                 dashboardViewModel.clearPaymentProgress()
-
                 DialogUtils.createChangeDialog(
                     activity = requireActivity(),
-                    title = "Xatolik",
+                    title = getString(R.string.error),
                     message = "${resource.message}",
                     color =  R.color.tred
                 )
@@ -136,14 +137,24 @@ class TransferDashboardFragment : Fragment() {
 
     }
 
-    private fun updatePaymentUi(type: Boolean?) {
+    private fun updatePaymentUi(type: Int?) {
 
-        if (type == false) {
-            clickButton?.strokeWidth = 4
-            payMeButton?.strokeWidth = 0
-        } else {
-            clickButton?.strokeWidth = 0
-            payMeButton?.strokeWidth = 4
+        when(type){
+            1 -> {
+                clickButton?.strokeWidth = 4
+                payMeButton?.strokeWidth = 0
+                uzumButton?.strokeWidth = 0
+            }
+            2 -> {
+                clickButton?.strokeWidth = 0
+                payMeButton?.strokeWidth = 4
+                uzumButton?.strokeWidth = 0
+            }
+            3 ->{
+                clickButton?.strokeWidth = 0
+                payMeButton?.strokeWidth = 0
+                uzumButton?.strokeWidth = 4
+            }
         }
 
     }
@@ -182,16 +193,19 @@ class TransferDashboardFragment : Fragment() {
     }
 
     private fun showTransferDialog() {
+        dashboardViewModel.paymentClick()
         dialog.setContentView(R.layout.dialog_payment)
         dialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
         dialog.window?.setGravity(Gravity.CENTER)
         dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         clickButton = dialog.findViewById(R.id.buttonClick)
         payMeButton = dialog.findViewById(R.id.buttonPayme)
+        uzumButton = dialog.findViewById(R.id.buttonUzum)
         edMoneyValue = dialog.findViewById(R.id.ed_money_value)
         sendMoneyButton = dialog.findViewById(R.id.sendMoney_button)
         clickButton?.setOnClickListener { dashboardViewModel.paymentClick() }
         payMeButton?.setOnClickListener { dashboardViewModel.paymentPayme() }
+        uzumButton?.setOnClickListener{dashboardViewModel.paymentUzum()}
 
         sendMoneyButton?.setOnClickListener {
             val amount = edMoneyValue?.text.toString()
@@ -209,5 +223,10 @@ class TransferDashboardFragment : Fragment() {
             }
         }
         dialog.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dashboardViewModel.clearPaymentProgress()
     }
 }

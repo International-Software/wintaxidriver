@@ -13,6 +13,8 @@
     <color name="date_picker_background">#76777e</color>
     <color name="only_white">#FFFFFFFF</color>
 
+    <color name="tarif_color">#0B5A53</color>
+
 
     <color name="background_driver_is_order">#393939</color>
 

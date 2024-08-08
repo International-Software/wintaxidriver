@@ -360,7 +360,6 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
                 android.R.anim.fade_in,
                 android.R.anim.fade_out
             )
-            preferenceManager.saveStatusIsTaximeter(false)
             dismiss()
             startActivity(intent)
             currentActivity.overridePendingTransition(

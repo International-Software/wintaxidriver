@@ -44,6 +44,7 @@ object SpotlightUtils {
     }
 
     fun showIntroTarget(activity: FragmentActivity, viewBinding: FragmentDashboardBinding,userPreferenceManager: UserPreferenceManager) {
+
         TapTargetSequence(activity)
             .targets(
                 TapTarget.forView(
@@ -55,7 +56,7 @@ object SpotlightUtils {
                     .outerCircleColor(R.color.blue)
                     .targetCircleColor(android.R.color.holo_blue_light)
                     .transparentTarget(true)
-                    .cancelable(false)
+                    .cancelable(true)
                     .textColor(android.R.color.black),
                 TapTarget.forView(
                     viewBinding.socketIsConnected,

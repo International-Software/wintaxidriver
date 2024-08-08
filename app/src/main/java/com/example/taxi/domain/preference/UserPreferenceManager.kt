@@ -50,7 +50,7 @@ class UserPreferenceManager(private val context: Context) {
         const val KEY_TOGGLE_STATE = "ToggleState"
         const val IS_TAXIMETER = "is_taximeter"
         const val ORDER_ID = "order_id"
-
+        const val ADVERTISING = "is_advertising"
 
     }
 
@@ -58,10 +58,15 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putInt(START_COST, start_cost).apply()
     }
 
+    fun saveAdvertisingStatus(status: Int){
+        prefs.edit().putInt(ADVERTISING,status).apply()
+    }
+
+    fun getAdvertisingStatus():Int{
+        return prefs.getInt(ADVERTISING,-1)
+    }
     fun savePriceSettings(order: OrderAccept<UserModel>) {
 
-        Log.d("narx", "savePriceSettings: ichkarida ${order.start_cost}")
-        Log.d("narx", "savePriceSettings: har bir km ${order.getMinCost()}")
         with(prefs.edit()) {
 //
             if (order.getCostPerKm() == 0) putInt(COST_PER_KM, 2000) else putInt(
@@ -269,7 +274,7 @@ class UserPreferenceManager(private val context: Context) {
 
     fun getLanguage(): Language {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        return when (sharedPreferences.getString("language", "la")) {
+        return when (sharedPreferences.getString("language", "uz")) {
             "la" -> {
                 Language.UZBEK
             }

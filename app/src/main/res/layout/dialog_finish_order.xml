@@ -20,6 +20,7 @@
             android:id="@+id/back_show_price_button"
             android:layout_width="@dimen/_20sdp"
             android:visibility="gone"
+            android:contentDescription="@string/back_show_price_button"
             android:src="@drawable/ic_ss_arrow_back"
             android:layout_gravity="center_vertical"
             android:layout_height="@dimen/_20sdp"

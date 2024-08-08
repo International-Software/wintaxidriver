@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taxi.R
 import com.example.taxi.domain.model.order.Service
+import com.example.taxi.ui.home.service.ModeDrawableMapper
 import com.example.taxi.utils.PhoneNumberUtil
 import com.example.taxi.utils.convertToCyrillic
 
@@ -31,6 +32,7 @@ class ServiceOrderAdapter(val list: List<Service>) : RecyclerView.Adapter<Servic
 
     override fun onBindViewHolder(holder: ServiceOrderViewHolder, position: Int) {
        with(holder){
+
            serviceTitle.isSelected = true;
            servicePrice.text = PhoneNumberUtil.formatMoneyNumberPlate(list[position].cost.toString())
            list[position].name?.let { serviceTitle.convertToCyrillic(it) }

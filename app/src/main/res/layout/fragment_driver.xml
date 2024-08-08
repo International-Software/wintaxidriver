@@ -34,6 +34,7 @@
 
         <include
             android:id="@+id/bottom_dialog_taxometer"
+
             layout="@layout/dialog_taxometer" />
     </FrameLayout>
 
@@ -112,9 +113,10 @@
 
         <ImageView
             android:id="@+id/imageView4"
-            android:layout_width="@dimen/_25sdp"
-            android:layout_height="@dimen/_25sdp"
-            android:src="@drawable/icon_google_maps"
+            android:layout_width="@dimen/_35sdp"
+            android:layout_height="@dimen/_35sdp"
+            android:src="@drawable/ic_navigator"
+            app:layout_constraintVertical_bias=".38"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -123,7 +125,7 @@
             android:id="@+id/textView9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Navigatsiya"
+            android:text="Navigator"
             android:textColor="@color/text_black_white"
             android:textSize="@dimen/_8ssp"
             app:layout_constraintBottom_toBottomOf="parent"

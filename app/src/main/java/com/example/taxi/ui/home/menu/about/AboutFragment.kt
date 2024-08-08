@@ -34,6 +34,8 @@ class AboutFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewBinding.webview.loadUrl("https://bekjaantaxi.uz/policy")
+
         viewBinding.webview.webViewClient = WebViewClient()
         val webSettings = viewBinding.webview.settings
         webSettings.javaScriptEnabled = true
@@ -43,9 +45,10 @@ class AboutFragment : Fragment() {
         }
 
         aboutViewModel.getAbout()
-        aboutViewModel.about.observe(viewLifecycleOwner){
-            getAboutData(it)
-        }
+
+//        aboutViewModel.about.observe(viewLifecycleOwner){
+//            getAboutData(it)
+//        }
     }
 
     private fun getAboutData(resource: Resource<MainResponse<ResponseAbout>>) {

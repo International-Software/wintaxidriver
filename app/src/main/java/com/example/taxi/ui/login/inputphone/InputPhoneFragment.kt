@@ -1,7 +1,18 @@
 package com.example.taxi.ui.login.inputphone
 
 import android.app.Dialog
+import android.content.Intent
+import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.UnderlineSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +57,11 @@ class InputPhoneFragment : Fragment() {
         createPhoneNumberPlateEditText(viewBinding.edtInputPhone, viewBinding.textInputLayout)
         registerViewModel.registerResponse.observe(viewLifecycleOwner, ::updateView)
 
+        val originalText = if (preferenceManager.getLanguage().code == "uz")"Давом этиш орқали сиз Bekjaan taxi Хизмат кўрсатиш шартларига рози бўласиз ва Махфийлик сиёсатемизни ўқиганлигингизни тасдиқлайсиз." else "Davom etish orqali siz Bekjaan taxining Xizmat ko'rsatish shartlariga rozi bo'lasiz va Maxfiylik siyosatimizni o'qiganligingizni tasdiqlaysiz."
+        val styledText = getStyledText(originalText)
+        viewBinding.tvPrivacy.text = styledText
+        viewBinding.tvPrivacy.movementMethod = LinkMovementMethod.getInstance()
+        viewBinding.tvPrivacy.highlightColor = resources.getColor(android.R.color.transparent)
         viewBinding.fbnInputPhone.setOnClickListener {
             if (!validateInputs()) return@setOnClickListener
 
@@ -141,5 +157,42 @@ class InputPhoneFragment : Fragment() {
         }
     }
 
+    private fun getStyledText(text: String): SpannableString {
+        val spannableString = SpannableString(text)
+
+        // Define the parts to change size
+        val a = if(preferenceManager.getLanguage().code == "uz") "Хизмат кўрсатиш" else "Xizmat ko'rsatish"
+        val xizmatStart =   text.indexOf(a)
+        val xizmatEnd = xizmatStart + a.length
+
+        val b = if(preferenceManager.getLanguage().code == "uz") "Махфийлик сиёсатемизни" else "Maxfiylik siyosatimizni"
+
+        val maxfiylikStart = text.indexOf(b)
+        val maxfiylikEnd = maxfiylikStart + b.length
+
+        // Apply size span
+        spannableString.setSpan(RelativeSizeSpan(1.2f), xizmatStart, xizmatEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), xizmatStart, xizmatEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        spannableString.setSpan(RelativeSizeSpan(1.2f), maxfiylikStart, maxfiylikEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), maxfiylikStart, maxfiylikEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+
+        spannableString.setSpan(object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                openUrl()
+            }
+        }, maxfiylikStart, maxfiylikEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+
+        return spannableString
+    }
+
+    private fun openUrl() {
+        val url = "https://bekjaantaxi.uz/policy"
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(url)
+        startActivity(intent)
+    }
 
 }

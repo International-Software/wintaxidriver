@@ -30,6 +30,7 @@ data class Meta(
 data class Ride<R,A,U,S,C>(
     val id: Int,
     val type: R,
+    val order_id: Int,
     val services: List<Any>,
     val address: A,
     val latitude1: String,

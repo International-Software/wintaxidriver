@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/imageView3"
-        android:layout_width="@dimen/_40sdp"
-        android:layout_height="@dimen/_40sdp"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
         android:contentDescription="@string/icon"
         android:src="@drawable/ic_settings"
         android:padding="@dimen/_4sdp"

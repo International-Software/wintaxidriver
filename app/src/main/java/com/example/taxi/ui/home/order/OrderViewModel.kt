@@ -176,7 +176,9 @@ class OrderViewModel(private val getMainResponseUseCase: GetMainResponseUseCase)
         )
     }
 
-
+    fun clearOrder(){
+        _acceptedOrder.value?.getContentIfNotHandled()
+    }
     fun getOrders() {
         _serverOrderResponse.postValue(Resource(ResourceState.LOADING))
         compositeDisposable.add(

@@ -2,6 +2,7 @@ package com.example.taxi.data.repository
 
 import com.example.taxi.data.source.ApiService
 import com.example.taxi.domain.model.BonusResponse
+import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.IsCompletedModel
 import com.example.taxi.domain.model.MainResponse
 import com.example.taxi.domain.model.PaymentUrl
@@ -28,6 +29,7 @@ import com.example.taxi.domain.model.transfer.ResponseTransferHistory
 import com.example.taxi.domain.model.transfer.TransferRequest
 import com.example.taxi.domain.repository.MainRepository
 import io.reactivex.Observable
+import okhttp3.MultipartBody
 
 class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
 
@@ -136,7 +138,7 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         return apiService.getFAQ()
     }
 
-    override fun getCurrentOrder(): Observable<MainResponse<Any>> {
+    override fun getCurrentOrder(): Observable<MainResponse<OrderAccept<UserModel>>> {
         return apiService.getOrderCurrent()
     }
 
@@ -164,6 +166,36 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
 
     override fun paymentPayme(amount: Int): Observable<MainResponse<PaymentUrl>> {
         return apiService.paymentPayme(amount)
+    }
+
+    override fun paymentUzum(amount: Int): Observable<MainResponse<PaymentUrl>> {
+        return apiService.paymentUzum(amount)
+    }
+
+    override fun photoControl(
+        img_front: MultipartBody.Part,
+        img_back: MultipartBody.Part,
+        img_left: MultipartBody.Part,
+        img_right: MultipartBody.Part,
+        img_front_chair: MultipartBody.Part,
+        img_back_chair: MultipartBody.Part,
+        img_number: MultipartBody.Part,
+        img_license: MultipartBody.Part
+    ): Observable<MainResponse<Any>> {
+        return apiService.photoControl(
+            img_front,
+            img_back,
+            img_left,
+            img_right,
+            img_front_chair,
+            img_back_chair,
+            img_number,
+            img_license
+        )
+    }
+
+    override fun checkPhotoControl(): Observable<MainResponse<CheckResponse>> {
+        return apiService.checkPhotoControl()
     }
 
 

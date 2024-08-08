@@ -57,7 +57,7 @@
                     android:layout_gravity="center"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="Taxometer"
+                    android:text="@string/taximeter"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                     <FrameLayout

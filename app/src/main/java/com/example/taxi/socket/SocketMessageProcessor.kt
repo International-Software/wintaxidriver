@@ -1,6 +1,7 @@
 package com.example.taxi.socket
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,12 +10,14 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import com.example.taxi.R
 import com.example.taxi.components.service.KillStateDialogService
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.model.socket.SocketMessage
 import com.example.taxi.domain.model.socket.SocketOnlyForYouData
 import com.example.taxi.domain.model.socket.SocketOrderCancelledData
+import com.example.taxi.ui.home.HomeActivity
 import com.example.taxi.ui.home.order.OrderViewModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
@@ -140,11 +143,33 @@ class SocketMessageProcessor(
 
     private fun showNotification(contentTex: String,title: String) {
 
+
+        val intent = Intent(activity, HomeActivity::class.java)
+        intent.putExtra("navigate_to_order_fragment", true)
+        val pendingIntent = TaskStackBuilder.create(activity).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+        }
+
+
+//        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        } else {
+//            PendingIntent.FLAG_UPDATE_CURRENT
+//        }
+//        val pendingIntent = PendingIntent.getActivity(
+//            this,
+//            0,
+//            notificationIntent,
+//            flags
+//        )
+
         val notification = NotificationCompat.Builder(activity,"channel_notif")
             .setSmallIcon(R.drawable.ic_message)
             .setContentText(contentTex)
             .setContentTitle(title)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .build()
         val notificationManager = NotificationManagerCompat.from(activity)
@@ -167,13 +192,18 @@ class SocketMessageProcessor(
 
     private fun startForegroundServiceWithMessage(message: String) {
 
-        val intent = Intent(activity, KillStateDialogService::class.java)
-        intent.putExtra("message", message)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            activity.startForegroundService(intent)
-        } else {
-            activity.startService(intent)
+        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        ){
+            val intent = Intent(activity, KillStateDialogService::class.java)
+            intent.putExtra("message", message)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                activity.startForegroundService(intent)
+            } else {
+                activity.startService(intent)
+            }
         }
+
     }
 
 }

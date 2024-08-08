@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.taxi.R
 import com.example.taxi.domain.model.message.MessageItem
+import com.example.taxi.utils.convertToCyrillic
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -19,7 +20,7 @@ class MessageAdapter(val list: List<MessageItem>): RecyclerView.Adapter<MessageA
         private val dayMessage: TextView = itemView.findViewById(R.id.date_textView)
 
         fun bind(model: MessageItem){
-            messageContent.text = model.message
+            messageContent.convertToCyrillic(model.message)
             timeMessage.text = getTimeFromString(model.time)
             dayMessage.text = convertDateTimeFormat(model.time)
         }

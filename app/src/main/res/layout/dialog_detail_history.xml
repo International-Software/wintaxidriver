@@ -25,9 +25,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:contentDescription="@string/bekor_qilish"
                 android:background="?selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
+
                 android:padding="@dimen/_4sdp"
                 android:src="@drawable/ic_x" />
             <TextView

@@ -165,7 +165,6 @@
         <com.google.android.material.button.MaterialButton
             android:layout_width="match_parent"
             android:backgroundTint="@color/blue"
-
             android:id="@+id/button_transfer"
             android:layout_marginTop="@dimen/_5sdp"
             android:textColor="@color/white"
