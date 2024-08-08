@@ -193,4 +193,10 @@ interface ApiService {
 
     @GET("photo-control/check")
     fun checkPhotoControl(): Observable<MainResponse<CheckResponse>>
+
+
+    @GET("statistics/index")
+    fun getStatisticsData(
+        @Query("type_id") type: Int
+    ): Observable<MainResponse<Any>>
 }

@@ -28,6 +28,7 @@ import com.example.taxi.domain.model.transfer.ResponseTransferHistory
 import com.example.taxi.domain.model.transfer.TransferRequest
 import io.reactivex.Observable
 import okhttp3.MultipartBody
+import retrofit2.http.Query
 
 interface MainRepository {
 
@@ -109,4 +110,7 @@ interface MainRepository {
 
     fun checkPhotoControl(): Observable<MainResponse<CheckResponse>>
 
+    fun getStatisticsData(
+        type: Int
+    ): Observable<MainResponse<Any>>
 }

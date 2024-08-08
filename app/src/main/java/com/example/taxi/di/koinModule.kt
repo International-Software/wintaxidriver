@@ -35,6 +35,7 @@ import com.example.taxi.ui.home.driver.driveReport.DriveReportViewModel
 import com.example.taxi.ui.home.history.HistoryViewModel
 import com.example.taxi.ui.home.menu.about.AboutViewModel
 import com.example.taxi.ui.home.order.OrderViewModel
+import com.example.taxi.ui.home.profile.ProfileViewModel
 import com.example.taxi.ui.home.service.ServiceViewModel
 import com.example.taxi.ui.home.tarif.ModeViewModel
 import com.example.taxi.ui.home.transfer.transferhistory.TransferHistoryViewModel
@@ -129,6 +130,8 @@ val koinModule = module {
     viewModel { DriveReportViewModel(get(), get(), get(), get()) }
     viewModel{CheckViewModel(get())}
     viewModel{NetworkViewModel(get(),get())}
+    viewModel{ProfileViewModel(get())}
+
 //    factory { GetRegisterResponseUseCase(registerRepository = get()) }
     factory { GetMainResponseUseCase(mainRepository = get()) }
     factory { PrivacyPolicyService(get()) }

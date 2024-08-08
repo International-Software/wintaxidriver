@@ -198,5 +198,9 @@ class MainRepositoryImpl(private val apiService: ApiService) : MainRepository {
         return apiService.checkPhotoControl()
     }
 
+    override fun getStatisticsData(type: Int): Observable<MainResponse<Any>> {
+        return apiService.getStatisticsData(type)
+    }
+
 
 }

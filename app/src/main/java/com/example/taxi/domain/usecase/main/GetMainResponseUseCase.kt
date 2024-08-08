@@ -9,6 +9,7 @@ import com.example.taxi.domain.model.transfer.TransferRequest
 import com.example.taxi.domain.repository.MainRepository
 import io.reactivex.Observable
 import okhttp3.MultipartBody
+import retrofit2.http.Query
 
 class GetMainResponseUseCase(private val mainRepository: MainRepository) {
 
@@ -105,4 +106,7 @@ class GetMainResponseUseCase(private val mainRepository: MainRepository) {
 
     fun checkPhotoControl() = mainRepository.checkPhotoControl()
 
+    fun getStatisticsData(
+         type: Int
+    ) = mainRepository.getStatisticsData(type)
 }
