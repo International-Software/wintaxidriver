@@ -4,15 +4,17 @@ package com.example.taxi.custom.chart
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity.BOTTOM
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.example.taxi.R
+import com.example.taxi.domain.model.statistics.StatisticsResponse
+import com.example.taxi.domain.model.statistics.StatisticsResponseValue
 
 
 class ChartProgressBar @JvmOverloads constructor(
@@ -24,7 +26,7 @@ class ChartProgressBar @JvmOverloads constructor(
     private var barHeight: Int = 150 // Default qiymat
     private var selectedTextView: TextView? = null
     private var selectedContainer: LinearLayout? = null
-    private var onItemSelected: ((Int) -> Unit)? = null
+    private var onItemSelected: ((String,Int) -> Unit)? = null
     init {
         orientation = HORIZONTAL
         gravity = BOTTOM
@@ -37,59 +39,113 @@ class ChartProgressBar @JvmOverloads constructor(
         }
     }
 
-    fun setData(dataList: List<Pair<Int, String>>,onItemSelected: ((Int) -> Unit)?) {
+    fun setData(
+        dataList: List<StatisticsResponse<StatisticsResponseValue>>,
+        onItemSelected: ((String, Int) -> Unit)?,
+        layoutSelector: Int) {
         this.onItemSelected = onItemSelected
         removeAllViews() // Avvalgi viewlarni tozalash
-        val maxValue = dataList.maxOf { it.first }
-        Log.d("qiymat", "maximal qiymat $maxValue")
+        val maxValue = dataList.maxOf { it.data.totalSum }
         for ((index, data) in dataList.withIndex()) {
 
             val progressBarView =
-                LayoutInflater.from(context).inflate(R.layout.custom_progress_bar, null)
-
+                LayoutInflater.from(context).inflate(layoutSelector, null)
+            val textViewPrice = progressBarView.findViewById<TextView>(R.id.textViewPrice)
             val progressBar = progressBarView.findViewById<View>(R.id.progressBar)
             val textViewDate = progressBarView.findViewById<TextView>(R.id.textViewDate)
             val container = progressBarView.findViewById<LinearLayout>(R.id.liner_container)
 
-            val targetHeight = ((barHeight * (data.first.toFloat() / maxValue)) * 0.85).toInt()
-            Log.d("qiymat", "setData: ${barHeight}")
-            Log.d("qiymat", "setData: ${targetHeight}")
-            animateHeight(progressBar, targetHeight)
+            progressBarView.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
 
-            // Maksimal balandlikni belgilash
-//            val calculatedHeight = (barHeight * (data.first / 100.0)).toInt()
+                    val textViewsHeight = (textViewPrice?.height ?: 0) + textViewDate.height
+                    val adjustedBarHeight = barHeight - textViewsHeight
 
-            // Balandlikni o'zgartirish
+
+                    val targetHeight = ((adjustedBarHeight * (data.data.totalSum.toFloat() / maxValue)) * 0.9).toInt()
+
+
+                    animateHeight(progressBar, targetHeight)
+
+                    progressBarView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
+
+
+
             val params = progressBar.layoutParams
-//            params.height = calculatedHeight
+
             progressBar.layoutParams = params
 
-            textViewDate.text = data.second
+
+            textViewPrice?.text = formatMoneyNumberPlate(data.data.totalSum.toString())
+            textViewDate.text = if(data.period_between_date.length > 13) convertDateRangeToUzbek(data.period_between_date) else getLastDay(data.period_between_date)
 
             val layoutParams = LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT
             )
             layoutParams.weight = 1f
-            layoutParams.leftMargin = if (data.second.length == 1) 12 else 8
-            layoutParams.rightMargin = if (data.second.length == 1) 12 else 8
+            layoutParams.leftMargin =  8
+            layoutParams.rightMargin =  8
 
             addView(progressBarView, layoutParams)
 
             container.setOnClickListener {
                 handleContainerClick(container)
-                onItemSelected?.invoke(index)
+                onItemSelected?.invoke(data.period_between_date,data.data.totalSum)
             }
 
             if (index == dataList.size - 1) {
                 handleContainerClick(container)
-                onItemSelected?.invoke(index)
+                onItemSelected?.invoke(data.period_between_date,data.data.totalSum)
             }
             // TextView uchun click listener qo'shish
 
         }
     }
 
+
+    private fun convertDateRangeToUzbek(range: String): String {
+        val monthsUzbek = mapOf(
+            "01" to "yan",
+            "02" to "fev",
+            "03" to "mart",
+            "04" to "apr",
+            "05" to "may",
+            "06" to "iyun",
+            "07" to "iyul",
+            "08" to "avg",
+            "09" to "sent",
+            "10" to "okt",
+            "11" to "noy",
+            "12" to "dek"
+        )
+
+        val dates = range.split(" - ")
+        val startDate = dates[0]
+        val endDate = dates[1]
+
+        val startDay = startDate.substring(8, 10)
+        val startMonth = startDate.substring(5, 7)
+
+        val endDay = endDate.substring(8, 10)
+        val endMonth = endDate.substring(5, 7)
+
+        val monthName = monthsUzbek[startMonth] ?: "no"
+        return "$startDay-$endDay\n$monthName"
+    }
+
+
+
+    private fun getLastDay(day: String): String {
+        return day.split("-").last()
+    }
+
+    fun formatMoneyNumberPlate(input: String): String {
+        val regex = "(\\d)(?=(\\d{3})+$)".toRegex()
+        return input.replace(regex, "$1 ")
+    }
     private fun animateHeight(view: View, targetHeight: Int) {
         val animator = ValueAnimator.ofInt(0, targetHeight)
         animator.addUpdateListener { animation ->

@@ -9,7 +9,7 @@
 
     <View
         android:id="@+id/progressBar"
-        android:layout_width="20dp"
+        android:layout_width="@dimen/_15sdp"
         android:layout_height="0dp"
         android:layout_gravity="bottom|center"
         android:background="@drawable/custom_progress_drawable" />
@@ -21,7 +21,7 @@
         android:textSize="@dimen/_12ssp"
         android:paddingHorizontal="@dimen/_5sdp"
         android:background="@drawable/bg_tab"
-        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_5sdp"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center_horizontal" />

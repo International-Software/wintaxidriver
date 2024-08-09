@@ -17,6 +17,7 @@ import com.example.taxi.domain.model.statistics.StatisticsResponse
 import com.example.taxi.domain.model.statistics.StatisticsResponseValue
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.ui.home.dashboard.DashboardViewModel
+import com.example.taxi.utils.PhoneNumberUtil
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
 import org.koin.android.ext.android.inject
@@ -37,30 +38,30 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        viewBinding = FragmentProfileBinding.inflate(inflater,container,false)
+        viewBinding = FragmentProfileBinding.inflate(inflater, container, false)
         return viewBinding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (userPreferenceManager.getDriverName() != "" || userPreferenceManager.getDriverPhone() != ""){
+        if (userPreferenceManager.getDriverName() != "" || userPreferenceManager.getDriverPhone() != "") {
             viewBinding.driverIdHeader.text = userPreferenceManager.getDriverID().toString()
             viewBinding.driverNameTextView.text = userPreferenceManager.getDriverName()
             viewBinding.driverPhoneNumberTextView.text = userPreferenceManager.getDriverPhone()
-        }else{
+        } else {
             dashboardViewModel.getDriverData()
         }
         viewBinding.fbnBackHome.setOnClickListener { findNavController().navigateUp() }
         viewBinding.btnSettings.setOnClickListener { findNavController().navigate(R.id.settingsFragment) }
-        profileViewModel.statisticsType.observe(viewLifecycleOwner){
+        profileViewModel.statisticsType.observe(viewLifecycleOwner) {
             setStatisticsType(it)
         }
 
-        profileViewModel.statisticsValue.observe(viewLifecycleOwner){
+        profileViewModel.statisticsValue.observe(viewLifecycleOwner) {
             setStatisticsValues(it)
         }
-        dashboardViewModel.driverDataResponse.observe(viewLifecycleOwner){
+        dashboardViewModel.driverDataResponse.observe(viewLifecycleOwner) {
             setDriverData(it)
         }
 
@@ -78,45 +79,90 @@ class ProfileFragment : Fragment() {
 
     }
 
-    private fun getLastDay(day: String): String{
-        return day.split("-").last()
-    }
+
 
     private fun setStatisticsValues(data: Resource<MainResponse<List<StatisticsResponse<StatisticsResponseValue>>>>) {
 
-        when(data.state){
-            ResourceState.ERROR ->{}
-            ResourceState.LOADING ->{}
-            ResourceState.SUCCESS ->{}
-        }
+        when (data.state) {
+            ResourceState.ERROR -> {}
+            ResourceState.LOADING -> {
+                viewBinding.shimmerDayStatistics.visibility = View.VISIBLE
+                viewBinding.horizontalScrollView.visibility = View.GONE
+                viewBinding.shimmerDayStatistics.startShimmer()
+            }
 
+            ResourceState.SUCCESS -> {
+                viewBinding.shimmerDayStatistics.visibility = View.GONE
+                viewBinding.horizontalScrollView.visibility = View.VISIBLE
+                viewBinding.shimmerDayStatistics.startShimmer()
 
-        val dataList = data?.data?.map { day ->
-            Pair(day.data.totalSum, getLastDay(day.period_between_date))
-        } ?: emptyList()
+                var dataList = data.data?.data ?: emptyList()
+//                val dataList = data.data?.data?.map { day ->
+//                    Pair(day.data.totalSum, getLastDay(day.period_between_date))
+//                } ?: emptyList()
+                dataList = dataList.reversed()
+                val style = if (dataList.isNotEmpty() && dataList[0].period_between_date.length > 13) R.layout.custom_week_progress_bar else
+                    R.layout.custom_day_progress_bar
 
-//        val dataList = List(30) { index ->
-//            Pair((50 + index % 50), "${index + 1}")
-//        }
-
-
-        chartProgressBar.setData(dataList.reversed()){index ->
-
+                chartProgressBar.setData(dataList ,{period,total ->
+                    viewBinding.totalPriceTv.text = PhoneNumberUtil.formatMoneyNumberPlate(total.toString())
+                    viewBinding.periodTimeTv.text = if (period.length > 13) convertDateRangeWithMonth(period) else period
+                },style)
+            }
         }
 
     }
 
+    fun convertDateRangeWithMonth(range: String): String {
+        val monthsUzbek = mapOf(
+            "01" to "yan",
+            "02" to "fev",
+            "03" to "mart",
+            "04" to "apr",
+            "05" to "may",
+            "06" to "iyun",
+            "07" to "iyul",
+            "08" to "avg",
+            "09" to "sent",
+            "10" to "okt",
+            "11" to "noy",
+            "12" to "dek"
+        )
+
+        val dates = range.split(" - ")
+        val startDate = dates[0]
+        val endDate = dates[1]
+
+        val startDay = startDate.substring(8, 10).toInt()
+        val startMonth = startDate.substring(5, 7)
+
+        val endDay = endDate.substring(8, 10).toInt()
+        val endMonth = endDate.substring(5, 7)
+
+        val startMonthName = monthsUzbek[startMonth] ?: "noma'lum"
+        val endMonthName = monthsUzbek[endMonth] ?: "noma'lum"
+
+        return if (startMonth == endMonth) {
+            "$startDay $startMonthName - $endDay $endMonthName"
+        } else {
+            "$startDay $startMonthName - $endDay $endMonthName"
+        }
+    }
+
     private fun setDriverData(resource: Resource<MainResponse<SelfieAllData<IsCompletedModel, StatusModel>>>?) {
-        when(resource?.state){
-            ResourceState.ERROR ->{
+        when (resource?.state) {
+            ResourceState.ERROR -> {
 
             }
-            ResourceState.SUCCESS ->{
+
+            ResourceState.SUCCESS -> {
                 stopShimmerLoading(resource.data?.data)
             }
-            ResourceState.LOADING ->{
+
+            ResourceState.LOADING -> {
                 startShimmerLoading()
             }
+
             else -> {}
         }
     }
@@ -138,17 +184,19 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setStatisticsType(type: Int?) {
-        when(type){
+        when (type) {
             0 -> {
                 viewBinding.buttonDay.isSelected = false
                 viewBinding.buttonWeek.isSelected = false
                 viewBinding.buttonMonth.isSelected = true
             }
+
             1 -> {
                 viewBinding.buttonDay.isSelected = false
                 viewBinding.buttonWeek.isSelected = true
                 viewBinding.buttonMonth.isSelected = false
             }
+
             2 -> {
                 viewBinding.buttonDay.isSelected = true
                 viewBinding.buttonWeek.isSelected = false
@@ -165,7 +213,6 @@ class ProfileFragment : Fragment() {
 
 
     }
-
 
 
 }
