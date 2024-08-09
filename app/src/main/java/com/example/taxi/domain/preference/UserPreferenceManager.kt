@@ -298,6 +298,8 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putString("phone", phone).apply()
     }
 
+    fun getDriverName(): String? = prefs.getString("firstName","")
+    fun getDriverPhone(): String? = prefs.getString("phone","")
 
     fun saveDriverAllData(data: SelfieAllData<IsCompletedModel, StatusModel>) {
         with(prefs.edit()) {

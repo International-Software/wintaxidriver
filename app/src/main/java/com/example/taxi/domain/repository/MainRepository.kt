@@ -20,6 +20,8 @@ import com.example.taxi.domain.model.order.UserModel
 import com.example.taxi.domain.model.selfie.SelfieAllData
 import com.example.taxi.domain.model.selfie.StatusModel
 import com.example.taxi.domain.model.settings.SettingsData
+import com.example.taxi.domain.model.statistics.StatisticsResponse
+import com.example.taxi.domain.model.statistics.StatisticsResponseValue
 import com.example.taxi.domain.model.tarif.ModeRequest
 import com.example.taxi.domain.model.tarif.ModeResponse
 import com.example.taxi.domain.model.transfer.DriverNameByIdResponse
@@ -112,5 +114,5 @@ interface MainRepository {
 
     fun getStatisticsData(
         type: Int
-    ): Observable<MainResponse<Any>>
+    ): Observable<MainResponse<List<StatisticsResponse<StatisticsResponseValue>>>>
 }
