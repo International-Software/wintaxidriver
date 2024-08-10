@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/_170sdp">
+    android:layout_height="@dimen/_160sdp">
 
 
     <LinearLayout
@@ -28,7 +28,8 @@
 
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -57,7 +58,8 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
 
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
@@ -87,7 +89,7 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -116,7 +118,7 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -145,7 +147,8 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -174,7 +177,8 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -203,7 +207,8 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"
@@ -232,7 +237,8 @@
             android:paddingHorizontal="@dimen/_5sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:clickable="true"
-            android:text="5"
+            android:minEms="1"
+
             android:background="@drawable/custom_progress_drawable"
             android:textColor="#e0e0e0"
             android:focusable="true"

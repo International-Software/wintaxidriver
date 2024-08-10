@@ -37,6 +37,7 @@
     <color name="card_color">#fff</color>
     <color name="active_order_color">#888888</color>
     <color name="menu_color">#1C1C1E</color>
+    <color name="chart_bg_color">#FFFDF8</color>
 
     <color name="text_black_white">#000</color>
     <color name="date_picker_background">#F7F7F8</color>

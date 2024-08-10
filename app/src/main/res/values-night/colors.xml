@@ -15,6 +15,7 @@
 
     <color name="tarif_color">#0B5A53</color>
 
+    <color name="chart_bg_color">#3e3e3e</color>
 
     <color name="background_driver_is_order">#393939</color>
 

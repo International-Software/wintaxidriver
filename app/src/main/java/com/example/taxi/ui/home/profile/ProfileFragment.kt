@@ -1,5 +1,6 @@
 package com.example.taxi.ui.home.profile
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -81,31 +82,30 @@ class ProfileFragment : Fragment() {
 
 
 
+    @SuppressLint("SetTextI18n")
     private fun setStatisticsValues(data: Resource<MainResponse<List<StatisticsResponse<StatisticsResponseValue>>>>) {
 
         when (data.state) {
             ResourceState.ERROR -> {}
             ResourceState.LOADING -> {
-                viewBinding.shimmerDayStatistics.visibility = View.VISIBLE
-                viewBinding.horizontalScrollView.visibility = View.GONE
-                viewBinding.shimmerDayStatistics.startShimmer()
+                startAllShimmer()
             }
 
             ResourceState.SUCCESS -> {
-                viewBinding.shimmerDayStatistics.visibility = View.GONE
-                viewBinding.horizontalScrollView.visibility = View.VISIBLE
-                viewBinding.shimmerDayStatistics.startShimmer()
+                stopAllShimmer()
 
                 var dataList = data.data?.data ?: emptyList()
-//                val dataList = data.data?.data?.map { day ->
-//                    Pair(day.data.totalSum, getLastDay(day.period_between_date))
-//                } ?: emptyList()
+//
                 dataList = dataList.reversed()
                 val style = if (dataList.isNotEmpty() && dataList[0].period_between_date.length > 13) R.layout.custom_week_progress_bar else
                     R.layout.custom_day_progress_bar
 
-                chartProgressBar.setData(dataList ,{period,total ->
-                    viewBinding.totalPriceTv.text = PhoneNumberUtil.formatMoneyNumberPlate(total.toString())
+                chartProgressBar.setData(dataList ,{period,value ->
+                    viewBinding.totalPriceTv.text = PhoneNumberUtil.formatMoneyNumberPlate(value.totalSum.toString())
+                    viewBinding.totalDistance.text = "${value.distance} km"
+                    viewBinding.totalOrderCountTv.text = "${getString(R.string.buyurtmalar)} (${value.totalCount})"
+                    viewBinding.totalPriceFeeTv.text = "- ${PhoneNumberUtil.formatMoneyNumberPlate(value.total.toString())}"
+                    viewBinding.totalPriceTvBottom.text = PhoneNumberUtil.formatMoneyNumberPlate(value.totalSum.toString())
                     viewBinding.periodTimeTv.text = if (period.length > 13) convertDateRangeWithMonth(period) else period
                 },style)
             }
@@ -113,7 +113,60 @@ class ProfileFragment : Fragment() {
 
     }
 
-    fun convertDateRangeWithMonth(range: String): String {
+    private fun startAllShimmer(){
+        viewBinding.shimmerDayStatistics.visibility = View.VISIBLE
+        viewBinding.shimmer1.visibility = View.VISIBLE
+        viewBinding.shimmer2.visibility = View.VISIBLE
+        viewBinding.shimmer3.visibility = View.VISIBLE
+        viewBinding.shimmer4.visibility = View.VISIBLE
+        viewBinding.shimmer5.visibility = View.VISIBLE
+        viewBinding.shimmer6.visibility = View.VISIBLE
+        viewBinding.shimmerDayStatistics.startShimmer()
+        viewBinding.shimmerUserData.startShimmer()
+        viewBinding.shimmer1.startShimmer()
+        viewBinding.shimmer2.startShimmer()
+        viewBinding.shimmer3.startShimmer()
+        viewBinding.shimmer4.startShimmer()
+        viewBinding.shimmer5.startShimmer()
+        viewBinding.shimmer6.startShimmer()
+
+        viewBinding.horizontalScrollView.visibility = View.GONE
+        viewBinding.totalPriceTv.visibility = View.GONE
+        viewBinding.periodTimeTv.visibility = View.GONE
+        viewBinding.totalDistance.visibility = View.GONE
+        viewBinding.totalPriceTvBottom.visibility = View.GONE
+        viewBinding.totalPriceFeeTv.visibility = View.GONE
+        viewBinding.totalOrderCountTv.visibility = View.GONE
+    }
+
+    private fun stopAllShimmer(){
+        viewBinding.shimmerDayStatistics.visibility = View.GONE
+        viewBinding.shimmer1.visibility = View.GONE
+        viewBinding.shimmer2.visibility = View.GONE
+        viewBinding.shimmer3.visibility = View.GONE
+        viewBinding.shimmer4.visibility = View.GONE
+        viewBinding.shimmer5.visibility = View.GONE
+        viewBinding.shimmer6.visibility = View.GONE
+        viewBinding.shimmerDayStatistics.stopShimmer()
+        viewBinding.shimmerUserData.stopShimmer()
+        viewBinding.shimmer1.stopShimmer()
+        viewBinding.shimmer2.stopShimmer()
+        viewBinding.shimmer3.stopShimmer()
+        viewBinding.shimmer4.stopShimmer()
+        viewBinding.shimmer5.stopShimmer()
+        viewBinding.shimmer6.stopShimmer()
+
+        viewBinding.horizontalScrollView.visibility = View.VISIBLE
+        viewBinding.totalPriceTv.visibility = View.VISIBLE
+        viewBinding.periodTimeTv.visibility = View.VISIBLE
+        viewBinding.totalDistance.visibility = View.VISIBLE
+        viewBinding.totalPriceTvBottom.visibility = View.VISIBLE
+        viewBinding.totalPriceFeeTv.visibility = View.VISIBLE
+        viewBinding.totalOrderCountTv.visibility = View.VISIBLE
+
+    }
+
+    private fun convertDateRangeWithMonth(range: String): String {
         val monthsUzbek = mapOf(
             "01" to "yan",
             "02" to "fev",

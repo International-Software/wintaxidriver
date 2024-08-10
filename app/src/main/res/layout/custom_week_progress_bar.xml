@@ -33,6 +33,6 @@
         android:layout_marginTop="@dimen/_4sdp"
         android:clickable="true"
         android:focusable="true"
-        android:paddingHorizontal="@dimen/_5sdp"
+        android:paddingHorizontal="@dimen/_7sdp"
         android:gravity="center_horizontal" />
 </LinearLayout>

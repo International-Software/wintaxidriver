@@ -26,7 +26,7 @@ class ChartProgressBar @JvmOverloads constructor(
     private var barHeight: Int = 150 // Default qiymat
     private var selectedTextView: TextView? = null
     private var selectedContainer: LinearLayout? = null
-    private var onItemSelected: ((String,Int) -> Unit)? = null
+    private var onItemSelected: ((String,StatisticsResponseValue) -> Unit)? = null
     init {
         orientation = HORIZONTAL
         gravity = BOTTOM
@@ -41,7 +41,7 @@ class ChartProgressBar @JvmOverloads constructor(
 
     fun setData(
         dataList: List<StatisticsResponse<StatisticsResponseValue>>,
-        onItemSelected: ((String, Int) -> Unit)?,
+        onItemSelected: ((String, StatisticsResponseValue) -> Unit)?,
         layoutSelector: Int) {
         this.onItemSelected = onItemSelected
         removeAllViews() // Avvalgi viewlarni tozalash
@@ -93,12 +93,12 @@ class ChartProgressBar @JvmOverloads constructor(
 
             container.setOnClickListener {
                 handleContainerClick(container)
-                onItemSelected?.invoke(data.period_between_date,data.data.totalSum)
+                onItemSelected?.invoke(data.period_between_date,data.data)
             }
 
             if (index == dataList.size - 1) {
                 handleContainerClick(container)
-                onItemSelected?.invoke(data.period_between_date,data.data.totalSum)
+                onItemSelected?.invoke(data.period_between_date,data.data)
             }
             // TextView uchun click listener qo'shish
 
