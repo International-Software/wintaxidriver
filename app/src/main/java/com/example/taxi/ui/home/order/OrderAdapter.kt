@@ -26,11 +26,21 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
         private val distanceTextView: TextView = itemView.findViewById(R.id.distanceTextView)
         private val typeTextView: AppCompatTextView = itemView.findViewById(R.id.textView_type)
         private val orderTime: TextView = itemView.findViewById(R.id.order_time)
+        private val infoForPriceTv: TextView = itemView.findViewById(R.id.infoForPriceTv)
 
         fun bind(order: OrderData<Address>) {
 
             addressFromTextView.convertToCyrillic(order.address.from)
 
+            if (order.predict_cost != null && order.predict_distance != null) {
+                infoForPriceTv.text = itemView.context.getString(R.string.taxminiy_narx)
+                priceTextView.setPriceCost(order.predict_cost)
+
+            } else {
+                infoForPriceTv.text = itemView.context.getString(R.string.boshlang_ich_summa)
+                priceTextView.setPriceCost(order.start_cost)
+
+            }
             if (order.address.to.isEmpty()){
                 addressToTextView.text = "-"
             }else{

@@ -33,6 +33,8 @@ data class SocketOnlyForYouData(
     @Json(name = "latitude2") val latitude2: String?,
     @Json(name = "longitude2") val longitude2: String?,
     val comment: String?,
+    val predict_cost: Int? = null,
+    val predict_distance: Int? = null,
 //    val created_at: CreatedAt1,
     val mode: SocketMode,
     val distance: Int? = 0
@@ -93,6 +95,8 @@ fun SocketOnlyForYouData.toOrderData(): OrderData<Address> {
         latitude1 = this.latitude1,
         longitude1 = this.longitude1,
         latitude2 = this.latitude2,
+        predict_distance = predict_distance,
+        predict_cost = predict_cost,
         longitude2 = this.longitude2,
         comment = this.comment,
 //        created_at = CreatedAt(

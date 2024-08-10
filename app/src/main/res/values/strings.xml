@@ -191,6 +191,7 @@
     <string name="tasdiqlash_kodini_kiriting">Tasdiqlash kodini kiriting</string>
     <string name="qr">Qr Bonus</string>
     <string name="message">Xabarlar</string>
+    <string name="messag">Xabar</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="xabarlar_tarixi">Xabarlar tarixi</string>
     <string name="about_order">Buyurtma haqida</string>
@@ -231,5 +232,8 @@
     <string name="battery_permission">Bekjaan Taxi(Driver) dasturi fonda ham muntazam ravishda ishlashi uchun quvvat tejash rejimini faolsizlantirish zarur.\nBuni keyinchalik sozlamalar bo\'limidan o\'chirib qo\'yishingiz mumkin.</string>
     <string name="settings">Sozlamalar</string>
     <string name="my_profile">Mening profilim</string>
+
+    <string name="taxminiy_narx">Taxminiy narx</string>
+    <string name="new_order">Yangi buyurtma</string>
 
 </resources>

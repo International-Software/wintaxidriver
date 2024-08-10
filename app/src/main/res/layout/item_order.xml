@@ -22,8 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingHorizontal="@dimen/_10sdp"
-            android:paddingTop="@dimen/_7sdp">
+            android:paddingHorizontal="@dimen/_10sdp">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/textView_type"
@@ -35,7 +34,7 @@
                 android:paddingHorizontal="@dimen/_20sdp"
                 android:paddingVertical="@dimen/_5sdp"
                 android:text="TG"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
                 android:textColor="#014EA8"
                 app:drawableStartCompat="@drawable/ic_telegram"
                 app:drawableTint="#014EA8" />
@@ -155,6 +154,7 @@
             android:paddingVertical="@dimen/_7sdp">
 
             <TextView
+                android:id="@+id/infoForPriceTv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"

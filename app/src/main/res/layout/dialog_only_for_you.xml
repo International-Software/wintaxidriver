@@ -74,6 +74,7 @@
                 android:paddingVertical="@dimen/_7sdp">
 
                 <TextView
+                    android:id="@+id/infoTripTv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"

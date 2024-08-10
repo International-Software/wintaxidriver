@@ -235,5 +235,6 @@
     <string name="boshqa_dasturlar_ustidan_ochilish">Boshqa dasturlar ustidan ochilish</string>
     <string name="quvvat_tejashni_o_chirish">Quvvat tejashni o\'chirish</string>
     <string name="battery_permission">Bekjaan Taxi(Driver) dasturi fonda ham muntazam ravishda ishlashi uchun quvvat tejash rejimini faolsizlantirish zarur.\nBuni keyinchalik sozlamalar bo\'limidan o\'chirib qo\'yishingiz mumkin.</string>
+    <string name="new_order">Yangi buyurtma</string>
 
 </resources>

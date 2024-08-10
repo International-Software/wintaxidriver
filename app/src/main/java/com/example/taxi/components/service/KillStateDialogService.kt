@@ -228,8 +228,21 @@ class KillStateDialogService : Service() {
     @SuppressLint("MissingPermission")
     private fun setupViews(data: SocketOnlyForYouData) {
         val priceTextView = dialogView?.findViewById<TextView>(R.id.priceTextView_dialog)
+        val infoForPriceTv = dialogView?.findViewById<TextView>(R.id.infoTripTv)
+
+        if (data.predict_cost != null && data.predict_distance != null) {
+            infoForPriceTv?.text = getString(R.string.taxminiy_narx)
+            priceTextView?.setPriceCost(data.predict_cost)
+
+        } else {
+            infoForPriceTv?.text = getString(R.string.boshlang_ich_summa)
+            priceTextView?.setPriceCost(data.startCost)
+
+        }
+
         val addressTextView = dialogView?.findViewById<TextView>(R.id.addressTextView_dialog)
         val typeTv = dialogView?.findViewById<AppCompatTextView>(R.id.textView_type_dialog)
+
         val t = Type(data.type.number,data.type.name)
         typeTv?.let { updateTextView(t, it) }
         val secondAddressTextView =
