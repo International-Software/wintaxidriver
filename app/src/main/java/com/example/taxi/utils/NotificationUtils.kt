@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -21,12 +20,11 @@ object NotificationUtils {
 
     private const val FOREGROUND_CHANNEL_ID = "Speedometer"
     private const val REQ_CODE_OPEN_ACTIVITY = 1
-    const val TOPSED_RACE_NOTIFICATION_ID = 1
+    const val TAXI_RACE_NOTIFICATION_ID = 10
 
     private fun checkAndCreateChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            Log.d("taxometer", "checkAndCreateChannel: notification")
             context.getSystemService(NotificationManager::class.java)?.let { notificationManager ->
 
                 if (notificationManager.getNotificationChannel(FOREGROUND_CHANNEL_ID) == null) {

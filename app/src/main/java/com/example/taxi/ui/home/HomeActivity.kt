@@ -3,8 +3,8 @@ package com.example.taxi.ui.home
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.AlertDialog
-import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -21,10 +21,8 @@ import android.os.Messenger
 import android.os.PersistableBundle
 import android.provider.Settings
 import android.util.Log
-import android.util.Rational
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -37,6 +35,7 @@ import com.example.taxi.R
 import com.example.taxi.components.service.ActivityMessenger
 import com.example.taxi.components.service.DriveBackGroundService
 import com.example.taxi.components.service.KillStateDialogService
+import com.example.taxi.custom.floatingwidget.FloatingWidgetView
 import com.example.taxi.databinding.ActivityHomeBinding
 import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.DashboardData
@@ -89,6 +88,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
     private val networkViewModel: NetworkViewModel by viewModel()
     private val checkViewModel: CheckViewModel by viewModel()
+    private lateinit var floatingWidgetView: FloatingWidgetView
 
     //    private lateinit var locationEngine: LocationEngine
     lateinit var viewBinding: ActivityHomeBinding
@@ -147,8 +147,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 //        injectFeature()
         super.onCreate(savedInstanceState)
         val filter = IntentFilter("com.example.taxi.ORDER_DATA_ACTION")
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(receiver, filter, RECEIVER_EXPORTED)
         } else {
@@ -158,6 +156,8 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
         viewBinding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        floatingWidgetView = FloatingWidgetView(this)
+
         soundManager = SoundManager(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -238,16 +238,25 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
                 START -> {
                     activityMessenger.startDrive()
                     viewBinding.root.keepScreenOn = true
+                    val activityManager =
+                        getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.appTasks[0].setExcludeFromRecents(true)
                 }
 
                 PAUSE -> {
                     activityMessenger.pauseDrive()
                     viewBinding.root.keepScreenOn = true
+                    val activityManager =
+                        getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.appTasks[0].setExcludeFromRecents(true)
                 }
 
                 STOP -> {
                     activityMessenger.stopDrive()
                     viewBinding.root.keepScreenOn = false
+                    val activityManager =
+                        getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.appTasks[0].setExcludeFromRecents(false)
                 }
             }
         }
@@ -337,6 +346,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             activity.finish()
         }
     }
+
     private fun showBackgroundLocationRationale() {
         AlertDialog.Builder(this)
             .setTitle("Background Location Permission")
@@ -352,7 +362,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             }
             .show()
     }
-
 
 
     override fun onStart() {
@@ -387,13 +396,12 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         bindService(
             Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
         )
-        Log.d("taxometr", "onStart: ${userPreferenceManager.getStatusIsTaximeter()}")
+        floatingWidgetView.hide()
         val currentDestinationId = navController.currentDestination?.id
         if (userPreferenceManager.getStatusIsTaximeter()) {
             driverViewModel.completeTaximeter()
             viewModel.startDrive()
             val bundle = Bundle()
-            Log.d("taxometr", "updateStatus: ip")
 
             bundle.putBoolean("is_taxo", true)
 //            navController.navigate(R.id.taximeterFragment, bundle)
@@ -464,6 +472,11 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        floatingWidgetView.hide()
+    }
+
 
     private fun checkAndEnterPipMode(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && packageManager.hasSystemFeature(
@@ -471,9 +484,10 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             )
         ) {
             if (viewModel.dashboardLiveData.value?.isRunning() == true || userPreferenceManager.getDriverStatus().name != UserPreferenceManager.DriverStatus.COMPLETED.name) {
-                return enterPictureInPictureMode(
-                    PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1)).build()
-                )
+//                return enterPictureInPictureMode(
+//                    PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1)).build()
+
+                return true
             }
         }
 
@@ -481,7 +495,10 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     }
 
     override fun onUserLeaveHint() {
-        checkAndEnterPipMode()
+        if (checkAndEnterPipMode()) {
+            floatingWidgetView.show()
+        }
+//        checkAndEnterPipMode()
     }
 
     @SuppressLint("NewApi", "MissingSuperCall")
@@ -521,6 +538,11 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        floatingWidgetView.hide()
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
@@ -536,6 +558,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+
         if (intent?.getBooleanExtra("navigate_to_order", false) == true) {
             val lat1 = intent.getStringExtra("lat1")
             val lat2 = intent.getStringExtra("lat2")
@@ -545,6 +568,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             Log.d("lokatsiya", "ichida: long2 = ${long2} , lat2 = ${lat2}")
 
             navigateToOrderFragment(orderId, lat1, long1, lat2, long2)
+
         }
     }
 

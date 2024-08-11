@@ -964,7 +964,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     @SuppressLint("StringFormatInvalid")
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun setDashboardStatus(dashboardData: DashboardData?) {
 
         if (lastStatus != dashboardData?.getStatus()) {

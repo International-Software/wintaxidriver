@@ -22,7 +22,6 @@ class DriveBackGroundService : Service() {
 
     private val driveService: DriveService by inject()
     private var isForeGround: Boolean = false
-    @RequiresApi(Build.VERSION_CODES.N)
     private val serviceMessenger =
         ServiceMessenger(::onCommandReceived)
 
@@ -38,7 +37,6 @@ class DriveBackGroundService : Service() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate() {
         super.onCreate()
 
@@ -58,7 +56,7 @@ class DriveBackGroundService : Service() {
     private fun startForeGround() {
         isForeGround = true
         startForeground(
-            NotificationUtils.TOPSED_RACE_NOTIFICATION_ID,
+            NotificationUtils.TAXI_RACE_NOTIFICATION_ID,
             NotificationUtils.getRacingNotification(this)
         )
     }
@@ -68,7 +66,6 @@ class DriveBackGroundService : Service() {
         stopForeground(true)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onBind(intent: Intent?): IBinder {
         stopForeground(true)
         return serviceMessenger.getBinder()
@@ -80,6 +77,7 @@ class DriveBackGroundService : Service() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
+        Log.d("orqa", "onUnbind: ")
         if (driveService.isRaceOngoing()) {
             startForeGround()
         } else {
@@ -92,14 +90,12 @@ class DriveBackGroundService : Service() {
         return START_NOT_STICKY
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun onCommandReceived(@MessengerProtocol.Command command: Int) {
         when (command) {
             MessengerProtocol.COMMAND_HANDSHAKE -> {
                 serviceMessenger.sendDashboardData(driveService.getDashboardData())
             }
             MessengerProtocol.COMMAND_START -> {
-                Log.d("orqafon", "onCommandReceived: start")
                 driveService.startDrive()
             }
             MessengerProtocol.COMMAND_PAUSE -> {
@@ -111,7 +107,6 @@ class DriveBackGroundService : Service() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun stopRace() {
         driveService.stopDrive()
         stopForeground()

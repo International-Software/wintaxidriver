@@ -407,4 +407,31 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
     companion object {
         val TAG = "finishDialog"
     }
+
+
+    /**
+     * Xatolik keyinchalik bo'lib qolsa shu funksiya shahar ichi va tashqarisini hisoblaydi
+     */
+
+//    fun calculateDistances(locationPoints: List<LocationPoint>, centerLat: Double, centerLon: Double, radius: Double): Pair<Double, Double> {
+//        var insideDistance = 0.0
+//        var outsideDistance = 0.0
+//
+//        for (i in 0 until locationPoints.size - 1) {
+//            val point1 = locationPoints[i]
+//            val point2 = locationPoints[i + 1]
+//
+//            val distance = haversine(point1.latitude, point1.longitude, point2.latitude, point2.longitude)
+//            val distanceFromCenter1 = haversine(centerLat, centerLon, point1.latitude, point1.longitude)
+//            val distanceFromCenter2 = haversine(centerLat, centerLon, point2.latitude, point2.longitude)
+//
+//            if (distanceFromCenter1 <= radius && distanceFromCenter2 <= radius) {
+//                insideDistance += distance
+//            } else {
+//                outsideDistance += distance
+//            }
+//        }
+//
+//        return Pair(insideDistance, outsideDistance)
+//    }
 }

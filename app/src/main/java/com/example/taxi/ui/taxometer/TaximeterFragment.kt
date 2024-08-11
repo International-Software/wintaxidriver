@@ -44,6 +44,7 @@ import com.example.taxi.utils.DialogUtils
 import com.example.taxi.utils.Event
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
+import com.example.taxi.utils.TaxiCalculator
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -487,6 +488,17 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         var secondsElapsed = 0
         viewBinding.bottomDialogTaxometer.timeWorkTextView.text = dashboardData.timeText()
 
+
+        viewBinding.bottomDialogTaxometer.inDriveCostPrice.text =
+            if (preferenceManager.isHasDestinationSecond()) {
+                preferenceManager.getStartCost().toString()
+            } else {
+                TaxiCalculator.getCurrentDriveCost(
+                    dashboardData,
+                    preferenceManager,
+                    secondsElapsed.toLong()
+                )
+            }
     }
 
     private fun setBottomSheetSetting(state: Int?) {

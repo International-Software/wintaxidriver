@@ -74,7 +74,7 @@ data class SocketMode(
 fun SocketOnlyForYouData.toOrderData(): OrderData<Address> {
     return OrderData(
         id = this.id,
-        type = this.type?.let {
+        type = this.type.let {
             Type(
                 number = it.number,
                 name = it.name

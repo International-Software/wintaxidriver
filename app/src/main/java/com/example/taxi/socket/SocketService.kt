@@ -33,9 +33,6 @@ import java.util.concurrent.TimeUnit
 
 class SocketService : Service() {
 
-    // Initialize your dependencies here, e.g., ViewModel, CoroutineScope, SocketMessageProcessor
-
-    private var isAckReceived = true
     private val orderViewModel: OrderViewModel by inject()
     private val userPreferenceManager: UserPreferenceManager by inject()
     private val compositeDisposable = CompositeDisposable()
