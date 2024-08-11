@@ -235,5 +235,8 @@
 
     <string name="taxminiy_narx">Taxminiy narx</string>
     <string name="new_order">Yangi buyurtma</string>
+    <string name="auto">Tizim</string>
+    <string name="night">Tungi</string>
+    <string name="day">Kunduzgi</string>
 
 </resources>

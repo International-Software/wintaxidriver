@@ -513,5 +513,13 @@ class UserPreferenceManager(private val context: Context) {
         )
     }
 
+    fun saveMapSettings(value: String, name: String){
+        prefs.edit().putString("preferred_map",value).apply()
+        prefs.edit().putString("preferred_map_name",name).apply()
+    }
+
+    fun getMapSettings() = prefs.getString("preferred_map", "ru.yandex.yandexnavi") ?: "ru.yandex.yandexnavi"
+    fun getMapName() = prefs.getString("preferred_map_name", "Yandex Navigator") ?: "Yandex Navigator"
+
 
 }
