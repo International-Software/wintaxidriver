@@ -2,7 +2,6 @@ package com.example.taxi.domain.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.IsCompletedModel
@@ -58,13 +57,14 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putInt(START_COST, start_cost).apply()
     }
 
-    fun saveAdvertisingStatus(status: Int){
-        prefs.edit().putInt(ADVERTISING,status).apply()
+    fun saveAdvertisingStatus(status: Int) {
+        prefs.edit().putInt(ADVERTISING, status).apply()
     }
 
-    fun getAdvertisingStatus():Int{
-        return prefs.getInt(ADVERTISING,-1)
+    fun getAdvertisingStatus(): Int {
+        return prefs.getInt(ADVERTISING, -1)
     }
+
     fun savePriceSettings(order: OrderAccept<UserModel>) {
 
         with(prefs.edit()) {
@@ -272,6 +272,11 @@ class UserPreferenceManager(private val context: Context) {
         }
     }
 
+    fun setTheme(value: String){
+        prefs.edit().putString("theme",value).apply()
+    }
+    fun getThemeOptions() = prefs.getString("theme","auto")
+
     fun getLanguage(): Language {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         return when (sharedPreferences.getString("language", "uz")) {
@@ -298,8 +303,8 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putString("phone", phone).apply()
     }
 
-    fun getDriverName(): String? = prefs.getString("firstName","")
-    fun getDriverPhone(): String? = prefs.getString("phone","")
+    fun getDriverName(): String? = prefs.getString("firstName", "")
+    fun getDriverPhone(): String? = prefs.getString("phone", "")
 
     fun saveDriverAllData(data: SelfieAllData<IsCompletedModel, StatusModel>) {
         with(prefs.edit()) {
@@ -513,13 +518,28 @@ class UserPreferenceManager(private val context: Context) {
         )
     }
 
-    fun saveMapSettings(value: String, name: String){
-        prefs.edit().putString("preferred_map",value).apply()
-        prefs.edit().putString("preferred_map_name",name).apply()
+    fun saveMapSettings(value: String, name: String) {
+        prefs.edit().putString("preferred_map", value).apply()
+        prefs.edit().putString("preferred_map_name", name).apply()
     }
 
-    fun getMapSettings() = prefs.getString("preferred_map", "ru.yandex.yandexnavi") ?: "ru.yandex.yandexnavi"
-    fun getMapName() = prefs.getString("preferred_map_name", "Yandex Navigator") ?: "Yandex Navigator"
+    fun getMapSettings() =
+        prefs.getString("preferred_map", "ru.yandex.yandexnavi") ?: "ru.yandex.yandexnavi"
 
+    fun getMapName() =
+        prefs.getString("preferred_map_name", "Yandex Navigator") ?: "Yandex Navigator"
 
+    fun getOrderAppearance(): OrderAppearance {
+        return when (prefs.getString("order_appearance", "small")) {
+            "small" -> OrderAppearance.SMALL
+            "large" -> OrderAppearance.LARGE
+            else -> {
+                OrderAppearance.SMALL
+            }
+        }
+    }
+
+    enum class OrderAppearance {
+        SMALL, LARGE
+    }
 }

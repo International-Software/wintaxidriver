@@ -300,7 +300,8 @@ class OrderFragment : Fragment(), BottomSheetInterface {
                         orderData,
 //                                    singleLocationProvider.getLocation(requireContext()),
                         location,
-                        this@OrderFragment
+                        this@OrderFragment,
+                        getAppearance()
                     )
                     viewBinding.recyclerViewOrder.adapter = orderAdapter
 
@@ -322,6 +323,13 @@ class OrderFragment : Fragment(), BottomSheetInterface {
             // Perform any additional UI-related operations here
         }
 
+    }
+
+    private fun getAppearance(): Int {
+        return when(preferenceManager.getOrderAppearance()){
+            UserPreferenceManager.OrderAppearance.LARGE -> R.layout.item_order
+            UserPreferenceManager.OrderAppearance.SMALL -> R.layout.item_order_small
+        }
     }
 
     override fun showBottom(orderData: OrderData<Address>, distance: String) {

@@ -3,7 +3,6 @@ package com.example.taxi.ui.home.driver
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -15,7 +14,6 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.view.*
@@ -49,6 +47,7 @@ import com.example.taxi.ui.home.order.OrderViewModel
 import com.example.taxi.ui.permission.PermissionCheckActivity
 import com.example.taxi.utils.*
 import com.example.taxi.utils.ConstantsUtils.locationDestination2
+import com.example.taxi.utils.map.MapUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -385,6 +384,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setUpUiNavigation()
         networkMonitor = NetworkMonitor(requireContext())
         soundManager = SoundManager(requireContext())
 //        viewModel = ViewModelProvider(this)[TimerViewModel::class.java]
@@ -959,10 +959,24 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 ResourceState.LOADING -> {}
             }
         }
-
-
     }
 
+    private fun setUpUiNavigation() {
+        viewBinding.textView9.text = preferenceManager.getMapName()
+
+        when(preferenceManager.getMapSettings()){
+            MapUtils.MapType.WAZE.packageName ->{
+                viewBinding.imageView4.setImageResource(R.drawable.icon_waze)
+            }
+            MapUtils.MapType.YANDEX.packageName ->{
+                viewBinding.imageView4.setImageResource(R.drawable.ic_yandex_navigator)
+            }
+            MapUtils.MapType.GOOGLE.packageName ->{
+                viewBinding.imageView4.setImageResource(R.drawable.icon_google_maps)
+
+            }
+        }
+    }
     @SuppressLint("StringFormatInvalid")
     private fun setDashboardStatus(dashboardData: DashboardData?) {
 
@@ -1088,38 +1102,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     private fun findRoute(lat: String?, long: String?) {
 
-        /** for google**/
-//        val uri = Uri.parse("google.navigation:q=${lat},${long}")
+        MapUtils.findRoute(requireContext(),lat,long,preferenceManager)
 
-        /** for yandex **/
-//        val uri = Uri.parse("geo:$lat,$long?z=12") // z is zoom level
-
-        /** for yandex navigator **/
-        val uri = Uri.parse("yandexnavi://build_route_on_map?lat_to=$lat&lon_to=$long")
-
-
-        val navigationIntent = Intent(Intent.ACTION_VIEW, uri).apply {
-            // Set the package to specifically use Yandex Navigator
-            setPackage("ru.yandex.yandexnavi")
-        }
-        // Create an Intent from uri. Set the action to ACTION_VIEW
-        try {
-            startActivity(navigationIntent)
-        } catch (e: ActivityNotFoundException) {
-            // Handle the case where Yandex Navigator is not installed
-            try {
-                // Redirect to the Google Play Store to download Yandex Navigator
-                val playStoreIntent = Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("market://details?id=ru.yandex.yandexnavi")
-                    setPackage("com.android.vending")
-                }
-                startActivity(playStoreIntent)
-            } catch (ex: ActivityNotFoundException) {
-                // Handle the case where Google Play Store is not available
-                // You might want to notify the user or log this issue
-            }
-
-        }
 //        val currentLocation = navigationLocationProvider.lastLocation
 ////        val originPoint = originLocation?.let {
 ////            Point.fromLngLat(it.longitude, it.latitude)

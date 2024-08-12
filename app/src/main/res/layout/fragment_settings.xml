@@ -14,7 +14,6 @@
         android:fitsSystemWindows="true"
         android:paddingHorizontal="@dimen/_10sdp">
 
-
         <FrameLayout
             android:layout_width="@dimen/_26sdp"
             android:layout_height="@dimen/_26sdp"
@@ -50,15 +49,10 @@
         android:alpha=".8"
         android:layout_height="@dimen/_6sdp"/>
 
-
-
-
-
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"
         android:layout_marginStart="@dimen/_40sdp"
         android:layout_height="wrap_content"/>
-
 
     <LinearLayout
         android:id="@+id/button_choose_navigation"
@@ -100,7 +94,7 @@
         android:layout_height="wrap_content"/>
 
     <LinearLayout
-        android:id="@+id/buttonChooseMapOpen"
+        android:id="@+id/buttonChooseTheme"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/_10sdp"
@@ -138,6 +132,46 @@
         android:layout_marginStart="@dimen/_40sdp"
         android:layout_height="wrap_content"/>
 
+    <LinearLayout
+        android:id="@+id/buttonAppearance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/_10sdp"
+        android:gravity="center"
+        android:clickable="true"
+        android:visibility="gone"
+        android:focusable="true"
+        android:background="?selectableItemBackground"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/_22sdp"
+            android:src="@drawable/ic_appearance"
+            android:layout_height="@dimen/_22sdp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="Buyurtma ko'rinishi"
+            android:layout_marginStart="@dimen/_15sdp"
+            android:textColor="@color/text_black_white"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/selectAppearanceTv"
+            android:layout_width="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/_40sdp"
+        android:visibility="gone"
+        android:layout_height="wrap_content"/>
+
 
     <LinearLayout
         android:id="@+id/buttonLanguage"
@@ -169,7 +203,6 @@
         <TextView
             android:id="@+id/language_tv"
             android:layout_width="wrap_content"
-
             android:textColor="@color/blue"
             android:gravity="center_vertical"
             android:layout_gravity="center_vertical"

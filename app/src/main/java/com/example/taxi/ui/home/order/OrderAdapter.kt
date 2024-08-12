@@ -1,9 +1,11 @@
 package com.example.taxi.ui.home.order
 
 import android.location.Location
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +17,12 @@ import com.example.taxi.utils.ConversionUtil.calculateDistance
 import com.example.taxi.utils.convertToCyrillic
 import com.example.taxi.utils.setPriceCost
 
-open class OrderAdapter(private val list: List<OrderData<Address>>, private val location: Location?, private val receiveItem : BottomSheetInterface) :
+open class OrderAdapter(
+    private val list: List<OrderData<Address>>,
+    private val location: Location?,
+    private val receiveItem: BottomSheetInterface,
+    private val layoutItem: Int
+) :
     RecyclerView.Adapter<OrderAdapter.OrderViewHolder>() {
 
 
@@ -25,9 +32,8 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
         private val priceTextView: TextView = itemView.findViewById(R.id.priceTextView)
         private val distanceTextView: TextView = itemView.findViewById(R.id.distanceTextView)
         private val typeTextView: AppCompatTextView = itemView.findViewById(R.id.textView_type)
-        private val orderTime: TextView = itemView.findViewById(R.id.order_time)
         private val infoForPriceTv: TextView = itemView.findViewById(R.id.infoForPriceTv)
-
+        private val layoutSecondDestination: LinearLayout? = itemView.findViewById(R.id.layout_second_destination)
         fun bind(order: OrderData<Address>) {
 
             addressFromTextView.convertToCyrillic(order.address.from)
@@ -41,10 +47,12 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
                 priceTextView.setPriceCost(order.start_cost)
 
             }
-            if (order.address.to.isEmpty()){
-                addressToTextView.text = "-"
-            }else{
 
+            if (order.address.to.isEmpty() || order.address.to == "-") {
+                layoutSecondDestination?.visibility = View.GONE
+                addressToTextView.text = "-"
+            } else {
+                layoutSecondDestination?.visibility = View.VISIBLE
                 addressToTextView.convertToCyrillic(order.address.to)
             }
 
@@ -78,7 +86,7 @@ open class OrderAdapter(private val list: List<OrderData<Address>>, private val 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
         val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_order, parent, false)
+            LayoutInflater.from(parent.context).inflate(layoutItem, parent, false)
         return OrderViewHolder(itemView)
     }
 

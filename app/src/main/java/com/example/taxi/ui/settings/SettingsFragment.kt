@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.taxi.R
 import com.example.taxi.databinding.FragmentSettingsBinding
 import com.example.taxi.domain.preference.UserPreferenceManager
+import com.example.taxi.utils.ConstantsUtils
 import org.koin.android.ext.android.inject
 
 class SettingsFragment : Fragment() {
@@ -31,6 +32,10 @@ class SettingsFragment : Fragment() {
         viewBinding.languageTv.text = getLanguageText()
         viewBinding.selectThemeTv.text = getThemeText()
         viewBinding.selectMapNameTv.text = getMapText()
+        viewBinding.selectAppearanceTv.text = getAppearanceText()
+
+        setupButton(viewBinding.buttonChooseNavigation, ConstantsUtils.NAVIGATION)
+        setupButton(viewBinding.buttonChooseTheme, ConstantsUtils.THEME)
 
         viewBinding.fbnBackHome.setOnClickListener {
             findNavController().navigateUp()
@@ -38,6 +43,22 @@ class SettingsFragment : Fragment() {
 
         viewBinding.buttonLanguage.setOnClickListener {
             findNavController().navigate(R.id.choosingLanguageFragment)
+        }
+    }
+
+    private fun setupButton(button: View, value: Int) {
+        button.setOnClickListener {
+            val bundle = Bundle().apply {
+                putInt("value", value)
+            }
+            findNavController().navigate(R.id.chooseSettingsFragment, bundle)
+        }
+    }
+
+    private fun getAppearanceText(): String {
+        return when(userPreferenceManager.getOrderAppearance()){
+            UserPreferenceManager.OrderAppearance.SMALL -> getString(R.string.small)
+            UserPreferenceManager.OrderAppearance.LARGE -> getString(R.string.large)
         }
     }
 

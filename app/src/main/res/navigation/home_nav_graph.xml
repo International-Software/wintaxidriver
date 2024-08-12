@@ -94,4 +94,8 @@
         android:name="com.example.taxi.ui.settings.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/chooseSettingsFragment"
+        android:name="com.example.taxi.ui.settings.ChooseSettingsFragment"
+        android:label="ChooseSettingsFragment" />
 </navigation>

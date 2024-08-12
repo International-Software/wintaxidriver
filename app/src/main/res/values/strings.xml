@@ -238,5 +238,9 @@
     <string name="auto">Tizim</string>
     <string name="night">Tungi</string>
     <string name="day">Kunduzgi</string>
+    <string name="small">Kichik</string>
+    <string name="large">Katta</string>
+    <string name="navigation">Navigatsiya</string>
+    <string name="theme">Fon rejimi</string>
 
 </resources>
