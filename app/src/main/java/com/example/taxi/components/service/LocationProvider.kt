@@ -14,7 +14,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import org.koin.core.context.GlobalContext
 
-@RequiresApi(Build.VERSION_CODES.N)
 class LocationProvider: LocationListener, GnssStatus.Callback() {
 
     private var locationChangeCallback: (Location) -> Unit = {}
@@ -22,8 +21,8 @@ class LocationProvider: LocationListener, GnssStatus.Callback() {
     private var startTime = System.currentTimeMillis()
     private var currentGPSStrength = 0
 
-    private val locationManager by lazy {
-        GlobalContext.get().get<LocationManager>()
+    private val locationManager: LocationManager by lazy {
+        GlobalContext.get().get()
     }
 
 
@@ -44,6 +43,11 @@ class LocationProvider: LocationListener, GnssStatus.Callback() {
         this.gpsSignalCallback = gpsSignalCallback
 //        getLastKnownLocation()
         startTime = System.currentTimeMillis()
+
+        if (!isGPSEnabled()) {
+            Log.e("GPS", "GPS xizmatlari yoqilmagan.")
+            return
+        }
         val criteria = Criteria().apply {
             accuracy = Criteria.ACCURACY_FINE
             isCostAllowed = true // This allows Android to use data services
@@ -58,13 +62,19 @@ class LocationProvider: LocationListener, GnssStatus.Callback() {
         Log.d("GPS", "GnssStatus Callback registration successful: $isSuccess")
     }
 
-    @SuppressLint("MissingPermission")
-    fun getLastKnownLocation() {
-        val locationManager = GlobalContext.get().get<LocationManager>()
-        val lastKnownLocation: Location? = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        if (lastKnownLocation != null) {
-            // Use the last known location
-            locationChangeCallback(lastKnownLocation)
+    private fun isGPSEnabled(): Boolean {
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+
+    private fun getLastKnownLocation() {
+        try {
+            val lastKnownLocation: Location? = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            lastKnownLocation?.let {
+                locationChangeCallback(it)
+            }
+        } catch (e: SecurityException) {
+            Log.e("GPS", "Ruxsatlar mavjud emas: ${e.message}")
         }
     }
 

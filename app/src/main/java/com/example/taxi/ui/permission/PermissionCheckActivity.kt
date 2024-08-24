@@ -1,8 +1,8 @@
 package com.example.taxi.ui.permission
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ActionBar.LayoutParams
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -28,22 +28,38 @@ class PermissionCheckActivity : AppCompatActivity() {
 
     private val locationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
-            if (result) handleLocationPermissionGranted()
+            if (result) {
+                handlePermissionsGranted()
+            } else {
+                showPermissionDeniedDialog(getString(R.string.location))
+            }
         }
 
     private val backgroundLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
-            if (result) checkAndProceed()
+            if (result) {
+                checkAndProceed()
+            } else {
+                showPermissionDeniedDialog(getString(R.string.location_background_1))
+            }
         }
 
-    private val batteryOptimizationResultLauncher =
+    private val overlayPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) checkAndProceed()
+            if (result.resultCode == RESULT_OK) {
+                checkAndProceed()
+            } else {
+                showPermissionDeniedDialog(getString(R.string.overlay_perm))
+            }
         }
 
-    private val locationSettingActivityResultLauncher =
+    private val batteryOptimizationLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) handleLocationSettingsEnabled()
+            if (result.resultCode == RESULT_OK) {
+                checkAndProceed()
+            } else {
+                showPermissionDeniedDialog(getString(R.string.batter_perm))
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +73,49 @@ class PermissionCheckActivity : AppCompatActivity() {
         } else {
             viewBinding = ActivityPermissionCheckBinding.inflate(layoutInflater)
             setContentView(viewBinding.root)
-            if (!LocationPermissionUtils.isBackgroundPermissionGranted(this) || !LocationPermissionUtils.isBasicPermissionGranted(this)){
+            if (!LocationPermissionUtils.isLocationEnabled(this)) {
+                requestEnableLocation()
+            } else if (!LocationPermissionUtils.isBasicPermissionGranted(this) || !LocationPermissionUtils.isBackgroundPermissionGranted(
+                    this
+                )
+            ) {
                 showPermissionExplanationDialog()
             }
+
+            viewBinding.askBattery.setOnClickListener {
+                if (!LocationPermissionUtils.isPowerSavingModeEnabled(
+                        this
+                    )
+                ) requestIgnoreBatteryOptimizations() else checkAndProceed()
+            }
+            viewBinding.askOverlay.setOnClickListener { if (!Settings.canDrawOverlays(this)) showOverlayPermissionDialog() else checkAndProceed() }
+            viewBinding.askLocation.setOnClickListener { requestFineLocation() }
+            viewBinding.askBackgroundLocation.setOnClickListener { checkBackgroundLocationPermission() }
             viewBinding.buttonConfirmPermissions.setOnClickListener { checkAndAsk() }
+        }
+    }
+
+    private fun checkBackgroundLocationPermission() {
+        if (!LocationPermissionUtils.isLocationEnabled(this)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                !LocationPermissionUtils.isBackgroundPermissionGranted(this)
+            ) {
+                backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            } else {
+                checkAndProceed()
+            }
+        } else {
+            requestEnableLocation()
+        }
+    }
+
+    private fun requestFineLocation() {
+        if (!LocationPermissionUtils.isLocationEnabled(this)) {
+            requestEnableLocation()
+        } else if (LocationPermissionUtils.isBasicPermissionGranted(this)) {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            checkAndProceed()
         }
     }
 
@@ -71,10 +126,14 @@ class PermissionCheckActivity : AppCompatActivity() {
     }
 
     private fun checkAndAsk() {
-        when {
-            checkPermissions() -> handlePermissionsGranted()
-            shouldShowRationalePermission() -> showPermissionExplanationDialog()
-            else -> requestPermissions()
+        if (!LocationPermissionUtils.isLocationEnabled(this)) {
+            requestEnableLocation()
+        } else {
+            when {
+                checkPermissions() -> handlePermissionsGranted()
+                shouldShowRationalePermission() -> showPermissionExplanationDialog()
+                else -> requestPermissions()
+            }
         }
     }
 
@@ -89,15 +148,22 @@ class PermissionCheckActivity : AppCompatActivity() {
 
     private fun requestPermissions() {
         when {
-            !LocationPermissionUtils.isBasicPermissionGranted(this) ->
+            !LocationPermissionUtils.isBasicPermissionGranted(this) -> {
                 locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            !LocationPermissionUtils.isLocationEnabled(this) -> LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
-            !LocationPermissionUtils.isBackgroundPermissionGranted(this) ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-            !Settings.canDrawOverlays(this) -> showOverlayPermissionDialog()
-            !LocationPermissionUtils.isPowerSavingModeEnabled(this) -> showBatteryPermissionDialog()
+            }
+
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    !LocationPermissionUtils.isBackgroundPermissionGranted(this) -> {
+                backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+
+            !Settings.canDrawOverlays(this) -> {
+                showOverlayPermissionDialog()
+            }
+
+            !LocationPermissionUtils.isPowerSavingModeEnabled(this) -> {
+                showBatteryPermissionDialog()
+            }
         }
     }
 
@@ -128,8 +194,11 @@ class PermissionCheckActivity : AppCompatActivity() {
             .setTitle(getString(R.string.neеded_permission))
             .setMessage(getString(R.string.draw_permission))
             .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
-                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-                startActivity(intent)
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                overlayPermissionLauncher.launch(intent)
             }
             .create()
             .show()
@@ -147,10 +216,21 @@ class PermissionCheckActivity : AppCompatActivity() {
     }
 
     private fun updateStatusImages() {
-        updateImageView(viewBinding.imgBattery, LocationPermissionUtils.isPowerSavingModeEnabled(this))
+        updateImageView(
+            viewBinding.imgBattery,
+            LocationPermissionUtils.isPowerSavingModeEnabled(this)
+        )
         updateImageView(viewBinding.imgOverlay, Settings.canDrawOverlays(this))
-        updateImageView(viewBinding.imgLocation, LocationPermissionUtils.isBasicPermissionGranted(this))
-        updateImageView(viewBinding.imgGps, LocationPermissionUtils.isLocationEnabled(this) && LocationPermissionUtils.isBackgroundPermissionGranted(this))
+        updateImageView(
+            viewBinding.imgLocation,
+            LocationPermissionUtils.isBasicPermissionGranted(this) && LocationPermissionUtils.isLocationEnabled(
+                this
+            )
+        )
+        updateImageView(
+            viewBinding.imgGps,
+            LocationPermissionUtils.isBackgroundPermissionGranted(this)
+        )
     }
 
     private fun updateImageView(imageView: ImageView, isActive: Boolean) {
@@ -158,23 +238,30 @@ class PermissionCheckActivity : AppCompatActivity() {
 
         imageView.apply {
             setImageResource(if (isActive) R.drawable.ic_check else R.drawable.ic_cancel_settings)
-            setPadding(if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx, if (isActive) 0 else paddingInPx)
+            setPadding(
+                if (isActive) 0 else paddingInPx,
+                if (isActive) 0 else paddingInPx,
+                if (isActive) 0 else paddingInPx,
+                if (isActive) 0 else paddingInPx
+            )
         }
     }
 
     private fun handlePermissionsGranted() {
-        if(!LocationPermissionUtils.isLocationEnabled(this)){
-            LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
-        }else if (!Settings.canDrawOverlays(this)) {
+        if (!LocationPermissionUtils.isLocationEnabled(this)) {
+            requestEnableLocation()
+        } else if (!Settings.canDrawOverlays(this)) {
             showOverlayPermissionDialog()
         } else if (!LocationPermissionUtils.isPowerSavingModeEnabled(this)) {
             showBatteryPermissionDialog()
+        } else {
+            proceed()
         }
     }
 
     private fun handleLocationPermissionGranted() {
         if (checkPermissions()) {
-            LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled() }
+            proceed()
         } else {
             requestPermissions()
         }
@@ -185,15 +272,19 @@ class PermissionCheckActivity : AppCompatActivity() {
         finish()
     }
 
+    @SuppressLint("BatteryLife")
     private fun requestIgnoreBatteryOptimizations() {
         if (!LocationPermissionUtils.isPowerSavingModeEnabled(this)) {
-            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:$packageName"))
-            batteryOptimizationResultLauncher.launch(intent)
+            val intent =
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).setData(Uri.parse("package:$packageName"))
+            batteryOptimizationLauncher.launch(intent)
         }
     }
 
-    private fun locationEnabled() {
-        checkAndProceed()
+    private fun requestEnableLocation() {
+        LocationPermissionUtils.askEnableLocationRequest(this) { locationEnabled ->
+            if (locationEnabled) checkAndAsk()
+        }
     }
 
     private fun checkAndProceed() {
@@ -208,8 +299,17 @@ class PermissionCheckActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun cancel() {
-        finish()
+    private fun showPermissionDeniedDialog(permission: String) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.permission_denied))
+            .setMessage(getString(R.string.ruxsat_berilmagan, permission))
+            .setPositiveButton(R.string.go_to_settings) { _, _ ->
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+            .create()
+            .show()
     }
 
     companion object {
@@ -222,3 +322,4 @@ class PermissionCheckActivity : AppCompatActivity() {
         }
     }
 }
+

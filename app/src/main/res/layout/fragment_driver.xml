@@ -34,7 +34,6 @@
 
         <include
             android:id="@+id/bottom_dialog_taxometer"
-
             layout="@layout/dialog_taxometer" />
     </FrameLayout>
 

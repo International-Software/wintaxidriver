@@ -215,6 +215,25 @@
     <string name="success_check_photo">Вы успешно прошли проверку фото!</string>
     <string name="foto_nazorat">Контроль фото</string>
 
+    <string name="settings">Настройки</string>
+    <string name="my_profile">Мой профиль</string>
+
+    <string name="taxminiy_narx">Ориентировочная цена</string>
+    <string name="new_order">Новый заказ</string>
+    <string name="auto">Система</string>
+    <string name="night">Ночной</string>
+    <string name="day">Дневной</string>
+    <string name="small">Маленький</string>
+    <string name="large">Большой</string>
+    <string name="navigation">Навигация</string>
+    <string name="theme">Тема</string>
+    <string name="permission_denied">Разрешение отказано</string>
+    <string name="ruxsat_berilmagan">"Вы отказали в разрешении для %1$s. Это разрешение важно для корректной работы функций приложения. Пожалуйста, предоставьте это разрешение в настройках.</string>
+    <string name="location">Местоположение</string>
+    <string name="location_background_1">Фон местоположения</string>
+    <string name="overlay_perm">Наложение поверх приложений</string>
+    <string name="batter_perm">Отключение режима экономии энергии</string>
+    <string name="messag">Сообщение</string>
 
     <string name="yaqin_atrofdagi_buyurtmani_topish_hattoki_fonda_bo_lsa_ham">Поиск ближайших заказов, даже если приложение работает в фоновом режиме.</string>
     <string name="harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish">Отслеживание вашего движения и уведомление клиентов Bekjaan Taxi.</string>

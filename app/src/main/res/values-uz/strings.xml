@@ -217,6 +217,27 @@
     <string name="summani_kiriting">Суммани киритинг</string>
     <string name="to_lov_tizimini_tanlang">Тўлов тизимини танланг</string>
 
+
+    <string name="settings">Созламалар</string>
+    <string name="my_profile">Менинг профилим</string>
+
+    <string name="taxminiy_narx">Такминан нарх</string>
+    <string name="new_order">Янги буюртма</string>
+    <string name="auto">Тизим</string>
+    <string name="night">Тунги</string>
+    <string name="day">Кундузги</string>
+    <string name="small">Кичик</string>
+    <string name="large">Катта</string>
+    <string name="navigation">Навигация</string>
+    <string name="theme">Фон режими</string>
+    <string name="permission_denied">Рухсат рад этилди</string>
+    <string name="ruxsat_berilmagan">"Сиз %1$s учун рухсатни рад этдингиз. Бу рухсат дастур функцияларининг тўғри ишлаши учун муҳим. Илтимос, созламалардан бунга рухсат беринг.</string>
+    <string name="location">Жойлашув</string>
+    <string name="location_background_1">Орқа фон жойлашуви</string>
+    <string name="overlay_perm">Дастурлар устида очилиш</string>
+    <string name="batter_perm">Қувват тежаш режимини фаолсизлантириш</string>
+    <string name="messag">Хабар</string>
+
     <string name="yaqin_atrofdagi_buyurtmani_topish_hattoki_fonda_bo_lsa_ham">Яқин атрофдаги буюртмани топиш, ҳаттоки фонда бўлса ҳам.</string>
     <string name="harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish">Ҳаракатланишингизни кузатиш ва уларни Бекжаан такси мижозлари учун кўрсатиш ва хабардор қилиш.</string>
     <string name="sozlamalarni_tekshiring">Созламаларни текширинг!</string>

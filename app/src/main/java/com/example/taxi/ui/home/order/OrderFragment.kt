@@ -225,6 +225,10 @@ class OrderFragment : Fragment(), BottomSheetInterface {
             updateUi(it)
         }
 
+        viewBinding.buttonSort.setOnClickListener {
+            orderAdapter.sortWithKm()
+        }
+
         val locationManager =
             context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         singleLocationProvider = SingleLocationProvider(locationManager)

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.taxi.R
@@ -18,6 +19,7 @@ import com.example.taxi.domain.model.statistics.StatisticsResponse
 import com.example.taxi.domain.model.statistics.StatisticsResponseValue
 import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.ui.home.dashboard.DashboardViewModel
+import com.example.taxi.utils.ConversionUtil
 import com.example.taxi.utils.PhoneNumberUtil
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
@@ -69,17 +71,18 @@ class ProfileFragment : Fragment() {
         viewBinding.buttonWeek.setOnClickListener { profileViewModel.setWeeks() }
         viewBinding.buttonMonth.setOnClickListener { profileViewModel.setMonths() }
         viewBinding.buttonDay.setOnClickListener { profileViewModel.setDays() }
-
+        viewBinding.buttonPrivacy.setOnClickListener { navigateToPrivacy() }
         chartProgressBar = view.findViewById(R.id.chartProgressBar)
 
 
-//        viewBinding.horizontalScrollView.post {
-//            viewBinding.horizontalScrollView.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
-//        }
+
 
 
     }
 
+    private fun navigateToPrivacy() {
+        findNavController().navigate(R.id.aboutFragment)
+    }
 
 
     @SuppressLint("SetTextI18n")
@@ -102,12 +105,17 @@ class ProfileFragment : Fragment() {
 
                 chartProgressBar.setData(dataList ,{period,value ->
                     viewBinding.totalPriceTv.text = PhoneNumberUtil.formatMoneyNumberPlate(value.totalSum.toString())
-                    viewBinding.totalDistance.text = "${value.distance} km"
+                    viewBinding.totalDistance.text = "${ConversionUtil.getDistanceWithKm(value.distance.toDouble())} km"
                     viewBinding.totalOrderCountTv.text = "${getString(R.string.buyurtmalar)} (${value.totalCount})"
                     viewBinding.totalPriceFeeTv.text = "- ${PhoneNumberUtil.formatMoneyNumberPlate(value.total.toString())}"
                     viewBinding.totalPriceTvBottom.text = PhoneNumberUtil.formatMoneyNumberPlate(value.totalSum.toString())
                     viewBinding.periodTimeTv.text = if (period.length > 13) convertDateRangeWithMonth(period) else period
                 },style)
+
+
+                viewBinding.horizontalScrollView.post {
+                    viewBinding.horizontalScrollView.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
+                }
             }
         }
 

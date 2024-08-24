@@ -124,7 +124,7 @@ class MenuClass(val context: Context, val preferenceManager: UserPreferenceManag
 //        )
 
 
-    ) + a + c + b
+    ) + a  + b
 
     private val itemActionViews: Map<Int, View> = mapOf(
         456 to MenuUtils.getActionViewNext(context),

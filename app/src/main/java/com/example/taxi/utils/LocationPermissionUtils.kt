@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.common.api.ApiException
@@ -78,7 +79,7 @@ object LocationPermissionUtils {
 
     fun isBackgroundPermissionGranted(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            PermissionChecker.checkSelfPermission(
+            ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             ) == PermissionChecker.PERMISSION_GRANTED

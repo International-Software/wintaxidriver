@@ -14,6 +14,7 @@ import com.example.taxi.domain.model.order.Address
 import com.example.taxi.domain.model.order.OrderData
 import com.example.taxi.domain.model.order.updateTextView
 import com.example.taxi.utils.ConversionUtil.calculateDistance
+import com.example.taxi.utils.ConversionUtil.calculateDistanceDouble
 import com.example.taxi.utils.convertToCyrillic
 import com.example.taxi.utils.setPriceCost
 
@@ -36,13 +37,16 @@ open class OrderAdapter(
         private val layoutSecondDestination: LinearLayout? = itemView.findViewById(R.id.layout_second_destination)
         fun bind(order: OrderData<Address>) {
 
+            Log.d("buyurtma", "bind: $order")
             addressFromTextView.convertToCyrillic(order.address.from)
 
             if (order.predict_cost != null && order.predict_distance != null) {
                 infoForPriceTv.text = itemView.context.getString(R.string.taxminiy_narx)
+                Log.d("buyurtma", "bind: ${order.predict_cost}")
                 priceTextView.setPriceCost(order.predict_cost)
 
             } else {
+                Log.d("buyurtma", "bind: ${order.predict_cost} va ${order.start_cost}")
                 infoForPriceTv.text = itemView.context.getString(R.string.boshlang_ich_summa)
                 priceTextView.setPriceCost(order.start_cost)
 
@@ -74,7 +78,6 @@ open class OrderAdapter(
             distanceTextView.text = distance
 
 
-            priceTextView.setPriceCost(order.start_cost)
             order.type?.let { updateTextView(it, typeTextView) }
 
             itemView.setOnClickListener {
@@ -97,5 +100,23 @@ open class OrderAdapter(
     override fun onBindViewHolder(holder: OrderViewHolder, position: Int) {
         val order = list[position]
         holder.bind(order)
+    }
+
+    fun sortWithKm(){
+            if (list.isNotEmpty() && location != null) {
+                val sortedList = list.sortedBy { order ->
+                    val distance = calculateDistanceDouble(
+                        lat1 = order.latitude1.toDouble(),
+                        lat2 = location.latitude,
+                        lon1 = order.longitude1.toDouble(),
+                        lon2 = location.longitude
+                    )
+                    distance
+                }
+                // Saralangan ro'yxatni adapterga o'tkazish uchun yangi ro'yxat yaratish kerak.
+                (list as MutableList).clear()
+                (list as MutableList).addAll(sortedList)
+                notifyDataSetChanged()
+        }
     }
 }

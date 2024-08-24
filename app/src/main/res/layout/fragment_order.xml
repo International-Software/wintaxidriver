@@ -47,6 +47,27 @@
             android:text="@string/buyurtmalar"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textStyle="bold" />
+
+        <FrameLayout
+            android:id="@+id/button_sort"
+            android:layout_width="@dimen/_26sdp"
+            android:layout_height="@dimen/_26sdp"
+            android:layout_gravity="center"
+            android:background="@drawable/back_shape"
+            android:clickable="true"
+            android:backgroundTint="@color/blue"
+            android:focusable="true"
+            android:foreground="?selectableItemBackground">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/_4sdp"
+                android:src="@drawable/ic_sort"
+                app:tint="#fff"
+                android:contentDescription="@string/icon" />
+
+        </FrameLayout>
     </LinearLayout>
 
 

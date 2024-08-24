@@ -42,6 +42,23 @@ object ConversionUtil {
         return approxRoundedOffToKm(distance * 1.1)
     }
 
+    fun calculateDistanceDouble(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val r = 6371 // Earth's radius in kilometers
+
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+
+        val a = StrictMath.sin(dLat / 2) * StrictMath.sin(dLat / 2) +
+                StrictMath.cos(Math.toRadians(lat1)) * StrictMath.cos(Math.toRadians(lat2)) *
+                StrictMath.sin(dLon / 2) * StrictMath.sin(dLon / 2)
+
+        val c = 2 * StrictMath.atan2(StrictMath.sqrt(a), StrictMath.sqrt(1 - a))
+
+        val distance = r * c
+
+        return distance * 1.1
+    }
+
 
 
     fun convertToCyrillic(input: String): String {

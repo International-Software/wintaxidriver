@@ -56,10 +56,15 @@
                 android:layout_height="wrap_content"/>
 
             <LinearLayout
+                android:id="@+id/ask_background_location"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?selectableItemBackground"
+
                 android:paddingVertical="@dimen/_5sdp"
                 android:paddingHorizontal="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -97,10 +102,15 @@
                 android:layout_height="wrap_content"/>
 
             <LinearLayout
+                android:id="@+id/ask_location"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?selectableItemBackground"
+
                 android:paddingVertical="@dimen/_5sdp"
                 android:paddingHorizontal="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -138,10 +148,15 @@
                 android:layout_height="wrap_content"/>
 
             <LinearLayout
+                android:id="@+id/ask_overlay"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?selectableItemBackground"
+
                 android:paddingVertical="@dimen/_5sdp"
                 android:paddingHorizontal="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -179,10 +194,14 @@
                 android:layout_height="wrap_content"/>
 
             <LinearLayout
+                android:id="@+id/ask_battery"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?selectableItemBackground"
                 android:paddingVertical="@dimen/_5sdp"
                 android:paddingHorizontal="@dimen/_10sdp"
                 android:layout_marginTop="@dimen/_10sdp"

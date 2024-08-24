@@ -10,12 +10,13 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:background="@color/background_dashboard"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            app:contentScrim="@android:color/transparent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="@color/background_dashboard"
+            app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
             android:layout_height="wrap_content">
 
 
@@ -50,7 +51,7 @@
                         android:id="@+id/driverNameTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-
+                        android:textColor="@color/text_black_white"
                         android:textAppearance="@style/TextAppearance.AppCompat.Large"
                         android:textFontWeight="500"
                         android:textStyle="bold"
@@ -75,7 +76,7 @@
                         app:layout_constraintBottom_toBottomOf="@+id/circleImageView"
                         app:layout_constraintEnd_toEndOf="parent"
                         android:maxLines="1"
-
+                        android:textColor="@color/text_black_white"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         app:layout_constraintStart_toStartOf="@+id/driverNameTextView"
                         app:layout_constraintTop_toBottomOf="@+id/driver_id_header" />
@@ -94,9 +95,8 @@
                     </com.facebook.shimmer.ShimmerFrameLayout>
 
                 </FrameLayout>
-
-
             </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 app:layout_collapseMode="pin"
@@ -593,10 +593,14 @@
 
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/button_privacy"
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?selectableItemBackground"
                 android:paddingVertical="@dimen/_10sdp"
                 android:paddingHorizontal="@dimen/_10sdp"
                 android:layout_height="wrap_content">

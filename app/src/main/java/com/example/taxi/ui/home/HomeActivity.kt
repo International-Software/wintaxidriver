@@ -397,32 +397,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
             Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
         )
         floatingWidgetView.hide()
-        val currentDestinationId = navController.currentDestination?.id
-        if (userPreferenceManager.getStatusIsTaximeter()) {
-            driverViewModel.completeTaximeter()
-            viewModel.startDrive()
-            val bundle = Bundle()
 
-            bundle.putBoolean("is_taxo", true)
-//            navController.navigate(R.id.taximeterFragment, bundle)
-
-        } else {
-            if (currentDestinationId != R.id.driverFragment) {
-                if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED) {
-
-                    when (userPreferenceManager.getDriverStatus()) {
-                        UserPreferenceManager.DriverStatus.STARTED -> {
-                            driverViewModel.startedOrder()
-                        }
-
-                        UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
-                        UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
-                        else -> {}
-                    }
-                    navController.navigate(R.id.driverFragment)
-                }
-            }
-        }
     }
 
     override fun onDestroy() {
@@ -487,6 +462,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 //                return enterPictureInPictureMode(
 //                    PictureInPictureParams.Builder().setAspectRatio(Rational(1, 1)).build()
 
+
                 return true
             }
         }
@@ -541,6 +517,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     override fun onResume() {
         super.onResume()
         floatingWidgetView.hide()
+
     }
 
     override fun onRequestPermissionsResult(

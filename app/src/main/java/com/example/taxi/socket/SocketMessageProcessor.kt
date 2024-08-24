@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
@@ -49,10 +50,19 @@ class SocketMessageProcessor(
                 SocketConfig.SEND_NOTIFICATION -> handleSendNotification(message)
                 SocketConfig.ORDER_ONLY_FOR_YOU -> startForegroundServiceWithMessage(message)
                 SocketConfig.ORDER_ACCEPTED -> handleOrderAccepted(message)
+                SocketConfig.PAYMENT_RECEIVED -> handlePaymentReceived()
             }
         }
     }
 
+    private fun handlePaymentReceived(){
+        val mediaPlayer = MediaPlayer.create(context, R.raw.payment_received)
+        mediaPlayer.start()
+
+        mediaPlayer.setOnCompletionListener {
+            it.release()
+        }
+    }
 
     private fun handleNewOrder(message: String) {
         sendBroadcast("OrderData_new", message)

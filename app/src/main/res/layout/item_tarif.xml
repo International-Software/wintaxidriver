@@ -28,6 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checked="false"
+        android:enabled="false"
         android:theme="@style/MyIOSSwitch"
         android:thumb="@drawable/thumb_selector"
         app:layout_constraintBottom_toBottomOf="@+id/textViewp"

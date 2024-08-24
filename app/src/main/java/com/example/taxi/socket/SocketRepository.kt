@@ -81,7 +81,7 @@ class SocketRepository constructor(
             }
 
             override fun onMessage(message: String?) {
-
+                Log.d("pul", "onMessage: $message")
                 val gson = Gson()
                 val orderResponse = gson.fromJson(message, SocketMessage::class.java)
                 if (orderResponse.key == "order_new" && userPreferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED){
@@ -93,7 +93,6 @@ class SocketRepository constructor(
             }
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
-                Log.d("WebSocket", "Connection closed: $reason ($code)")
                 isConnected = false
                 socketLive.postValue(false)
                 userPreferenceManager.saveToggleState(false)

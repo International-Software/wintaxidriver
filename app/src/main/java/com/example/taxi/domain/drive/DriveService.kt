@@ -34,7 +34,6 @@ class DriveService {
         this.driveFinishCallback = driveFinishCallback
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun startDrive() {
         if (currentDrive == null || currentDrive?.isStopped() == true) {
             currentDrive = CurrentDrive()

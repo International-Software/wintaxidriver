@@ -243,5 +243,17 @@
     <string name="large">Katta</string>
     <string name="navigation">Navigatsiya</string>
     <string name="theme">Fon rejimi</string>
+    <string name="permission_denied">Ruxsat rad etildi</string>
+    <string name="location_background_1">Orqa fon joylashuvi</string>
+    <string name="overlay_perm">Dasturlar ustidan ochilish</string>
+    <string name="batter_perm">Quvvat tejash rejimini faolsizlantirish</string>
 
+
+    <string name="settings">Sozlamalar</string>
+    <string name="my_profile">Mening profilim</string>
+
+    <string name="taxminiy_narx">Taxminiy narx</string>
+    <string name="ruxsat_berilmagan">"Siz %1$s uchun ruxsatni rad etdingiz. Bu ruxsat dastur funksiyalarining to\'g\'ri ishlashi uchun muhim. Iltimos, sozlamalardan bunga ruxsat bering.</string>
+    <string name="location">Joylashuv</string>
+    <string name="messag">Xabar</string>
 </resources>

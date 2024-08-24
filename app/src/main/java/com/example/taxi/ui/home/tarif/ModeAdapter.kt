@@ -41,20 +41,20 @@ class ModeAdapter(
             titleName.convertToCyrillic(list[position].name)
             switchEnabled.isChecked = list[position].value == "1"
 //            price.text = PhoneNumberUtil.formatMoneyNumberPlate(list[position].cost)
-            switchEnabled.setOnCheckedChangeListener { _, _ ->
-                setSwitch(
-                    position = position,
-                    switchEnabled = switchEnabled,
-                    context = holder.itemView.context,
-                    modeToggleInterface = modeToggleInterface // Replace with your ModeToggleInterface object
-                )
-            }
+//            switchEnabled.setOnCheckedChangeListener { _, _ ->
+//                setSwitch(
+//                    position = position,
+//                    switchEnabled = switchEnabled,
+//                    context = holder.itemView.context,
+//                    modeToggleInterface = modeToggleInterface // Replace with your ModeToggleInterface object
+//                )
+//            }
 
 
-            itemView.setOnClickListener {
-                switchEnabled.isChecked = !switchEnabled.isChecked
-//                setSwitch(position = position, switchEnabled = switchEnabled)
-            }
+//            itemView.setOnClickListener {
+//                switchEnabled.isChecked = !switchEnabled.isChecked
+////                setSwitch(position = position, switchEnabled = switchEnabled)
+//            }
         }
     }
 
