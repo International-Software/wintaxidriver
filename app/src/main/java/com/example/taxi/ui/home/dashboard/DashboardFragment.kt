@@ -185,7 +185,6 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         soundManager = SoundManager(requireContext())
 
-        Log.d("aloqa", "onViewCreated: ")
         getAllData()
         viewBinding.refresh.setOnRefreshListener {
             getAllData()
@@ -197,7 +196,6 @@ class DashboardFragment : Fragment() {
             updateStatus(it)
         }
 
-        userPreferenceManager.timeClear()
 
         socketRepository = SocketRepository(
             context = requireContext(),
@@ -334,7 +332,6 @@ class DashboardFragment : Fragment() {
 
                     if (currentDestinationId != R.id.taximeterFragment) {
                         val bundle = Bundle()
-                        Log.d("taxometr", "updateStatus: pref")
                         bundle.putBoolean("is_taxo", true)
                         navController.navigate(R.id.taximeterFragment, bundle)
                     }
@@ -342,22 +339,15 @@ class DashboardFragment : Fragment() {
                     val currentDestinationId = navController.currentDestination?.id
 
                     if (currentDestinationId != R.id.driverFragment) {
-                        when (userPreferenceManager.getDriverStatus()) {
-                            UserPreferenceManager.DriverStatus.STARTED -> {
-                                driverViewModel.startedOrder()
-                            }
-
-                            UserPreferenceManager.DriverStatus.ARRIVED -> driverViewModel.arrivedOrder()
-                            UserPreferenceManager.DriverStatus.ACCEPTED -> driverViewModel.acceptedOrder()
-                            else -> {}
-                        }
-                        navController.navigate(R.id.driverFragment)
-
+                        val bundle = Bundle()
+                        val position = response.data?.data?.currentPosition
+                        val arrivedAt = response.data?.data?.arrivedAt
+                        val startedAt = response.data?.data?.startedAt
+                        position?.let { bundle.putInt("driver_current_position", it) }
+                        arrivedAt?.let { bundle.putInt("driver_arrivedAt", it) }
+                        startedAt?.let { bundle.putInt("driver_startedAt", it) }
+                        navController.navigate(R.id.driverFragment,bundle)
                     }
-
-//                    navController.navigate(R.id.driverFragment)
-//                    viewModel.startDrive()
-
                 }
             }
 

@@ -2,7 +2,10 @@ package com.example.taxi.ui.taxometer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.ActivityManager
 import android.app.Dialog
+import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -105,7 +108,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val isTax = arguments?.getBoolean("is_taxo", false)
+         val isTax = arguments?.getBoolean("is_taxo", false)
         if (isTax == true) {
             if (homeViewModel.dashboardLiveData.value?.isPaused() == true){
                 homeViewModel.startDrive()
@@ -489,6 +492,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         viewBinding.bottomDialogTaxometer.timeWorkTextView.text = dashboardData.timeText()
 
 
+        Log.d("tekshirish1", "setDashboardStatus: ${preferenceManager.getStartCost()}")
         viewBinding.bottomDialogTaxometer.inDriveCostPrice.text =
             if (preferenceManager.isHasDestinationSecond()) {
                 preferenceManager.getStartCost().toString()
@@ -538,6 +542,17 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onPause() {
         super.onPause()
+        Log.d("tekshirish1", "onPause: ")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val activityManager = requireActivity().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val tasks = activityManager.appTasks
+        if (tasks.isNotEmpty()) {
+            tasks[0].setExcludeFromRecents(true)
+        }
     }
 
     override fun onDistanceChanged(distance: Float) {

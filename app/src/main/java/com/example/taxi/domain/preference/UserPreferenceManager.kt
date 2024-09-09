@@ -2,6 +2,7 @@ package com.example.taxi.domain.preference
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.IsCompletedModel
@@ -54,6 +55,7 @@ class UserPreferenceManager(private val context: Context) {
     }
 
     fun saveStartCostUpdate(start_cost: Int) {
+        Log.d("tekshirish1", "saveStartCostUpdate: $start_cost")
         prefs.edit().putInt(START_COST, start_cost).apply()
     }
 
@@ -139,8 +141,9 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putLong("finishOrderTime", time).apply()
     }
 
-    fun getStartedTimeAcceptOrder(): Long =
-        prefs.getLong("startOrderTime", System.currentTimeMillis())
+    fun getStartedTimeAcceptOrder(): Long{
+        return prefs.getLong("startOrderTime", System.currentTimeMillis())
+    }
 
     fun getFinishedTimeAcceptOrder(): Long = prefs.getLong("finishOrderTime", 0)
 

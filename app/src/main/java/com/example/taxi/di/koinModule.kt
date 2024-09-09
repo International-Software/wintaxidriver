@@ -43,6 +43,8 @@ import com.example.taxi.ui.home.transfer.transfermoney.TransferMoneyViewModel
 import com.example.taxi.ui.splash.SplashViewModel
 import com.example.taxi.utils.ClockUtils
 import com.example.taxi.utils.ConversionUtil
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -59,10 +61,10 @@ val koinModule = module {
 
 //    factory { StateViewProvider() }
 
-    factory { LocationProvider() }
+    factory { LocationProvider(androidContext()) }
 
     factory { androidContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager }
-
+    factory { LocationServices.getFusedLocationProviderClient(androidContext()) }
     factory { ClockUtils() }
 
     factory { ConversionUtil }

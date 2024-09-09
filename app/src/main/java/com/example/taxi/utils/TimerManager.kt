@@ -3,10 +3,17 @@ package com.example.taxi.utils
 import android.content.Context
 import com.example.taxi.R
 import com.example.taxi.domain.preference.UserPreferenceManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.core.context.GlobalContext
 
-class TimerManager (
+class TimerManager(
     val context: Context,
     var updateCallback: (Int, String) -> Unit
 ) {
@@ -19,14 +26,10 @@ class TimerManager (
     private var pauseTime: Long = 0
     private var transitionTime: Long = 0
     private val userPreferenceManager by lazy { GlobalContext.get().get<UserPreferenceManager>() }
-    private val scope = CoroutineScope(Dispatchers.Main)
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var job: Job? = null
 
-    var isPaused = false
-        set(value) {
-            field = value
-            userPreferenceManager.saveIsPaused(value)
-        }
 
     init {
         loadFromPreferences()
@@ -40,47 +43,34 @@ class TimerManager (
             pauseTime = getPauseTime()
             isCountingDown = getIsCountingDown()
             minWaitTime = getMinWaitTime()
-            isPaused = getIsPaused()
         }
     }
 
     private fun startTimer() {
         job = scope.launch {
             while (isActive) {
-                val currentTime = System.currentTimeMillis()
-                val elapsedSeconds = ((currentTime - startTime) / 1000).toInt()
-
-                if (isCountingDown) {
-                    handleCountDown(currentTime, elapsedSeconds)
-                } else {
-                    handleMoneyTime(currentTime)
-                }
+                updateTime()
 
                 delay(1000)
             }
         }
     }
 
-    private suspend fun handleCountDown(currentTime: Long, elapsedSeconds: Int) {
+    private suspend fun updateTime() {
+        val currentTime = System.currentTimeMillis()
+        val elapsedSeconds = ((currentTime - startTime) / 1000).toInt()
         val remainingTime = minWaitTime - elapsedSeconds
-        withContext(Dispatchers.Main) {
-            updateCallback(remainingTime, context.getString(R.string.bepul_kutish))
-        }
 
-        if (remainingTime <= 0) {
-            isCountingDown = false
-            userPreferenceManager.saveIsCountingDown(false)
-            transitionTime = currentTime
-            userPreferenceManager.saveTransitionTime(transitionTime)
+        withContext(Dispatchers.Main) {
+            if (remainingTime >= 0) {
+                updateCallback(remainingTime, context.getString(R.string.bepul_kutish))
+            } else {
+                val moneyTime = (elapsedSeconds - minWaitTime)
+                updateCallback(moneyTime, context.getString(R.string.wait_money))
+            }
         }
     }
 
-    private suspend fun handleMoneyTime(currentTime: Long) {
-        val moneyTime = ((currentTime - transitionTime) / 1000).toInt()
-        withContext(Dispatchers.Main) {
-            updateCallback(moneyTime, context.getString(R.string.wait_money))
-        }
-    }
 
     fun saveTransitionTime() {
         if (isCountingDown) {
@@ -89,18 +79,18 @@ class TimerManager (
             moneyTime = 0
             userPreferenceManager.saveTransitionTime(currentTime)
             userPreferenceManager.saveIsCountingDown(false)
-        }else{
+        } else {
             moneyTime = ((transitionTime - startTime) / 1000).toInt()
         }
         job?.cancel()
     }
 
 
-
     companion object Factory {
 
         const val TAG = "vaqtlar"
     }
+
     fun stop() {
         // Implement cleanup logic here, such as canceling the coroutine job
         job?.cancel()

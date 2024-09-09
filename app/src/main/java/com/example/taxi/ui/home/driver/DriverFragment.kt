@@ -129,6 +129,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     private var timerManager: TimerManager? = null
 
 
+
+
     private var lastStatus = -1
     private var currentBottomStatus = DriveAction.ACCEPT
 
@@ -326,6 +328,24 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = preferenceManager.getSharedPreferences()
+
+        when (arguments?.getInt("driver_current_position", -1)) {
+            ConstantsUtils.STATUS_GOING_TO_CLIENT -> {
+                driverViewModel.acceptedOrder()
+            }
+
+            ConstantsUtils.STATUS_WAITING_FOR_CLIENT -> {
+                val startTime = arguments?.getInt("driver_arrivedAt", 0)
+                startTime?.toLong()?.let { preferenceManager.setStartedTimeAcceptOrder(it * 1000) }
+                driverViewModel.arrivedOrder()
+            }
+
+            ConstantsUtils.STATUS_ON_THE_WAY -> {
+                homeViewModel.startDrive()
+                driverViewModel.startedOrder()
+            }
+        }
+
     }
 
     override fun onCreateView(
@@ -813,7 +833,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
 
     private fun initViewDialog() {
-        viewBinding.addressFromTextViewNavigator.text = preferenceManager.getDestinationAddress()
+        preferenceManager.getDestinationAddress()
+            ?.let { viewBinding.addressFromTextViewNavigator.convertToCyrillic(it) }
         viewBinding.buttonNavigator.setOnClickListener {
             findRoute(
                 preferenceManager.getDestination1Lat(),
@@ -821,7 +842,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             )
         }
         with(viewBinding.bottomDialog) {
-            addressTextViewDialogOnMap.text = preferenceManager.getDestinationAddress()
+            preferenceManager.getDestinationAddress()
+                ?.let { addressTextViewDialogOnMap.convertToCyrillic(it) }
 
             if (preferenceManager.getPassengerName()
                     .isNullOrEmpty()
@@ -964,19 +986,22 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
     private fun setUpUiNavigation() {
         viewBinding.textView9.text = preferenceManager.getMapName()
 
-        when(preferenceManager.getMapSettings()){
-            MapUtils.MapType.WAZE.packageName ->{
+        when (preferenceManager.getMapSettings()) {
+            MapUtils.MapType.WAZE.packageName -> {
                 viewBinding.imageView4.setImageResource(R.drawable.icon_waze)
             }
-            MapUtils.MapType.YANDEX.packageName ->{
+
+            MapUtils.MapType.YANDEX.packageName -> {
                 viewBinding.imageView4.setImageResource(R.drawable.ic_yandex_navigator)
             }
-            MapUtils.MapType.GOOGLE.packageName ->{
+
+            MapUtils.MapType.GOOGLE.packageName -> {
                 viewBinding.imageView4.setImageResource(R.drawable.icon_google_maps)
 
             }
         }
     }
+
     @SuppressLint("StringFormatInvalid")
     private fun setDashboardStatus(dashboardData: DashboardData?) {
 
@@ -1102,7 +1127,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     private fun findRoute(lat: String?, long: String?) {
 
-        MapUtils.findRoute(requireContext(),lat,long,preferenceManager)
+        MapUtils.findRoute(requireContext(), lat, long, preferenceManager)
 
 //        val currentLocation = navigationLocationProvider.lastLocation
 ////        val originPoint = originLocation?.let {

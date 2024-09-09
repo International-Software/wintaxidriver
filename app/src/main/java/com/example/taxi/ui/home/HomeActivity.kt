@@ -129,6 +129,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
                 orderViewModel.addItem(orderItem = it.data.toOrderData())
             }
 
+
             orderDataUpdate?.let {
                 if (userPreferenceManager.getDriverStatus() != UserPreferenceManager.DriverStatus.COMPLETED && orderDataUpdate.data.id == userPreferenceManager.getOrderId()) {
                     userPreferenceManager.saveStartCostUpdate(it.data.startCost)
@@ -146,6 +147,8 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     override fun onCreate(savedInstanceState: Bundle?) {
 //        injectFeature()
         super.onCreate(savedInstanceState)
+
+
         val filter = IntentFilter("com.example.taxi.ORDER_DATA_ACTION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(receiver, filter, RECEIVER_EXPORTED)
@@ -236,6 +239,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         viewModel.startStopLiveData.observe(this) {
             when (it) {
                 START -> {
+                    Log.d("tekshirish1", "onCreate: start")
                     activityMessenger.startDrive()
                     viewBinding.root.keepScreenOn = true
                     val activityManager =
@@ -265,6 +269,11 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 //        startLocationUpdates()
 
 
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("tekshirish1", "onPause: boldi")
     }
 
     private fun updateUserCheck(resource: Resource<MainResponse<CheckResponse>>?) {
@@ -516,6 +525,10 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onResume() {
         super.onResume()
+
+        val activityManager =
+            getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        activityManager.appTasks[0].setExcludeFromRecents(true)
         floatingWidgetView.hide()
 
     }
