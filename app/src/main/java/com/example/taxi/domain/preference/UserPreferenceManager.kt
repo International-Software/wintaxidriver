@@ -2,7 +2,6 @@ package com.example.taxi.domain.preference
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.IsCompletedModel
@@ -55,7 +54,6 @@ class UserPreferenceManager(private val context: Context) {
     }
 
     fun saveStartCostUpdate(start_cost: Int) {
-        Log.d("tekshirish1", "saveStartCostUpdate: $start_cost")
         prefs.edit().putInt(START_COST, start_cost).apply()
     }
 
@@ -101,6 +99,21 @@ class UserPreferenceManager(private val context: Context) {
         }.apply()
     }
 
+
+
+    fun getCurrentDriveOrderId(): Int{
+        return prefs.getInt("_orderId",-1)
+    }
+
+    fun saveCurrentDrive(orderId: Int, runningTime: Long, pauseTime: Long, distance: Int) {
+        with(prefs.edit()) {
+            putInt("_orderId", orderId)
+            putLong("_runningTime", runningTime)
+            putLong("_pauseTime", pauseTime)
+            putInt("_distance", distance)
+        }.apply()
+    }
+
     fun saveStatusIsTaximeter(isOn: Boolean) {
         prefs.edit().putBoolean(IS_TAXIMETER, isOn).apply()
     }
@@ -141,7 +154,7 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putLong("finishOrderTime", time).apply()
     }
 
-    fun getStartedTimeAcceptOrder(): Long{
+    fun getStartedTimeAcceptOrder(): Long {
         return prefs.getLong("startOrderTime", System.currentTimeMillis())
     }
 
@@ -213,17 +226,6 @@ class UserPreferenceManager(private val context: Context) {
         prefs.edit().putString(PHONE_NUMBER_KEY, phoneNumber).apply()
     }
 
-    fun saveCenterLat(lat: Float) {
-    }
-
-    fun saveCentralLong(long: Float) {
-
-    }
-
-    fun saveCenterRadius(radius: Int) {
-
-    }
-
     fun getCenterRadius() = prefs.getString(CENTER_RADIUS, null)
 
     fun getCentralLat() = prefs.getString(LAT, null)
@@ -275,10 +277,11 @@ class UserPreferenceManager(private val context: Context) {
         }
     }
 
-    fun setTheme(value: String){
-        prefs.edit().putString("theme",value).apply()
+    fun setTheme(value: String) {
+        prefs.edit().putString("theme", value).apply()
     }
-    fun getThemeOptions() = prefs.getString("theme","auto")
+
+    fun getThemeOptions() = prefs.getString("theme", "auto")
 
     fun getLanguage(): Language {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)

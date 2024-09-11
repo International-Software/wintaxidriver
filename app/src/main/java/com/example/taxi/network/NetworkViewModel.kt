@@ -1,5 +1,6 @@
 package com.example.taxi.network
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -46,8 +47,7 @@ class NetworkViewModel(
             .doOnSubscribe {
                 // Perform any setup tasks before the subscription starts
             }.doOnTerminate {}.subscribe({ response ->
-
-                userPreferenceManager.saveStartCostUpdate(response.data.start_cost)
+                 userPreferenceManager.saveStartCostUpdate(response.data.start_cost)
                 _driverStatus.postValue(Resource(ResourceState.SUCCESS, response))
                 _response.postValue(Resource(ResourceState.SUCCESS, IS_CONNECT))
             }, { error ->

@@ -3,17 +3,22 @@ package com.example.taxi.components.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.os.PowerManager.PARTIAL_WAKE_LOCK
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.example.taxi.domain.drive.DriveService
 import com.example.taxi.domain.model.DashboardData
+import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.utils.NotificationUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Background Service(ForeGround Service in Android Context) to listen to GPS Signal in the background and hold the Drive com.example.taxi.domain.model.history.com.example.taxi.domain.model.history.com.example.taxi.domain.model.history.Status.
@@ -21,6 +26,9 @@ import java.util.concurrent.TimeUnit
 class DriveBackGroundService : Service() {
 
     private val driveService: DriveService by inject()
+    private val userPreferenceManager: UserPreferenceManager by inject()
+    private var prevDashboardData: DashboardData? = null
+    private var autoSaveJob: Job? = null
     private var isForeGround: Boolean = false
     private val serviceMessenger =
         ServiceMessenger(::onCommandReceived)
@@ -40,9 +48,11 @@ class DriveBackGroundService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        Log.d("dastur", "onCreate: ")
         driveService.registerCallback(
             dashboardDataCallback = { dashboardData ->
-
+                startAutoSave(dashboardData)
+                prevDashboardData = dashboardData
                 serviceMessenger.sendDashboardData(dashboardData)
                 checkAndUpdateCPUWake(dashboardData)
             },
@@ -50,6 +60,30 @@ class DriveBackGroundService : Service() {
                 serviceMessenger.sendRaceFinished(driveId)
                 releaseWakelock()
             }
+        )
+    }
+
+    private fun startAutoSave(dashboardData: DashboardData) {
+        autoSaveJob = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                while (true) {
+                    saveDriveDataToPreferences(dashboardData)  // Ma'lumotlarni saqlash
+                    delay(12000)  // Har 10 soniyada qayta ishga tushirish
+                }
+            } catch (e: CancellationException) {
+                // Servis to'xtatilganda tozalikni ta'minlash
+                Log.d("DriveAutoSave", "Auto Save cancelled")
+            }
+        }
+    }
+
+    private fun saveDriveDataToPreferences(dashboardData: DashboardData) {
+        val orderId = userPreferenceManager.getOrderId()
+        userPreferenceManager.saveCurrentDrive(
+            orderId,
+            dashboardData.getRunningTime(),
+            dashboardData.getPauseTimeNormal(),
+            dashboardData.distance
         )
     }
 
@@ -87,7 +121,7 @@ class DriveBackGroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     private fun onCommandReceived(@MessengerProtocol.Command command: Int) {
@@ -95,12 +129,15 @@ class DriveBackGroundService : Service() {
             MessengerProtocol.COMMAND_HANDSHAKE -> {
                 serviceMessenger.sendDashboardData(driveService.getDashboardData())
             }
+
             MessengerProtocol.COMMAND_START -> {
                 driveService.startDrive()
             }
+
             MessengerProtocol.COMMAND_PAUSE -> {
                 driveService.pauseDrive()
             }
+
             MessengerProtocol.COMMAND_STOP -> {
                 stopRace()
             }
@@ -108,12 +145,18 @@ class DriveBackGroundService : Service() {
     }
 
     private fun stopRace() {
+        Log.d("dastur", "stopRace: ")
         driveService.stopDrive()
         stopForeground()
     }
 
+
     override fun onDestroy() {
+        Log.d("dastur", "onDestroy: ")
+
+        Log.d("dastur", "onDestroy: malumot yoqoldi: $prevDashboardData")
         super.onDestroy()
+
 
         if (wakeLock.isHeld) {
             wakeLock.release()

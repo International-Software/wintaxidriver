@@ -337,7 +337,6 @@ class DashboardFragment : Fragment() {
                     }
                 } else {
                     val currentDestinationId = navController.currentDestination?.id
-
                     if (currentDestinationId != R.id.driverFragment) {
                         val bundle = Bundle()
                         val position = response.data?.data?.currentPosition

@@ -1,10 +1,12 @@
 package com.example.taxi.domain.drive
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.taxi.components.service.LocationProvider
 import com.example.taxi.domain.drive.currentDrive.CurrentDrive
 import com.example.taxi.domain.model.DashboardData
+import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.repositeries.DriveRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,10 @@ class DriveService {
 
     private val driveRepository by lazy {
         GlobalContext.get().get<DriveRepository>()
+    }
+
+    private val userPreferenceManager by lazy {
+        GlobalContext.get().get<UserPreferenceManager>()
     }
 
     fun registerCallback(
@@ -59,14 +65,12 @@ class DriveService {
         dashboardDataCallback(getDashboardData())
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun pauseDrive() {
         currentDrive?.onPause()
         locationProvider.unsubscribe()
         dashboardDataCallback(getDashboardData())
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     fun stopDrive() {
         locationProvider.unsubscribe()
         currentDrive?.onStop()
@@ -95,10 +99,11 @@ class DriveService {
 
     fun isRaceOngoing() = currentDrive != null
 
+
     fun getDashboardData(): DashboardData {
         return currentDrive?.let {
             DashboardData(
-                runningTime = it.getRunningTime(),
+                runningTime = it.getRunningTime(), // vaqt qoshish kerak ertaga qilaman. Preferencedan olaman
                 pauseTime = it.getPauseTime(),
                 currentSpeed = it.getCurrentSpeed().toDouble(),
                 topSpeed = it.getTopSpeed().toDouble(),

@@ -9,7 +9,7 @@ import com.google.android.gms.maps.model.LatLng
 import org.koin.core.context.GlobalContext
 import java.util.concurrent.TimeUnit
 
-class CurrentDrive {
+class  CurrentDrive {
 
     private val sphericalUtil: com.example.taxi.utils.SphericalUtil by lazy {
         GlobalContext.get().get()
@@ -28,13 +28,13 @@ class CurrentDrive {
     }
 
     private var startLocation: LocationPoint? = null
-    private var distance: Int = 0
+    var distance: Int = 0
     private var startTime: Long = 0L
     private var topSpeed: Float = 0f
     private var lastPingTime = startTime
     private var lastLocation = startLocation
     private var currentSpeed: Float = 0f
-    private var status: Int = com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STARTING
+    private var status: Int = CurrentDriveStatus.STARTING
 
 
     fun pingData(
@@ -43,7 +43,7 @@ class CurrentDrive {
         currentLon: Double,
         gpsSpeed: Float?,
     ) {
-        status = com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STARTED
+        status = CurrentDriveStatus.STARTED
 
 
 
@@ -127,18 +127,18 @@ class CurrentDrive {
 
     fun getStatus() = status
 
-    fun isStopped() = status == com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STOPPED
+    fun isStopped() = status == CurrentDriveStatus.STOPPED
 
-    fun isPaused() = status == com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.PAUSED
+    fun isPaused() = status == CurrentDriveStatus.PAUSED
 
-    fun isStarting() = status == com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STARTING
+    fun isStarting() = status == CurrentDriveStatus.STARTING
 
     fun onStart() {
-        this.status = com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STARTING
+        this.status = CurrentDriveStatus.STARTING
     }
 
     fun onPause() {
-        this.status = com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.PAUSED
+        this.status = CurrentDriveStatus.PAUSED
         pauseCalculator.onPause()
         lastLocation?.let {
             drivePathBuilder.addRacePathItem(it, currentSpeed, lastPingTime, true)
@@ -146,7 +146,7 @@ class CurrentDrive {
     }
 
     fun onStop() {
-        this.status = com.example.taxi.domain.drive.currentDrive.CurrentDriveStatus.STOPPED
+        this.status = CurrentDriveStatus.STOPPED
         lastLocation?.let {
             drivePathBuilder.addRacePathItem(it, currentSpeed, lastPingTime, true)
         }
@@ -171,7 +171,10 @@ class CurrentDrive {
         )
     }
 
-    fun getRacePath(): List<DrivePathItem> = drivePathBuilder.getRacePath()
+    fun getRacePath(): List<DrivePathItem>  {
+        Log.d("olmoq", "getRacePath: ")
+        return drivePathBuilder.getRacePath()
+    }
 
     private fun initialize(
         locationTime: Long,

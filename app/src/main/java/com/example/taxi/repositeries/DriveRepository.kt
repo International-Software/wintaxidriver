@@ -34,6 +34,8 @@ class DriveRepository(private val appDatabase: AppDatabase) {
         }
 
 
+
+
     fun getTopSpeedLiveData() = appDatabase.driveDao().getTopSpeed()
 
     fun getTotalDrives() = appDatabase.driveDao().getTotalDrives()
@@ -79,7 +81,7 @@ class DriveRepository(private val appDatabase: AppDatabase) {
     }
 
     suspend fun updateDriveLocality(driveId: Long, startLocality: String, endLocality: String) {
-        appDatabase.driveDao().updateLocalityInfo(startLocality, endLocality, driveId)
+         appDatabase.driveDao().updateLocalityInfo(startLocality, endLocality, driveId)
     }
 
     suspend fun updateTag(raceId: Long, tag: String?) {

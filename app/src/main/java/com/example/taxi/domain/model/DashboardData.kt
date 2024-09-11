@@ -17,7 +17,7 @@ data class DashboardData(
     private val currentSpeed: Double,
     private val topSpeed: Double,
     private val averageSpeed: Double,
-    private val distance: Int,
+    val distance: Int,
     private val runningTime: Long,
     private val pauseTime: Long,
     private val status: Int,
@@ -78,6 +78,11 @@ data class DashboardData(
         return clockUtils.getTimeFromMillis(runningTime)
     }
 
+    fun getPauseTimeNormal(): Long{
+        return pauseTime
+    }
+
+
     fun getPauseTime(): Int{
         return (pauseTime / 1000).toInt()
     }
@@ -93,6 +98,9 @@ data class DashboardData(
         return status != STOPPED
     }
 
+    fun getRunningTime(): Long{
+        return runningTime
+    }
     fun isPaused(): Boolean {
         return status == PAUSED
     }

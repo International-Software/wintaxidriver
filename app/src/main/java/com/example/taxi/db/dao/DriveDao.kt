@@ -3,6 +3,7 @@ package com.example.taxi.db.dao
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.taxi.dbModels.DriveEntity
 import com.example.taxi.dbModels.DrivePathItemEntity
@@ -59,4 +60,7 @@ interface DriveDao {
 
     @Insert
     suspend fun addDrivePathItems(drivePathItems: List<DrivePathItemEntity>)
+
+
+
 }

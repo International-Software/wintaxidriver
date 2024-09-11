@@ -87,6 +87,7 @@ class KillStateDialogService : Service() {
         super.onDestroy()
         dialogView?.let { windowManager?.removeView(it) }
         soundPlayer.stopSound()
+
         handler.removeCallbacksAndMessages(null)
     }
 

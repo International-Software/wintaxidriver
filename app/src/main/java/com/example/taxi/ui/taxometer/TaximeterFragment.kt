@@ -2,7 +2,6 @@ package com.example.taxi.ui.taxometer
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.ActivityManager
 import android.app.Dialog
 import android.content.Context
@@ -74,7 +73,6 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     private lateinit var locationTracker: LocationTracker
     private val driverViewModel: DriverViewModel by sharedViewModel()
 
-
     private val preferenceManager: UserPreferenceManager by inject()
     private val homeViewModel: HomeViewModel by sharedViewModel()
     private var lastStatus = -1
@@ -108,12 +106,12 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-         val isTax = arguments?.getBoolean("is_taxo", false)
+        val isTax = arguments?.getBoolean("is_taxo", false)
         if (isTax == true) {
-            if (homeViewModel.dashboardLiveData.value?.isPaused() == true){
+            if (homeViewModel.dashboardLiveData.value?.isPaused() == true) {
                 homeViewModel.startDrive()
 
-            }else{
+            } else {
                 homeViewModel.startDrive()
             }
             driverViewModel.completeTaximeter()
@@ -124,8 +122,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
         viewBinding = FragmentDriverBinding.inflate(inflater, container, false)
@@ -163,8 +160,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
             // Check permission
             when (PackageManager.PERMISSION_GRANTED) {
                 ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
                 ) -> {
                     enableLocationComponent()
                 }
@@ -209,8 +205,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 viewBinding.mapView.getMapboxMap().setCamera(
                     CameraOptions.Builder()
                         .center(Point.fromLngLat(lastLocation.longitude, lastLocation.latitude))
-                        .zoom(15.0)
-                        .build()
+                        .zoom(15.0).build()
                 )
             }
         }
@@ -263,8 +258,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setGravity(Gravity.BOTTOM)
         dialog.window?.setLayout(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT
+            WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT
         )
 
 
@@ -373,8 +367,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         viewBinding.mapView.location.apply {
             this.locationPuck = LocationPuck2D(
                 bearingImage = ContextCompat.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_navigation_puck_icon
+                    requireContext(), R.drawable.ic_navigation_puck_icon
                 )
             )
             enabled = true
@@ -386,22 +379,17 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 locationResult ?: return
                 val lastLocation = locationResult.lastLocation
                 viewBinding.mapView.getMapboxMap().setCamera(
-                    CameraOptions.Builder()
-                        .center(lastLocation?.longitude?.let {
+                    CameraOptions.Builder().center(lastLocation?.longitude?.let {
                             Point.fromLngLat(
                                 it, lastLocation.latitude
                             )
-                        })
-                        .zoom(15.0)
-                        .build()
+                        }).zoom(15.0).build()
                 )
             }
         }
 
         fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            null /* Looper */
+            locationRequest, locationCallback, null /* Looper */
         )
     }
 
@@ -416,8 +404,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 CurrentDriveStatus.STARTING -> {
                     viewBinding.bottomDialogTaxometer.icPauseStart.setImageDrawable(
                         ActivityCompat.getDrawable(
-                            requireContext(),
-                            R.drawable.ic_pause
+                            requireContext(), R.drawable.ic_pause
                         )
                     )
 
@@ -425,12 +412,10 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                         getString(R.string.buyurtmada)
 
                     Alerter.create(activity = requireActivity())
-                        .setTitle(title = getString(R.string.recconnect))
-                        .enableProgress(true)
+                        .setTitle(title = getString(R.string.recconnect)).enableProgress(true)
                         .setDismissable(false)
                         .setText("${getString(R.string.recconnect)}:  ${dashboardData.getGPSSignalStrength()}")
-                        .setBackgroundColorRes(colorResId = R.color.blue)
-                        .show()
+                        .setBackgroundColorRes(colorResId = R.color.blue).show()
 
                     viewBinding.parentContainer.keepScreenOn = true
                 }
@@ -441,8 +426,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                     Alerter.hide()
                     viewBinding.bottomDialogTaxometer.icPauseStart.setImageDrawable(
                         ActivityCompat.getDrawable(
-                            requireContext(),
-                            R.drawable.ic_pause
+                            requireContext(), R.drawable.ic_pause
                         )
                     )
 
@@ -458,8 +442,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                     Alerter.hide()
                     viewBinding.bottomDialogTaxometer.icPauseStart.setImageDrawable(
                         ActivityCompat.getDrawable(
-                            requireContext(),
-                            R.drawable.ic_play
+                            requireContext(), R.drawable.ic_play
                         )
                     )
 
@@ -477,8 +460,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                     Alerter.hide()
                     viewBinding.bottomDialogTaxometer.icPauseStart.setImageDrawable(
                         ActivityCompat.getDrawable(
-                            requireContext(),
-                            R.drawable.ic_pause
+                            requireContext(), R.drawable.ic_pause
                         )
                     )
 //                    viewBinding.timeCard.visibility = View.GONE
@@ -498,9 +480,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 preferenceManager.getStartCost().toString()
             } else {
                 TaxiCalculator.getCurrentDriveCost(
-                    dashboardData,
-                    preferenceManager,
-                    secondsElapsed.toLong()
+                    dashboardData, preferenceManager, secondsElapsed.toLong()
                 )
             }
     }
@@ -548,7 +528,8 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     override fun onResume() {
         super.onResume()
 
-        val activityManager = requireActivity().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val activityManager =
+            requireActivity().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val tasks = activityManager.appTasks
         if (tasks.isNotEmpty()) {
             tasks[0].setExcludeFromRecents(true)
@@ -556,6 +537,7 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     override fun onDistanceChanged(distance: Float) {
+        Log.d("masofau", "onDistanceChanged: $distance")
         handlerTimer.removeMessages(TIMER_MESSAGE_CODE)
         homeViewModel.startDrive()
         locationTracker.stopLocationUpdates()

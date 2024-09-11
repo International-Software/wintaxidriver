@@ -194,7 +194,7 @@ class DriverViewModel(private val mainResponseUseCase: GetMainResponseUseCase) :
         _acceptWithTaximeter.postValue(Event(Resource(ResourceState.LOADING)))
         compositeDisposable.add(
             mainResponseUseCase.acceptWithTaximeter()
-                .timeout(10, TimeUnit.SECONDS)
+                .timeout(15, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .doOnSubscribe {}
                 .doOnTerminate {}
