@@ -7,18 +7,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.media.MediaPlayer
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.taxi.R
 import com.example.taxi.domain.model.location.LocationRequest
 import com.example.taxi.domain.preference.UserPreferenceManager
+import com.example.taxi.network.NetworkStateCallback
 import com.example.taxi.ui.home.HomeActivity
 import com.example.taxi.ui.home.order.OrderViewModel
+import com.example.taxi.utils.ConstantsUtils
 import com.mapbox.android.core.location.*
 import com.mapbox.geojson.Point
 import com.mapbox.turf.TurfConstants
@@ -40,6 +44,10 @@ class SocketService : Service() {
     private var lastSentAccuracy = 0
     private var lastSentAngle = 0
     private  var mediaPlayer: MediaPlayer? = null
+    private var isFirstConnection = true
+    private lateinit var connectivityManager: ConnectivityManager
+    private lateinit var networkCallback: NetworkStateCallback
+    var isWebSocketConnected = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val locationSenderRunnable: Runnable = object : Runnable {
@@ -78,7 +86,6 @@ class SocketService : Service() {
     }
 
     private val socketMessageProcessor: SocketMessageProcessor by inject()
-    private val preferenceManager: UserPreferenceManager by inject()
     private var socketRepository: SocketRepository? = null
     private lateinit var locationEngine: LocationEngine
     private var lastSentLocation: Point? = null
@@ -115,23 +122,58 @@ class SocketService : Service() {
         }else{
             registerReceiver(receiver, filter)
         }
-        // Create a notification for the foreground service
-        val notification = Notification() // Replace with your own notification
-        startForeground(NOTIFICATION_ID, createNotification())
+
+
+         startForeground(NOTIFICATION_ID, createNotification())
 
         checkAndUpdateCPUWake()
 
         socketRepository = SocketRepository(
             context = this,
-//            socketViewModel = socketViewModel,
             viewModelScope = CoroutineScope(Dispatchers.IO),
             userPreferenceManager = userPreferenceManager,
             socketMessageProcessor = socketMessageProcessor,
             onMessageReceived = { playSound() }
         )
+        socketRepository?.setOnConnectionListener(object : SocketRepository.ConnectionListener {
+            override fun onConnected() {
+                isWebSocketConnected = true
+
+                userPreferenceManager.saveToggleState(true)
+            }
+
+            override fun onDisconnected() {
+                userPreferenceManager.saveToggleState(false)
+                Log.d("jarayon", "onDisconnected: ")
+                isWebSocketConnected = false
+            }
+
+        })
+
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        networkCallback = NetworkStateCallback(
+            onNetworkAvailable = {
+                if (!isFirstConnection) {
+                    attemptReconnect()
+                }
+                isFirstConnection = false
+
+            },
+            onNetworkLost = {
+                isWebSocketConnected = false
+                isFirstConnection = false
+                socketRepository?.disconnectSocket()
+            }
+        )
         locationEngine = LocationEngineProvider.getBestLocationEngine(this)
         startLocationUpdates()
         handler.postDelayed(locationSenderRunnable, 1000)
+    }
+
+    private fun attemptReconnect() {
+        if (!isWebSocketConnected) {
+            userPreferenceManager.getToken()?.let { socketRepository?.initSocket(it) }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -189,20 +231,45 @@ class SocketService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val token = intent?.getStringExtra("TOKEN")
+        val token = userPreferenceManager.getToken()
 
-
-        val isReadyForWork = intent?.getBooleanExtra("IS_READY_FOR_WORK", false) ?: false
-
-        if (token != null && isReadyForWork) {
-            socketRepository?.initSocket(token)
-        } else {
-            socketRepository?.disconnectSocket()
-            stopSelf()
+        when(intent?.getIntExtra("IS_READY_FOR_WORK", -1) ?: -1){
+            ConstantsUtils.DRIVER_IS_ONLINE ->{
+                if (token != null) {
+                    socketRepository?.initSocket(token)
+                }
+            }
+            ConstantsUtils.DRIVER_IS_OFFLINE ->{
+                socketRepository?.disconnectSocket()
+                stopForeground(true)
+            }
         }
+
+
+        startAlarmManager()
 
         return START_STICKY
     }
+
+    private fun startAlarmManager() {
+        val intent = Intent(this, SocketService::class.java)
+        val pendingIntent = PendingIntent.getService(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE // Ensure FLAG_IMMUTABLE is used for Android 12+
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val triggerAtMillis = SystemClock.elapsedRealtime() + 300000 // 1 minute later
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+    }
+
+
     private fun sendDataToSocket(data: String?) {
         // Code to send data to socket
         checkAndUpdateCPUWake()

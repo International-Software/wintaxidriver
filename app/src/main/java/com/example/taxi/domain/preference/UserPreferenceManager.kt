@@ -2,6 +2,7 @@ package com.example.taxi.domain.preference
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.taxi.domain.location.LocationPoint
 import com.example.taxi.domain.model.IsCompletedModel
@@ -123,6 +124,7 @@ class UserPreferenceManager(private val context: Context) {
     fun getStatusIsTaximeter(): Boolean = prefs.getBoolean(IS_TAXIMETER, false)
 
     fun saveToggleState(isOn: Boolean) {
+        Log.d("jarayon", "saveToggleState: $isOn")
         prefs.edit().putBoolean(KEY_TOGGLE_STATE, isOn).apply()
     }
 

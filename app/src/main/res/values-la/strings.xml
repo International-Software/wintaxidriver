@@ -256,4 +256,6 @@
     <string name="ruxsat_berilmagan">"Siz %1$s uchun ruxsatni rad etdingiz. Bu ruxsat dastur funksiyalarining to\'g\'ri ishlashi uchun muhim. Iltimos, sozlamalardan bunga ruxsat bering.</string>
     <string name="location">Joylashuv</string>
     <string name="messag">Xabar</string>
+    <string name="driver_running">Buyurtmada</string>
+    <string name="info_in_driver_running">Yurilgan masofani aniq hisoblashi uchun dasturni ochiq tuting.</string>
 </resources>

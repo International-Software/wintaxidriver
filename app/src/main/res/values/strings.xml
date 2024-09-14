@@ -248,5 +248,7 @@
     <string name="overlay_perm">Dasturlar ustidan ochilish</string>
     <string name="batter_perm">Quvvat tejash rejimini faolsizlantirish</string>
     <string name="messag">Xabar</string>
+    <string name="driver_running">Buyurtmada</string>
+    <string name="info_in_driver_running">Yurilgan masofani aniq hisoblashi uchun dasturni ochiq tuting.</string>
 
 </resources>

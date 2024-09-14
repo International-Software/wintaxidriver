@@ -28,7 +28,7 @@ class  CurrentDrive {
     }
 
     private var startLocation: LocationPoint? = null
-    var distance: Int = 0
+    private var distance: Int = 0
     private var startTime: Long = 0L
     private var topSpeed: Float = 0f
     private var lastPingTime = startTime

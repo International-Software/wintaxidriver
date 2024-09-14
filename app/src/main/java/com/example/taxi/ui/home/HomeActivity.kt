@@ -47,6 +47,7 @@ import com.example.taxi.domain.preference.UserPreferenceManager
 import com.example.taxi.network.NO_CONNECT
 import com.example.taxi.network.NetworkViewModel
 import com.example.taxi.socket.SocketConfig
+import com.example.taxi.socket.SocketService
 import com.example.taxi.ui.check.CheckViewModel
 import com.example.taxi.ui.home.DriveAction.PAUSE
 import com.example.taxi.ui.home.DriveAction.START
@@ -55,6 +56,7 @@ import com.example.taxi.ui.home.driver.DriverViewModel
 import com.example.taxi.ui.home.driver.driveReport.DriveFinishDialog
 import com.example.taxi.ui.home.driver.driveReport.DriveReportViewModel
 import com.example.taxi.ui.home.order.OrderViewModel
+import com.example.taxi.utils.ConstantsUtils
 import com.example.taxi.utils.DialogUtils
 import com.example.taxi.utils.Resource
 import com.example.taxi.utils.ResourceState
@@ -88,8 +90,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
     private val networkViewModel: NetworkViewModel by viewModel()
     private val checkViewModel: CheckViewModel by viewModel()
-    private lateinit var floatingWidgetView: FloatingWidgetView
-
     //    private lateinit var locationEngine: LocationEngine
     lateinit var viewBinding: ActivityHomeBinding
 
@@ -159,7 +159,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
         viewBinding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-        floatingWidgetView = FloatingWidgetView(this)
+
 
         soundManager = SoundManager(this)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -217,29 +217,13 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         checkViewModel.driverCheck()
         driveReportViewModel.checkAndUpdateDrive()
 
-//        networkViewModel.driverStatus.observe(this){
-//            when(it.state){
-//                ResourceState.ERROR ->{}
-//                ResourceState.SUCCESS ->{
-//                    if(it.data?.data?.type?.number == 4){
-//                        val currentDestinationId = navController.currentDestination?.id
-//                        if(currentDestinationId != R.id.taximeterFragment){
-//
-//                            navController.navigate(R.id.taximeterFragment)
-//
-//                        }
-//                    }
-//                }
-//                ResourceState.LOADING ->{}
-//            }
-//        }
 
         startService(Intent(this, DriveBackGroundService::class.java))
+
 
         viewModel.startStopLiveData.observe(this) {
             when (it) {
                 START -> {
-                    Log.d("tekshirish1", "onCreate: start")
                     activityMessenger.startDrive()
                     viewBinding.root.keepScreenOn = true
                     val activityManager =
@@ -375,14 +359,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onStart() {
         super.onStart()
-//        networkViewModel.getOrderCurrent()
 
-//        showBackgroundLocationRationale()
-//        val intent = Intent().apply {
-//            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-//            data = Uri.fromParts("package", packageName, null)
-//        }
-//        startActivity(intent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS
@@ -405,7 +382,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         bindService(
             Intent(this, DriveBackGroundService::class.java), this, Context.BIND_AUTO_CREATE
         )
-        floatingWidgetView.hide()
+
 
     }
 
@@ -458,7 +435,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onRestart() {
         super.onRestart()
-        floatingWidgetView.hide()
+
     }
 
 
@@ -481,7 +458,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
     override fun onUserLeaveHint() {
         if (checkAndEnterPipMode()) {
-            floatingWidgetView.show()
+
         }
 //        checkAndEnterPipMode()
     }
@@ -526,12 +503,41 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     override fun onResume() {
         super.onResume()
 
+        startSocketService()
         val activityManager =
             getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         activityManager.appTasks[0].setExcludeFromRecents(true)
-        floatingWidgetView.hide()
+
 
     }
+
+    private fun startSocketService() {
+        val isSocketService = isServiceRunning(SocketService::class.java)
+        if (!isSocketService && userPreferenceManager.getToggleState()) {
+
+            Intent(this, SocketService::class.java).also { intent ->
+                intent.putExtra("IS_READY_FOR_WORK", ConstantsUtils.DRIVER_IS_ONLINE)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent)
+                } else {
+                    startService(intent)
+                }
+            }
+        }
+
+    }
+
+
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray

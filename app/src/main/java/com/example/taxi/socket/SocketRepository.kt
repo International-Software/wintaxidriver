@@ -1,11 +1,9 @@
 package com.example.taxi.socket
 
 import android.content.Context
-import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.lifecycle.MutableLiveData
 import com.example.taxi.di.MAIN
 import com.example.taxi.domain.model.socket.SocketMessage
 import com.example.taxi.domain.preference.UserPreferenceManager
@@ -27,33 +25,32 @@ class SocketRepository constructor(
     private val onMessageReceived: () -> Unit
 ) {
 
+    private var connectionListener: ConnectionListener? = null
+    interface ConnectionListener {
+        fun onConnected()
+        fun onDisconnected()
+    }
+
+    fun setOnConnectionListener(listener: ConnectionListener) {
+        connectionListener = listener
+    }
+
+
     private var webSocket: WebSocketClient? = null
     private var shouldReconnect = true
 
     private var _isConnected: Boolean = false
-    val socketLive=  MutableLiveData<Boolean>().apply {
-        value = false
-    }
+
     var isConnected: Boolean
         get() = _isConnected
         set(value) {
             if (_isConnected != value) {
                 _isConnected = value
-
-                sendSocketStatusBroadcast()
-
-//                updateViewColor()
             }
         }
     var reconnectJob: Job? = null
+
     private val handler = Handler(Looper.getMainLooper())
-
-
-    private fun sendSocketStatusBroadcast() {
-        val intent = Intent("SOCKET_STATUS")
-        intent.putExtra("IS_CONNECTED", isConnected)
-        context.sendBroadcast(intent)
-    }
 
 
     fun initSocket(token: String) {
@@ -71,17 +68,12 @@ class SocketRepository constructor(
 
         webSocket = object : WebSocketClient(URI("wss://$MAIN/connect/?token=$token")) {
             override fun onOpen(handshakedata: ServerHandshake?) {
-//                isConnectedSocket.value = true
-                socketLive.postValue(true)
+
                 isConnected = true
-                userPreferenceManager.saveToggleState(true)
-
-                Log.d("WebSocket", "Connection onOpen: ")
-
+                connectionListener?.onConnected()
             }
 
             override fun onMessage(message: String?) {
-                Log.d("pul", "onMessage: $message")
                 val gson = Gson()
                 val orderResponse = gson.fromJson(message, SocketMessage::class.java)
                 if (orderResponse.key == "order_new" && userPreferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED){
@@ -94,27 +86,21 @@ class SocketRepository constructor(
 
             override fun onClose(code: Int, reason: String?, remote: Boolean) {
                 isConnected = false
-                socketLive.postValue(false)
-                userPreferenceManager.saveToggleState(false)
-
-//                isConnectedSocket.value = false
                 if (shouldReconnect) {
                     reconnectSocket(token)
                 }
-//                reconnectSocket(token)
+
+                connectionListener?.onDisconnected()
             }
 
             override fun onError(ex: Exception?) {
-                Log.e("WebSocket", "Error occurred", ex)
                 isConnected = false
-                socketLive.postValue(false)
-                userPreferenceManager.saveToggleState(false)
 
-//                isConnectedSocket.postValue(false)
+
                 if (shouldReconnect) {
                     reconnectSocket(token)
                 }
-
+                connectionListener?.onDisconnected()
             }
         }
 
@@ -131,13 +117,6 @@ class SocketRepository constructor(
         }
     }
 
-
-    private fun updateViewColor() {
-        viewModelScope?.launch() {
-
-//            socketViewModel?.setConnected(isConnected)
-        }
-    }
 
     fun disconnectSocket() {
         shouldReconnect = false

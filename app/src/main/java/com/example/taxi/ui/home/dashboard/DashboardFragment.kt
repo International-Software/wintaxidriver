@@ -1,7 +1,7 @@
 package com.example.taxi.ui.home.dashboard
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -11,7 +11,6 @@ import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +46,6 @@ import com.example.taxi.network.NetworkViewModel
 import com.example.taxi.socket.SocketMessageProcessor
 import com.example.taxi.socket.SocketRepository
 import com.example.taxi.socket.SocketService
-import com.example.taxi.ui.home.HomeViewModel
 import com.example.taxi.ui.home.SocketViewModel
 import com.example.taxi.ui.home.driver.DriverViewModel
 import com.example.taxi.ui.home.order.OrderViewModel
@@ -71,6 +69,7 @@ class DashboardFragment : Fragment() {
 
     var a: Boolean = true
     private lateinit var prefs: SharedPreferences
+
     private val preferenceChangeListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key == UserPreferenceManager.KEY_TOGGLE_STATE) {
@@ -87,14 +86,6 @@ class DashboardFragment : Fragment() {
     }
     private lateinit var socketRepository: SocketRepository
     private val socketMessageProcessor: SocketMessageProcessor by inject()
-
-    private val socketStatusReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val isConnected = intent?.getBooleanExtra("IS_CONNECTED", false) ?: false
-            updateSocket(isConnected)
-
-        }
-    }
 
     private val socketViewModel: SocketViewModel by viewModels()
     private val orderViewModel: OrderViewModel by sharedViewModel()
@@ -116,20 +107,10 @@ class DashboardFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = userPreferenceManager.getSharedPreferences()
-        registerSocketStatusReceiver()
+
+
     }
 
-
-    private fun registerSocketStatusReceiver() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context?.registerReceiver(socketStatusReceiver, IntentFilter("SOCKET_STATUS"),
-                Context.RECEIVER_EXPORTED
-            )
-        } else {
-            context?.registerReceiver(socketStatusReceiver, IntentFilter("SOCKET_STATUS"))
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -184,7 +165,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         soundManager = SoundManager(requireContext())
-
+        updateSocket(userPreferenceManager.getToggleState())
         getAllData()
         viewBinding.refresh.setOnRefreshListener {
             getAllData()
@@ -345,7 +326,7 @@ class DashboardFragment : Fragment() {
                         position?.let { bundle.putInt("driver_current_position", it) }
                         arrivedAt?.let { bundle.putInt("driver_arrivedAt", it) }
                         startedAt?.let { bundle.putInt("driver_startedAt", it) }
-                        navController.navigate(R.id.driverFragment,bundle)
+                        navController.navigate(R.id.driverFragment, bundle)
                     }
                 }
             }
@@ -373,27 +354,12 @@ class DashboardFragment : Fragment() {
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-    }
-
-    private fun connectToSocket() {
-        initSocket()
-    }
-
-
     override fun onStop() {
         super.onStop()
         lifecycleScope.cancel()
         networkViewModel.resetData()
     }
 
-
-    private fun initSocket() {
-        val token = userPreferenceManager.getToken()
-        token?.let { socketRepository.initSocket(token = it) }
-    }
 
     private fun setTextViews(data: SelfieAllData<IsCompletedModel, StatusModel>?, view: View) {
         val texts = mapOf(
@@ -592,36 +558,22 @@ class DashboardFragment : Fragment() {
         super.onResume()
         prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener)
 
-        val color = if (userPreferenceManager.getToggleState()) Color.GREEN else Color.RED
-        viewBinding.socketIsConnected.backgroundTintList = ColorStateList.valueOf(color)
-
-        // Don't forget to register your receiver
-        val filter = IntentFilter("SOCKET_STATUS")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requireActivity().registerReceiver(socketStatusReceiver, filter,
-                Context.RECEIVER_EXPORTED
-            )
-        }else{
-            requireActivity().registerReceiver(socketStatusReceiver, filter)
-        }
 
     }
 
     override fun onPause() {
         super.onPause()
         prefs.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener)
-
-        requireActivity().unregisterReceiver(socketStatusReceiver)
     }
 
     private fun updateSocket(connected: Boolean) {
-        if (!isViewCreated) return
         viewLifecycleOwner.lifecycleScope.launch {
             val color = if (connected) Color.GREEN else Color.RED
             viewBinding.socketIsConnected.backgroundTintList =
                 ColorStateList.valueOf(color)
         }
     }
+
 
 
     @SuppressLint("SetTextI18n")
@@ -771,11 +723,6 @@ class DashboardFragment : Fragment() {
 
         viewBinding.isReadyForWork.setOnToggledListener { _, isOn ->
 
-//            userPreferenceManager.saveToggleState(isOn)
-            val intent = Intent(requireActivity(), SocketService::class.java).apply {
-                putExtra("TOKEN", userPreferenceManager.getToken())
-                putExtra("IS_READY_FOR_WORK", isOn)
-            }
             setToggleButtonUi(isOn)
             if (userPreferenceManager.getLastRaceId() == -1) {
 
@@ -784,24 +731,30 @@ class DashboardFragment : Fragment() {
 
             if (isOn) {
                 soundManager.playSoundYouAreOnline()
-                Intent(requireActivity(), SocketService::class.java).also { intent ->
-                    intent.putExtra("TOKEN", userPreferenceManager.getToken())
-                    intent.putExtra("IS_READY_FOR_WORK", true)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        requireContext().startForegroundService(intent)
-                    } else {
-                        requireContext().startService(intent)
-                    }
-                }
+                startSocketService()
             } else {
                 soundManager.playSoundYouAreOffline()
-                Intent(requireActivity(), SocketService::class.java).also { intent ->
-                    intent.putExtra("IS_READY_FOR_WORK", false)
-                    requireContext().startService(intent)
-                }
+                stopSocketService()
             }
         }
+    }
 
+    private fun startSocketService() {
+        Intent(requireActivity(), SocketService::class.java).also { intent ->
+            intent.putExtra("IS_READY_FOR_WORK", ConstantsUtils.DRIVER_IS_ONLINE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                requireContext().startForegroundService(intent)
+            } else {
+                requireContext().startService(intent)
+            }
+        }
+    }
+
+    private fun stopSocketService() {
+        Intent(requireActivity(), SocketService::class.java).also { intent ->
+            intent.putExtra("IS_READY_FOR_WORK", ConstantsUtils.DRIVER_IS_ONLINE)
+            requireContext().stopService(intent)
+        }
     }
 
     private fun setToggleButtonUi(on: Boolean) {

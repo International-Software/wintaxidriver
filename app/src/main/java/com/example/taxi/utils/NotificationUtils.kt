@@ -14,15 +14,18 @@ import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.example.taxi.R
+import com.example.taxi.components.service.DriveBackGroundService
 import com.example.taxi.ui.home.HomeActivity
 
 object NotificationUtils {
 
     private const val FOREGROUND_CHANNEL_ID = "Speedometer"
+    private const val FOREGROUND_CHANNEL_NAME = "Speedometer Service Channel"
     private const val REQ_CODE_OPEN_ACTIVITY = 1
-    const val TAXI_RACE_NOTIFICATION_ID = 10
+    const val TAXI_RACE_NOTIFICATION_ID = 1211
 
-    private fun checkAndCreateChannel(context: Context) {
+    fun checkAndCreateChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             context.getSystemService(NotificationManager::class.java)?.let { notificationManager ->
@@ -31,7 +34,7 @@ object NotificationUtils {
 
                     val serviceChannel = NotificationChannel(
                         FOREGROUND_CHANNEL_ID,
-                        FOREGROUND_CHANNEL_ID,
+                        FOREGROUND_CHANNEL_NAME,
                         NotificationManager.IMPORTANCE_HIGH
                     )
 
@@ -42,28 +45,27 @@ object NotificationUtils {
 
     }
 
+
     fun getRacingNotification(
         context: Context,
     ): Notification {
 
-        checkAndCreateChannel(context)
+        val notificationBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationCompat.Builder(context, FOREGROUND_CHANNEL_ID)
+        } else {
+            NotificationCompat.Builder(context)
+        }
 
-        val notificationIntent = Intent(context, HomeActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            REQ_CODE_OPEN_ACTIVITY,
-            notificationIntent,
-            PendingIntent.FLAG_IMMUTABLE
-        )
-        val notificationBuilder = NotificationCompat.Builder(context, FOREGROUND_CHANNEL_ID)
-            .setContentTitle("Speedometer Running")
-            .setContentText("Keep the speedometer app open for accurate speed calculation")
+
+        return notificationBuilder
+            .setContentTitle(context.getString(R.string.driver_running))
+            .setContentText(context.getString(R.string.info_in_driver_running))
             .setWhen(System.currentTimeMillis())
-            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.ic_bekjaanlogo)
+            .setOngoing(true)
+            .build()
 
-        return notificationBuilder.build()
     }
-
 
 
     fun showNotification(
@@ -93,7 +95,11 @@ object NotificationUtils {
         }
     }
 
-    fun createPendingIntent(context: Context, targetActivity: Class<*>, extras: Bundle): PendingIntent {
+    fun createPendingIntent(
+        context: Context,
+        targetActivity: Class<*>,
+        extras: Bundle
+    ): PendingIntent {
         val intent = Intent(context, targetActivity).apply {
             putExtras(extras)
         }
