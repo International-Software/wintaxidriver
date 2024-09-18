@@ -72,6 +72,7 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.tripprogress.model.*
 import com.tapadoo.alerter.Alerter
+import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -341,8 +342,23 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             }
 
             ConstantsUtils.STATUS_ON_THE_WAY -> {
-                homeViewModel.startDrive()
                 driverViewModel.startedOrder()
+
+                Log.d("jarayonn", "onCreate: ${homeViewModel.dashboardLiveData.value?.getPauseTime()}")
+                if (homeViewModel.dashboardLiveData.value?.isRunning() == true) {
+                    if (homeViewModel.dashboardLiveData.value?.isPaused() == true){
+                        seconds = homeViewModel.dashboardLiveData.value?.getPauseTime()?: 0
+                        homeViewModel.startDrive()
+                        homeViewModel.pauseDrive()
+                        handlerTimer.sendEmptyMessageDelayed(TIMER_MESSAGE_CODE, 1000)
+
+                    }else{
+
+                    }
+                }else{
+                    homeViewModel.startDrive()
+                }
+
             }
         }
 
@@ -474,7 +490,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
         driverViewModel.startOrder.observe(viewLifecycleOwner) {
 //            startWorkTimer()
-
             startOrderUi(it)
         }
 
@@ -482,7 +497,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             if (homeViewModel.dashboardLiveData.value?.isPaused() == true) {
                 handlerTimer.removeMessages(TIMER_MESSAGE_CODE)
                 homeViewModel.startDrive()
-
             } else {
                 handlerTimer.sendEmptyMessageDelayed(TIMER_MESSAGE_CODE, 1000)
                 locationTracker.resumeTracking(this)
@@ -600,8 +614,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             when (currentBottomStatus) {
 
                 DriveAction.STARTED -> {
-                    Log.d("zakaz", "onViewCreated: started")
-
                     viewBinding.bottomDialog.swipeButton.checkedText =
                         getString(R.string.downloading)
                     setFinishDialog()
@@ -609,23 +621,17 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 }
 
                 DriveAction.ARRIVED -> {
-                    Log.d("zakaz", "onViewCreated: arrived")
-
-                    viewBinding.bottomDialog.swipeButton.checkedText =
+                     viewBinding.bottomDialog.swipeButton.checkedText =
                         getString(R.string.downloading)
                     viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.finish)
                     driverViewModel.startOrder()
                 }
 
                 DriveAction.COMPLETED -> {
-                    Log.d("zakaz", "onViewCreated: completed")
-
 
                 }
 
                 DriveAction.ACCEPT -> {
-
-                    Log.d("zakaz", "onViewCreated: accept")
                     viewBinding.bottomDialog.swipeButton.checkedText =
                         getString(R.string.downloading)
                     viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.lets_go)
@@ -882,11 +888,9 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
         if (currentBottomStatus != state) {
             currentBottomStatus = state!!
-
         }
         when (state) {
             DriveAction.ACCEPT -> {
-                Log.d(TAG1, "setBottomSheetSetting: accept")
 
                 viewBinding.buttonNavigator.visibility = View.VISIBLE
                 viewBinding.bottomDialog.timeWorkTextView.visibility = View.GONE
@@ -894,6 +898,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 viewBinding.bottomDialog.timeRemainingTextView.visibility = View.VISIBLE
                 viewBinding.bottomDialog.currentDetailTime.text = getString(R.string.mijozgacha)
                 viewBinding.parentContainer.keepScreenOn = true
+                viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.arrive)
+
 //                acquireWakeLock()
 //                homeViewModel.startDrive()
             }
@@ -914,6 +920,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 viewBinding.bottomDialog.currentDetailTime.text =
                     getString(R.string.bepul_kutish)
                 viewBinding.parentContainer.keepScreenOn = true
+                viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.lets_go)
+
 //                acquireWakeLock()
 
 
@@ -925,6 +933,8 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 if (!preferenceManager.getIsCountingDown()) {
                     preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
                 }
+                viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.finish)
+
 
                 preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.STARTED)
                 viewBinding.bottomDialog.timeWorkTextView.visibility = View.VISIBLE
@@ -946,6 +956,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 viewBinding.bottomDialog.linearLayoutWitPause.visibility = View.VISIBLE
                 viewBinding.bottomDialog.linearLayoutNoPause.visibility = View.GONE
                 viewBinding.bottomDialog.currentDetailTime.text = getString(R.string.buyurtmada)
+                Log.d("jarayonn", "setBottomSheetSetting: buyurtma")
                 viewBinding.parentContainer.keepScreenOn = true
 
             }
@@ -954,7 +965,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
 
             }
-
 
         }
     }
@@ -1051,6 +1061,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 }
 
                 PAUSED -> {
+
                     Alerter.hide()
                     viewBinding.bottomDialog.icPauseStart.setImageDrawable(
                         ActivityCompat.getDrawable(
@@ -1061,6 +1072,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
                     viewBinding.bottomDialog.currentDetailTime.text =
                         getString(R.string.pulli_kutish)
+                    Log.d("jarayonn", "setDashboardStatus: pulli kutish")
 
 
 //                    viewBinding.timeCard.visibility = View.VISIBLE
@@ -1090,17 +1102,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
 
         viewBinding.bottomDialog.timeWorkTextView.text = dashboardData.timeText()
-
-//        if (dashboardData.getDistanceText() >= dashboardData.convertToKm(minimalDistance)) {
-//            val a = dashboardData.getDistanceText() - dashboardData.convertToKm(minimalDistance)
-//            val addPrice = a * costPerKm
-//            currentDriveCost = startCost.plus(addPrice).roundToInt()
-//            currentDriveDistance = dashboardData.getDistanceText().roundToInt()
-//        } else {
-//            currentDriveCost = startCost
-//            currentDriveDistance = dashboardData.getDistanceText().roundToInt()
-//        }
-//        viewBinding.priceTrip.text = currentDriveCost.toString()
 
 
         viewBinding.bottomDialog.inDriveCostPrice.text =
