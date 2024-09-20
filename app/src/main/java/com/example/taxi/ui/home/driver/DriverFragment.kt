@@ -348,6 +348,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 if (homeViewModel.dashboardLiveData.value?.isRunning() == true) {
                     if (homeViewModel.dashboardLiveData.value?.isPaused() == true){
                         seconds = homeViewModel.dashboardLiveData.value?.getPauseTime()?: 0
+                        Log.d("jarayonn", "onCreate: vaqt  $seconds")
                         homeViewModel.startDrive()
                         homeViewModel.pauseDrive()
                         handlerTimer.sendEmptyMessageDelayed(TIMER_MESSAGE_CODE, 1000)
@@ -930,9 +931,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             DriveAction.STARTED -> {
                 timerManager?.saveTransitionTime()
 //                timerManager?.clearTime()
-                if (!preferenceManager.getIsCountingDown()) {
-                    preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
-                }
+
                 viewBinding.bottomDialog.swipeButton.uncheckedText = getString(R.string.finish)
 
 
@@ -1369,6 +1368,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
         response?.let {
             when (response.state) {
                 ResourceState.SUCCESS -> {
+                    preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
                     preferenceManager.saveLastRaceId(-1)
                     if (!soundPlayed) {
                         soundManager.playSoundJourneyBeginWithBelt()
@@ -1392,6 +1392,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
                 }
 
                 ResourceState.ERROR -> {
+                    preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
                     preferenceManager.saveLastRaceId(1)
                     viewBinding.bottomDialog.swipeButton.isChecked = false
                     driverViewModel.startedOrder()

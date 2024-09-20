@@ -126,9 +126,7 @@ object ConversionUtil {
 
     fun getAllWaitTime(): Int{
         val startTime = userPreferenceManager.getStartedTimeAcceptOrder()
-        Log.d("vaqt", "getAllWaitTime: start $startTime")
         val endTime = userPreferenceManager.getFinishedTimeAcceptOrder()
-        Log.d("vaqt", "getAllWaitTime: finish $endTime")
         val seconds = (endTime - startTime) / 1000
         val waitTime = seconds.toInt() - userPreferenceManager.getMinWaitTime()
         return if (waitTime > 0) waitTime else 0
