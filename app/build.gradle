@@ -18,8 +18,8 @@ android {
         applicationId "uz.insoft.bekjaantdr"
         minSdk 24
         targetSdk 34
-        versionCode 77
-        versionName "8.9.20"
+        versionCode 78
+        versionName "8.9.23"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

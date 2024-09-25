@@ -134,8 +134,7 @@ class OrderFragment : Fragment(), BottomSheetInterface {
 
                     }
                     preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.ACCEPTED)
-                    preferenceManager.saveLastRaceId(-1)
-                    driverViewModel.acceptedOrder()
+                     driverViewModel.acceptedOrder()
                     val navController = findNavController()
                     orderViewModel.clearAcceptOrderData()
                     changeDriveStatus()

@@ -119,10 +119,6 @@ class DashboardFragment : Fragment() {
         // Inflate the layout for this fragment
         isViewCreated = true
         viewBinding = FragmentDashboardBinding.inflate(inflater, container, false)
-
-//        initializeNetworkReceiver()
-
-
         setToggleButtonUi(userPreferenceManager.getToggleState())
 
         return viewBinding.root
@@ -486,7 +482,6 @@ class DashboardFragment : Fragment() {
             ResourceState.SUCCESS -> {
                 userPreferenceManager.saveLastRaceId(-1)
                 viewBinding.buttonOrder.isEnabled = true
-
             }
 
             ResourceState.ERROR -> {
@@ -550,8 +545,18 @@ class DashboardFragment : Fragment() {
     private fun exitApp() {
         DialogUtils.showExitDialog(requireContext()).dismiss()
         socketViewModel.setExit(true)
+        stopStack()
         requireActivity().finishAffinity()
 
+    }
+
+    private fun stopStack(){
+        val activityManager =
+            requireActivity().getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val tasks = activityManager.appTasks
+        if (tasks.isNotEmpty()) {
+            tasks[0].setExcludeFromRecents(false)
+        }
     }
 
     override fun onResume() {
@@ -735,6 +740,7 @@ class DashboardFragment : Fragment() {
             } else {
                 soundManager.playSoundYouAreOffline()
                 stopSocketService()
+                stopStack()
             }
         }
     }
@@ -752,7 +758,7 @@ class DashboardFragment : Fragment() {
 
     private fun stopSocketService() {
         Intent(requireActivity(), SocketService::class.java).also { intent ->
-            intent.putExtra("IS_READY_FOR_WORK", ConstantsUtils.DRIVER_IS_ONLINE)
+            intent.putExtra("IS_READY_FOR_WORK", ConstantsUtils.DRIVER_IS_OFFLINE)
             requireContext().stopService(intent)
         }
     }

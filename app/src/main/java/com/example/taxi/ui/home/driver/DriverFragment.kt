@@ -72,7 +72,6 @@ import com.mapbox.navigation.core.replay.route.ReplayRouteMapper
 import com.mapbox.navigation.ui.maneuver.api.MapboxManeuverApi
 import com.mapbox.navigation.ui.tripprogress.model.*
 import com.tapadoo.alerter.Alerter
-import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -432,7 +431,7 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
 
         locationTracker = LocationTracker.getInstance(requireContext())
-//        handlerTimer = Handler(Looper.getMainLooper())
+//        handlerTimer = Handler(L ooper.getMainLooper())
         requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         initViewDialog()
@@ -1347,15 +1346,12 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
                 ResourceState.SUCCESS -> {
                     isOrderStarted = true
-                    preferenceManager.saveLastRaceId(-1)
-
 //                    startTimerIfOrderStarted()
                     viewBinding.bottomDialog.swipeButton.isChecked = false
                     driverViewModel.arrivedOrder()
                 }
 
                 ResourceState.ERROR -> {
-                    preferenceManager.saveLastRaceId(1)
                     viewBinding.bottomDialog.swipeButton.isChecked = false
                     driverViewModel.arrivedOrder()
                 }
@@ -1369,7 +1365,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
             when (response.state) {
                 ResourceState.SUCCESS -> {
                     preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
-                    preferenceManager.saveLastRaceId(-1)
                     if (!soundPlayed) {
                         soundManager.playSoundJourneyBeginWithBelt()
                         soundPlayed = true
@@ -1393,7 +1388,6 @@ class DriverFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
                 ResourceState.ERROR -> {
                     preferenceManager.setFinishedTimeOrder(System.currentTimeMillis())
-                    preferenceManager.saveLastRaceId(1)
                     viewBinding.bottomDialog.swipeButton.isChecked = false
                     driverViewModel.startedOrder()
                     if (LocationPermissionUtils.isBasicPermissionGranted(requireContext())

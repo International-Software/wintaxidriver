@@ -498,7 +498,6 @@ class UserPreferenceManager(private val context: Context) {
 
     fun getMessageValue(): Int = prefs.getInt("message_value", 0)
 
-
     fun getPauseTime(): Long {
         return prefs.getLong("pause_time", 0L)
     }

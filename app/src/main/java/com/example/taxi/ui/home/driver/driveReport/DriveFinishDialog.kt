@@ -328,7 +328,6 @@ class DriveFinishDialog(val raceId: Long, val viewModel: DriveReportViewModel) :
 
                 ResourceState.SUCCESS -> {
                     preferenceManager.saveLastRace(order, -1)
-
                     viewBinding.finishButtonDialog.stopAnimation()
 
                     driverViewModel.completedOrder()

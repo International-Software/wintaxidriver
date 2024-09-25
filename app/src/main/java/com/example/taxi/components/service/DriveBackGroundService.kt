@@ -123,8 +123,6 @@ class DriveBackGroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-
-
         if (wakeLock.isHeld) {
             wakeLock.release()
         }

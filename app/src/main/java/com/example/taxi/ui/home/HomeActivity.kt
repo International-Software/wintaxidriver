@@ -35,7 +35,6 @@ import com.example.taxi.R
 import com.example.taxi.components.service.ActivityMessenger
 import com.example.taxi.components.service.DriveBackGroundService
 import com.example.taxi.components.service.KillStateDialogService
-import com.example.taxi.custom.floatingwidget.FloatingWidgetView
 import com.example.taxi.databinding.ActivityHomeBinding
 import com.example.taxi.domain.model.CheckResponse
 import com.example.taxi.domain.model.DashboardData
@@ -166,8 +165,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
 
 
         val appUpdateManager = AppUpdateManagerFactory.create(this)
-
-
 
         checkViewModel.checkResponse.observe(this) {
             updateUserCheck(it)
@@ -571,8 +568,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     private fun navigateToOrderFragment(
         id: Int, lat1: String?, long1: String?, lat2: String?, long2: String?
     ) {
-        Log.d("lokatsiya", "funksiya: long2 = ${long2} , lat2 = ${lat2}")
-
         val bundle = Bundle().apply {
             putInt("order_id", id)
             putString("lat1", lat1)

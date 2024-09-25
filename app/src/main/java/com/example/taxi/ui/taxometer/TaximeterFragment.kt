@@ -261,7 +261,6 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
             WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT
         )
 
-
         val finishButton: MaterialButton = dialog.findViewById(R.id.button_finish_order)
         val cancelButton: MaterialButton = dialog.findViewById(R.id.button_cancel_order)
 
@@ -347,8 +346,6 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
                     homeViewModel.startDrive()
                     preferenceManager.saveStatusIsTaximeter(true)
                     preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.STARTED)
-
-                    preferenceManager.saveLastRaceId(-1)
 
                 }
             }
@@ -522,7 +519,6 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
 
     override fun onPause() {
         super.onPause()
-        Log.d("tekshirish1", "onPause: ")
     }
 
     override fun onResume() {
@@ -537,7 +533,6 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
     }
 
     override fun onDistanceChanged(distance: Float) {
-        Log.d("masofau", "onDistanceChanged: $distance")
         handlerTimer.removeMessages(TIMER_MESSAGE_CODE)
         homeViewModel.startDrive()
         locationTracker.stopLocationUpdates()
