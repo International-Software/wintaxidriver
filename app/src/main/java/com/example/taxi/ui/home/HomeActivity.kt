@@ -167,7 +167,7 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
         val appUpdateManager = AppUpdateManagerFactory.create(this)
 
         checkViewModel.checkResponse.observe(this) {
-            updateUserCheck(it)
+//            updateUserCheck(it)
         }
 
         // Returns an intent object that you use to check for an update.
@@ -260,7 +260,6 @@ class HomeActivity : AppCompatActivity(), ServiceConnection {
     private fun updateUserCheck(resource: Resource<MainResponse<CheckResponse>>?) {
         val currentDestinationId = navController.currentDestination?.id
 
-        Log.d("foto", "updateUserCheck: ${resource?.data?.data?.check}")
         when (resource?.state) {
             ResourceState.LOADING -> {}
             ResourceState.SUCCESS -> {

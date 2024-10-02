@@ -14,12 +14,13 @@
         android:layout_height="0dp"
         android:layout_marginTop="?actionBarSize"
         android:importantForAccessibility="no"
-        android:scaleType="centerCrop"
+        android:padding="@dimen/_10sdp"
         android:src="@drawable/logo_copy"
         app:layout_constraintDimensionRatio="1:.35"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_black_white" />
 
     <TextView
         android:id="@+id/textView"

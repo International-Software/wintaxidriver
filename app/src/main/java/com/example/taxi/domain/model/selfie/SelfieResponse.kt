@@ -14,7 +14,7 @@ data class SelfieAllData<T,S>(
     val type: TypeModel,
     val status: S,
     val step: StepModel,
-    val is_advertising: Int?,
+    val is_advertising: Int? = -1,
     val is_completed: T
 )
 

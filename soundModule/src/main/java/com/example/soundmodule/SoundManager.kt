@@ -27,7 +27,7 @@ class SoundManager(val context: Context) {
 
 
     fun playSoundFinish() {
-        playSoundInternal(R.raw.finish)
+//        playSoundInternal(R.raw.finish)
     }
 
     fun playSoundYouAreOffline() {
@@ -35,7 +35,7 @@ class SoundManager(val context: Context) {
     }
 
     fun playSoundJourneyBeginWithBelt() {
-        playSoundInternal(R.raw.letsgo)
+        playSoundInternal(R.raw.safar_boshlandi_xavfsizlik_kamari)
     }
 
     fun playSoundLetsGo() {
@@ -43,11 +43,11 @@ class SoundManager(val context: Context) {
     }
 
     fun playSoundCancelOrder() {
-        playSoundInternal(R.raw.buyurtma_bekor_qilindi)
+//        playSoundInternal(R.raw.buyurtma_bekor_qilindi)
     }
 
     fun playSoundStartTaximeter() {
-        playSoundInternal(R.raw.taxometr_boshlandi)
+        playSoundInternal(R.raw.kettik)
     }
 
     // Call this method to release resources when the SoundManager is no longer needed

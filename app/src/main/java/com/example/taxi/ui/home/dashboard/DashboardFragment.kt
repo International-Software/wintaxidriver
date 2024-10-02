@@ -223,7 +223,7 @@ class DashboardFragment : Fragment() {
                     val bundle = Bundle()
                     bundle.putInt("export_photo", 1)
 
-                    navController.navigate(R.id.checkDriverFragment, bundle)
+//                    navController.navigate(R.id.checkDriverFragment, bundle)
                     true
                 }
                 // 987 -> id about us layout
