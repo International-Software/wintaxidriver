@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Yassin Taxi(Driver)</string>
+    <string name="app_name" translatable="false">Sarbon Taxi(Driver)</string>
     <string name="tizimga_kirish">Tizimga kirish</string>
     <string name="tizimga_kirish_uchun_telefon_raqamingizni_kiriting">Tizimga kirish uchun telefon raqamingizni kiriting</string>
     <string name="telefon_raqamingiz">Telefon raqamingiz</string>
@@ -217,9 +217,7 @@
     <string name="payment_uzum">payment uzum</string>
     <string name="next_for_phone">next for phone</string>
     <string name="yaqin_atrofdagi_buyurtmani_topish_hattoki_fonda_bo_lsa_ham">Yaqin atrofdagi buyurtmani topish, hattoki fonda bo\'lsa ham.</string>
-    <string name="harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish">Harakatlanishingizni kuzatish va ularni Yassin taxi mijozlari uchun ko\'rsatish va xabardor qilish.</string>
     <string name="sozlamalarni_tekshiring">Sozlamalarni tekshiring!</string>
-    <string name="bekjaan_taxi_driver_ilovasi_joylashuvingizni_doimiy_ravishda_kuzatishga_ruxsat_berishingizni_so_raydi_ushbu_dastur_joylashuvingizdan_quyidagilar_uchun_foydalanadi">Yassin Taxi(Driver) ilovasi joylashuvingizni doimiy ravishda kuzatishga ruxsat berishingizni so\'raydi. Ushbu dastur joylashuvingizdan quyidagilar uchun foydalanadi:</string>
     <string name="o_tkazib_yuborish">O\'tkazib yuborish</string>
     <string name="ruxsatnomalar">Ruxsatnomalar</string>
     <string name="dasturdan_to_laqonli_foydalanishingiz_uchun_ushbu_ruxsatnomalarga_ruxsat_berishingiz_zarur">Dasturdan to\'laqonli foydalanishingiz uchun ushbu ruxsatnomalarga ruxsat berishingiz zarur.</string>
@@ -228,7 +226,6 @@
     <string name="aniq_joylashuv_uchun_ruxsat">Aniq joylashuv uchun ruxsat</string>
     <string name="boshqa_dasturlar_ustidan_ochilish">Boshqa dasturlar ustidan ochilish</string>
     <string name="quvvat_tejashni_o_chirish">Quvvat tejashni o\'chirish</string>
-    <string name="battery_permission">Yassin Taxi(Driver) dasturi fonda ham muntazam ravishda ishlashi uchun quvvat tejash rejimini faolsizlantirish zarur.\nBuni keyinchalik sozlamalar bo\'limidan o\'chirib qo\'yishingiz mumkin.</string>
     <string name="settings">Sozlamalar</string>
     <string name="my_profile">Mening profilim</string>
 
@@ -250,5 +247,11 @@
     <string name="messag">Xabar</string>
     <string name="driver_running">Buyurtmada</string>
     <string name="info_in_driver_running">Yurilgan masofani aniq hisoblashi uchun dasturni ochiq tuting.</string>
+
+
+
+    <string name="battery_permission">%1$s dasturi fonda ham muntazam ravishda ishlashi uchun quvvat tejash rejimini faolsizlantirish zarur.\nBuni keyinchalik sozlamalar bo\'limidan o\'chirib qo\'yishingiz mumkin.</string>
+    <string name="harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish">Harakatlanishingizni kuzatish va ularni %1$s mijozlari uchun ko\'rsatish va xabardor qilish.</string>
+    <string name="bekjaan_taxi_driver_ilovasi_joylashuvingizni_doimiy_ravishda_kuzatishga_ruxsat_berishingizni_so_raydi_ushbu_dastur_joylashuvingizdan_quyidagilar_uchun_foydalanadi">%1$s ilovasi joylashuvingizni doimiy ravishda kuzatishga ruxsat berishingizni so\'raydi. Ushbu dastur joylashuvingizdan quyidagilar uchun foydalanadi:</string>
 
 </resources>

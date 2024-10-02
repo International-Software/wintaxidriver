@@ -54,6 +54,7 @@ class InputPhoneFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         createPhoneNumberPlateEditText(viewBinding.edtInputPhone, viewBinding.textInputLayout)
         registerViewModel.registerResponse.observe(viewLifecycleOwner, ::updateView)
 

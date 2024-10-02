@@ -13,9 +13,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.example.taxi.R
 import com.example.taxi.databinding.ActivityPermissionCheckBinding
 import com.example.taxi.utils.LocationPermissionUtils
@@ -176,6 +178,8 @@ class PermissionCheckActivity : AppCompatActivity() {
                 setGravity(Gravity.CENTER)
             }
         }
+        dialog.findViewById<TextView>(R.id.textViewBekjaanTaxi).text =  getString(R.string.bekjaan_taxi_driver_ilovasi_joylashuvingizni_doimiy_ravishda_kuzatishga_ruxsat_berishingizni_so_raydi_ushbu_dastur_joylashuvingizdan_quyidagilar_uchun_foydalanadi, getString(R.string.app_name))
+        dialog.findViewById<TextView>(R.id.showNearTv).text = getString(R.string.harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish, getString(R.string.app_name))
 
         dialog.findViewById<MaterialButton>(R.id.button_permissions).setOnClickListener {
             dialog.dismiss()
@@ -207,7 +211,7 @@ class PermissionCheckActivity : AppCompatActivity() {
     private fun showBatteryPermissionDialog() {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.neеded_permission))
-            .setMessage(getString(R.string.battery_permission))
+            .setMessage(getString(R.string.battery_permission,getString(R.string.app_name)))
             .setPositiveButton(getString(R.string.go_to_settings)) { _, _ ->
                 requestIgnoreBatteryOptimizations()
             }
