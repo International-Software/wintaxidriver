@@ -20,6 +20,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/updateDescriptionText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_20sdp"
@@ -28,7 +29,6 @@
         android:textColor="@color/text_black_white"
 
         android:paddingStart="@dimen/_15sdp"
-        android:text="Bekjaan taxi(Driver) ilovasini yangi versiyaga yangilashingiz lozim."
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
 

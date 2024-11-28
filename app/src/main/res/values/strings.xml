@@ -247,6 +247,7 @@
     <string name="messag">Xabar</string>
     <string name="driver_running">Buyurtmada</string>
     <string name="info_in_driver_running">Yurilgan masofani aniq hisoblashi uchun dasturni ochiq tuting.</string>
+    <string name="new_version_update">ilovasini yangi versiyaga yangilashingiz lozim.</string>
 
     <string name="battery_permission">%1$s dasturi fonda ham muntazam ravishda ishlashi uchun quvvat tejash rejimini faolsizlantirish zarur.\nBuni keyinchalik sozlamalar bo\'limidan o\'chirib qo\'yishingiz mumkin.</string>
     <string name="harakatlanishingizni_kuzatish_va_ularni_bekjaan_taxi_mijozlari_uchun_ko_rsatish_va_xabardor_qilish">Harakatlanishingizni kuzatish va ularni %1$s mijozlari uchun ko\'rsatish va xabardor qilish.</string>

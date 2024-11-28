@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.taxi.R
 import com.example.taxi.databinding.ActivityUpdateBinding
 
 class UpdateActivity : AppCompatActivity() {
@@ -14,6 +15,8 @@ class UpdateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityUpdateBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+
+        viewBinding.updateDescriptionText.text = "${getString(R.string.app_name)} ${getString(R.string.new_version_update)}"
 
         viewBinding.updatingButton.setOnClickListener {
             try {
