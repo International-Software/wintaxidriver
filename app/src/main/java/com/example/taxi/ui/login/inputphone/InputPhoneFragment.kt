@@ -57,8 +57,7 @@ class InputPhoneFragment : Fragment() {
 
         createPhoneNumberPlateEditText(viewBinding.edtInputPhone, viewBinding.textInputLayout)
         registerViewModel.registerResponse.observe(viewLifecycleOwner, ::updateView)
-
-        val originalText = if (preferenceManager.getLanguage().code == "uz")"Давом этиш орқали сиз Bekjaan taxi Хизмат кўрсатиш шартларига рози бўласиз ва Махфийлик сиёсатемизни ўқиганлигингизни тасдиқлайсиз." else "Davom etish orqali siz Bekjaan taxining Xizmat ko'rsatish shartlariga rozi bo'lasiz va Maxfiylik siyosatimizni o'qiganligingizni tasdiqlaysiz."
+        val originalText = if (preferenceManager.getLanguage().code == "uz")"Давом этиш орқали сиз ${getString(R.string.app_name)} Хизмат кўрсатиш шартларига рози бўласиз ва Махфийлик сиёсатемизни ўқиганлигингизни тасдиқлайсиз." else "Davom etish orqali siz ${getString(R.string.app_name)} Xizmat ko'rsatish shartlariga rozi bo'lasiz va Maxfiylik siyosatimizni o'qiganligingizni tasdiqlaysiz."
         val styledText = getStyledText(originalText)
         viewBinding.tvPrivacy.text = styledText
         viewBinding.tvPrivacy.movementMethod = LinkMovementMethod.getInstance()
