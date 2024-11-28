@@ -108,12 +108,19 @@ class TaximeterFragment : Fragment(), LocationTracker.LocationUpdateListener {
         super.onCreate(savedInstanceState)
         val isTax = arguments?.getBoolean("is_taxo", false)
         if (isTax == true) {
-            if (homeViewModel.dashboardLiveData.value?.isPaused() == true) {
-                homeViewModel.startDrive()
+            if(homeViewModel.dashboardLiveData.value?.isRunning() == true){
+                if (homeViewModel.dashboardLiveData.value?.isPaused() == true) {
+                    seconds = homeViewModel.dashboardLiveData.value?.getPauseTime()?: 0
+                    homeViewModel.startDrive()
+                    homeViewModel.pauseDrive()
+                    handlerTimer.sendEmptyMessageDelayed(TIMER_MESSAGE_CODE, 1000)
+                } else {
 
-            } else {
+                }
+            }else{
                 homeViewModel.startDrive()
             }
+
             driverViewModel.completeTaximeter()
             preferenceManager.saveStatusIsTaximeter(true)
             preferenceManager.setDriverStatus(UserPreferenceManager.DriverStatus.STARTED)
