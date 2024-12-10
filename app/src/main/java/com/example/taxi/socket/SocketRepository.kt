@@ -74,6 +74,7 @@ class SocketRepository constructor(
             }
 
             override fun onMessage(message: String?) {
+                Log.d("websocket", "onMessage: $message")
                 val gson = Gson()
                 val orderResponse = gson.fromJson(message, SocketMessage::class.java)
                 if (orderResponse.key == "order_new" && userPreferenceManager.getDriverStatus() == UserPreferenceManager.DriverStatus.COMPLETED){

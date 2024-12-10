@@ -48,6 +48,7 @@ class NetworkViewModel(
                 // Perform any setup tasks before the subscription starts
             }.doOnTerminate {}.subscribe({ response ->
                  userPreferenceManager.saveStartCostUpdate(response.data.start_cost)
+                Log.d("tekshirishh", "getOrderCurrent: $response")
                 _driverStatus.postValue(Resource(ResourceState.SUCCESS, response))
                 _response.postValue(Resource(ResourceState.SUCCESS, IS_CONNECT))
             }, { error ->

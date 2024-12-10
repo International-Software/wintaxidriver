@@ -15,10 +15,10 @@ android {
 
     defaultConfig {
 //        uz.insoft.AlifTaxi
-        applicationId "uz.insoft.yassindriver"
+        applicationId "uz.insoft.win_taxi"
         minSdk 24
         targetSdk 34
-        versionCode 52
+        versionCode 60
         versionName "8.10.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

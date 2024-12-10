@@ -316,7 +316,7 @@ class SocketService : Service() {
         }
 
         return notificationBuilder
-            .setContentTitle("Bekjaan Taxi(Driver)")
+            .setContentTitle(getString(R.string.app_name))
             .setContentText("Dastur ayni paytda ishlamoqda...")
             .setSmallIcon(R.drawable.ic_bekjaanlogo)
             .setContentIntent(pendingIntent)
